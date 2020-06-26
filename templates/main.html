@@ -1,0 +1,604 @@
+<html>
+    <head>
+        <title>Radio SkyGUIde</title>
+        <style>
+            body { margin: 0; text-align: center; background-color: #FFEEAA}
+            canvas { display: block; }
+            gui {position: fixed; left:50%; top:0px; transform: translate(-50%, -0%);}
+            .sidtime {position: fixed; left:5%; top:15%; font-family:Verdana; text-align: center;}
+            .leftdetails {position: fixed; left:5%; top:10%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
+            .rightdetails {position: fixed; left:80%; top:10%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
+            .button {
+              background-color: var(--bcolor);
+              border: none;
+              color: white;
+              padding: 15px 24px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: var(--fsize);
+              margin: 4px 2px;
+              cursor: pointer;
+            }
+        </style>
+    </head>
+    <body onload="fullReload();">
+        <div id="leftdetails" class="leftdetails">
+            <input type="button" class="button" style="--bcolor: #00DD00; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}"><br>
+            <div id="sidtime">
+                
+            </div>
+            <br><br><br><br><br>
+            <div>
+                Time:<br>
+                <input type="button" class="button" style="--bcolor: #9999FF; --fsize: 15px;" value="+5m" onclick="offsetRA(1.25);">
+                <input type="button" class="button" style="--bcolor: #FF9999; --fsize: 15px;" value="-5m" onclick="offsetRA(-1.25);">
+                <br>
+                <input type="button" class="button" style="--bcolor: #6666FF; --fsize: 15px;" value="+1h" onclick="offsetRA(15);">
+                <input type="button" class="button" style="--bcolor: #FF6666; --fsize: 15px;" value="-1h" onclick="offsetRA(-15);">
+                <br>
+                <input type="button" class="button" style="--bcolor: #77AA77; --fsize: 15px;" value="Reset to Current Time" onclick="offsetRA(0, true);">
+                <br>
+                <div id="totaloffset">
+                    <input type="button" class="button" style="--bcolor: #66DD66; --fsize: 15px;" value="Total Time Offset (min): 0">
+                </div>
+            </div>
+            <br><br><br><br><br>
+            <form action='/'>
+                <input type="Submit" class="button" style="--bcolor: #FF0000; --fsize: 15px;" value="Restart">
+            </form>
+        </div>
+        <div id='rightdetails' class='rightdetails'>
+            <input type="button" class="button" style="--bcolor: #00DDDD; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
+            <br><br>
+            Select Catalogs to Draw:<br><br>
+            <form action='/main'>
+                <input type="hidden" name="loc" value="{{loc_here}}">
+                <input type="checkbox" name="drawatnf" value="true" id="drawatnf" onclick="dealWithCheckboxes();">
+                <label for="drawatnf" style="color: #FF0000">ATNF Catalog</label><br><br>
+                <input type="checkbox" name="drawfrb" value="true" id="drawfrb" onclick="dealWithCheckboxes();">
+                <label for='drawfrb' style="color: #00FF00">FRB Catalog</label>
+                <br><br>
+            </form>
+            <br><br>
+            <form>
+                <input type="checkbox" name="equatorialcheckbox" value="true" id="equatorialcheckbox" onclick="gridCheckboxes();" checked>
+                <label for="equatorialcheckbox" style="color: #9922FF">Equatorial Grid</label>
+                <br><br>
+                <input type="checkbox" name="altazcheckbox" value="true" id="altazcheckbox" onclick="gridCheckboxes();">
+                <label for="altazcheckbox" style="color: #9922FF">Alt-Az Grid</label>
+            </form>
+            <br><br>
+            <div id="showing">
+                Currently Showing:
+            </div>
+            <br>
+
+        </div>
+        <gui id='gui'>
+        <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
+        <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+            astrojs.ready(function(e){
+
+            });
+            loc = "{{ loc_here }}";
+            if (loc == "Allen Telescope Array"){
+                longitude = -121.47173
+            }
+            if (loc == "Green Bank Observatory"){
+                longitude = -79.8398566
+            }
+            if (loc == "Parkes Radio Telescope"){
+                longitude = 148.2626028
+            }
+            if (loc == "Atacama Large Millimeter Array"){
+                longitude = -67.7548021
+            }
+
+            draw_atnf = {{ draw_atnf }}
+            draw_frb = {{ draw_frb }}
+
+            function writeCatalog(catalog, color){
+                showing = document.getElementById("showing");
+                if (showing.innerHTML.includes(catalog)){
+                    console.log('none');
+                }
+                else{
+                    showing.innerHTML += "<div id="+catalog.replace(" ", '')+" style='color: "+color+"'><br>&#9745 "+catalog+"</div>"
+                }
+            }
+
+            function dealWithCheckboxes(){
+                atnfcheckbox = document.getElementById("drawatnf");
+                frbcheckbox = document.getElementById("drawfrb");
+                showing = document.getElementById("showing");
+
+                if (atnfcheckbox.checked){
+                    writeCatalog("ATNF Catalog", "#FF0000");
+                    drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
+                }
+                else{
+                    for (let i = scene.children.length - 1; i >= 0; i--) {
+                        if(scene.children[i].type === "Points" && scene.children[i].name == "ATNF Catalog")
+                            scene.remove(scene.children[i]);
+                    }
+                    var el = document.getElementById("ATNFCatalog");
+                    if (el == null){
+
+                    }
+                    else{
+                        el.remove();
+                    }
+                }
+
+                if (frbcheckbox.checked){
+                    writeCatalog("FRB Catalog", "#00FF00");
+                    drawObjects(frb_thetas, frb_phis, 0x00ff00, "FRB Catalog");
+                }
+                else{
+                    for (let i = scene.children.length - 1; i >= 0; i--) {
+                        if(scene.children[i].type === "Points" && scene.children[i].name == "FRB Catalog")
+                            scene.remove(scene.children[i]);
+                    }   
+                    var el = document.getElementById("FRBCatalog");
+                    if (el == null){
+
+                    }
+                    else{
+                        el.remove();
+                    }
+                }
+            }
+
+            function gridCheckboxes(){
+                altazcheckbox = document.getElementById("altazcheckbox");
+                equatorialcheckbox = document.getElementById("equatorialcheckbox");
+
+                if (equatorialcheckbox.checked){
+                    addRALines();
+                    writeRALabels();
+                    addDecLines();
+                    writeDecLabels();
+                }
+                else{
+                    for (let i = scene.children.length - 1; i >= 0; i--) {
+                        if(scene.children[i].group == "equatorial")
+                            scene.remove(scene.children[i]);
+                    }    
+                }
+
+                if (altazcheckbox.checked){
+                    drawAltAz(0, 0, 0);
+                }
+                else{
+                    //for (let i = scene.children.length - 1; i >= 0; i--) {
+                    //    if(scene.children[i].group == "altaz")
+                    //        scene.remove(scene.children[i]);
+                    //}
+                    for (let i = camera.children.length - 1; i >= 0; i--){
+                        if (camera.children[i].group == "altaz")
+                            camera.remove(camera.children[i]);
+                    }                        
+                }
+            }
+
+            function calculateSiderealTime(raw){
+
+                //get the time in UTC
+                seconds_since_j2000 = Math.floor(Date.now()/1000) - 946684800;
+
+                seconds = seconds_since_j2000 % 86400;
+
+                hours = Math.floor(seconds/3600);
+                minutes = Math.floor(seconds/60) - hours*60;
+                seconds = seconds - minutes*60 - hours*3600;
+
+                days_since_j2000 = seconds_since_j2000 / 86400;
+
+                hours_passed = seconds_since_j2000 % 86400
+                hours_passed = hours_passed / 3600
+
+                siderealtime = 100.46;
+                siderealtime += (0.985647 * days_since_j2000);
+                siderealtime += longitude;
+
+                siderealtime += 15*hours_passed;
+
+                siderealtime = siderealtime % 360;
+                siderealtime = siderealtime / 15;
+
+                if (raw==true){
+                
+                    return siderealtime;
+                }
+
+                else{
+                    hours = Math.floor(siderealtime);
+                    siderealtime = siderealtime - hours;
+                    minutes = Math.floor(siderealtime*60);
+                    siderealtime = siderealtime - minutes/60;
+                    seconds = Math.floor(siderealtime*3600);
+
+                    if (String(hours).length < 2){
+                        hours = '0' + hours;
+                    }
+                    if (String(minutes).length < 2){
+                        minutes = '0' + minutes;
+                    }
+                    if (String(seconds).length < 2){
+                        seconds = '0' + seconds;
+                    }
+
+                    return hours + ":" + minutes + ":" + seconds;
+                }
+            }
+
+
+            function fullReload() {
+                sid = document.getElementById("sidtime");
+                sid.innerHTML = "<input type='button' class='button' style='--bcolor: #00DD00; --fsize: 15px;' value=" +calculateSiderealTime(false) + ">";
+                setTimeout(fullReload, 500);
+            }
+
+            //var drawingSurface = document.getElementByID('gui');
+
+            var r = 10;
+            var scene;
+            var camera;
+            var renderer;
+
+            function startScene(){
+                var width = window.innerWidth;
+                var height = window.innerHeight;
+                camera = new THREE.OrthographicCamera( -r, r, r, -r, 0, 1000 );
+                
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(height, height);
+                document.getElementById('gui').appendChild(renderer.domElement);
+
+                scene = new THREE.Scene({canvas:gui});
+                scene.add(camera);
+            }
+
+            //draw RA lines
+
+            function addDecLines(){
+                angles = [0, Math.PI/6, -Math.PI/6, Math.PI/4, -Math.PI/4, Math.PI/3, -Math.PI/3, 5*Math.PI/12, -5*Math.PI/12];
+                color = 0xffff00
+                for (var angle = 0; angle < angles.length; angle++){
+                    if (angles[angle] == 0){
+                        color = 0xffa500;
+                    }
+                    else{
+                        color = 0xffff00;
+                    }
+                    ring_rad = r * Math.cos(angles[angle]);
+                    ring_width = 0.06
+                    var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
+                    var material = new THREE.MeshBasicMaterial( { color: color, side: THREE.DoubleSide } );
+                    line = new THREE.Mesh( geometry, material );
+                    line.position.set(0, r*Math.sin(angles[angle]), 0);
+                    line.rotation.setFromVector3(new THREE.Vector3(Math.PI/2, 0, Math.PI/2));
+                    line.group = "equatorial";
+                    scene.add(line);
+                }
+            }
+
+            //draw DEC lines
+
+            function addRALines(){
+                angles = [0, Math.PI/2];
+                for (var angle = 0; angle < angles.length; angle++){
+                    ring_rad = r;
+                    ring_width = 0.06
+                    var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
+                    var material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
+                    line = new THREE.Mesh( geometry, material );
+                    line.position.set(0, 0, 0);
+                    line.rotation.setFromVector3(new THREE.Vector3(0, angles[angle], angles[angle]));
+                    line.group = "equatorial";
+                    scene.add(line);
+                }
+            }
+
+            function addText(text, pos, group, addtocamera=false){
+                var loader = new THREE.FontLoader();
+                loader.load( '/static/examples/fonts/helvetiker_bold.typeface.json', function (font){
+                    var textGeo = new THREE.TextGeometry( text, {
+                        font: font,
+                        size: 0.35,
+                        height: 0.35,
+                        curveSegments: 12,
+                        bevelEnabled: false
+
+                    } );
+                    var textMaterial = new THREE.MeshBasicMaterial( { color: 0x00fff8 } );
+
+                    var mesh = new THREE.Mesh( textGeo, textMaterial );
+                    if (addtocamera==true){
+                        camera.add(mesh);
+                    }
+                    else{
+                        scene.add(mesh);
+                    }
+                    mesh.position.set(pos[0], pos[1], pos[2]);
+                    mesh.name = "textlabel";
+                    mesh.group = group;
+                } );
+            }
+
+
+            var frb_thetas = {{ frb_ra_dat_here }};
+            var frb_phis = {{ frb_dec_dat_here }}
+
+            var atnf_thetas = {{ atnf_ra_dat_here }};
+            var atnf_phis = {{ atnf_dec_dat_here }};
+
+            function drawObjects(thetas, phis, color, name) {
+                for (var i = 0; i < thetas.length; i++){
+                    theta = thetas[i];
+                    phi = phis[i];
+
+                    x = r * Math.cos(theta) * Math.cos(phi);
+                    y = r * Math.sin(phi);
+                    z = r * Math.sin(theta) * Math.cos(phi);
+
+                    var geometry = new THREE.Geometry();
+                    geometry.vertices.push(new THREE.Vector3(x, y, z))
+                    var material = new THREE.PointsMaterial( { size: 2, sizeAttenuation: false, color: color } );
+                    var point = new THREE.Points( geometry, material );
+                    point.name = name;
+                    scene.add(point);
+
+                        //point.position.set(x,y,z);
+                }
+            }
+
+
+
+            var dec = "{{ declination_here }}" * Math.PI / 180;
+            var ra = 0;
+
+            //write declination labels
+            function writeDecLabels(){
+                labels = [-5*Math.PI/12, -Math.PI/3, -Math.PI/4, -Math.PI/6, Math.PI/6, Math.PI/4, Math.PI/3, 5*Math.PI/12];
+                for (var i = 0; i < labels.length; i++){
+                    shift = 0.2;
+                    mainaxis = r * Math.cos(labels[i]);
+                    elev = shift + r * Math.sin(labels[i]);
+                    deg_angle = Math.round(labels[i] * 180 / Math.PI)
+                    addText(deg_angle+String.fromCharCode("0176"), [mainaxis, elev, shift], "equatorial");
+                    addText(deg_angle+String.fromCharCode("0176"), [-shift, elev, mainaxis], "equatorial");
+                    addText(deg_angle+String.fromCharCode("0176"), [-mainaxis, elev, -shift], "equatorial");
+                    addText(deg_angle+String.fromCharCode("0176"), [shift, elev, -mainaxis], "equatorial");
+                }
+            }
+
+            //write ra labels
+            function writeRALabels(){
+                labels = [0, Math.PI/2, Math.PI, 3*Math.PI/2];
+                for (var i = 0; i < labels.length; i++){
+                    angle = labels[i];
+                    hour = angle * 180 / Math.PI;
+                    hour = Math.round(hour/15);
+
+                    addText(String(hour)+'h', [r*Math.cos(angle)+0.2, 0.2, r*Math.sin(angle)], "equatorial");
+                }
+            }
+
+            function drawSun(){
+                seconds_since_j2000 = Math.floor(Date.now()/1000) - 946684800;
+
+                seconds = seconds_since_j2000 % 86400;
+
+                hours = Math.floor(seconds/3600);
+                minutes = Math.floor(seconds/60) - hours*60;
+                seconds = seconds - minutes*60 - hours*3600;
+
+                days_since_j2000 = seconds_since_j2000 / 86400;
+
+                //other calculations 
+                L = 280.460 + (0.9856474 * days_since_j2000)
+                g = 357.528 + (0.9856003 * days_since_j2000)
+                lambda = L + (1.915 * Math.sin(g * Math.PI/180)) + (0.02 * Math.sin(2 * g * Math.PI/180));
+
+                obl_earth = 23.43663;
+
+                ra_sun = Math.atan2(Math.cos(obl_earth*Math.PI/180) * Math.sin(lambda*Math.PI/180), Math.cos(lambda*Math.PI/180));
+                dec_sun = Math.asin(Math.sin(obl_earth*Math.PI/180) * Math.sin(lambda*Math.PI/180));
+
+                sun_x = r * Math.cos(ra_sun) * Math.cos(dec_sun);
+                sun_y = r * Math.sin(dec_sun);
+                sun_z = r * Math.sin(ra_sun) * Math.cos(dec_sun);
+
+                sun_rad = 2 * Math.PI * r * 0.5/360;
+                sun_halo_rad = sun_rad * 20;
+
+                var geometry = new THREE.SphereGeometry(sun_rad, 32, 32);
+                var halo_geometry = new THREE.SphereGeometry(sun_halo_rad, 32, 32)
+
+                var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+                var halo_material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0.3} );
+
+                var sun = new THREE.Mesh( geometry, material );
+                var sun_halo = new THREE.Mesh( halo_geometry, halo_material );
+
+                sun.position.set(sun_x, sun_y, sun_z);
+                sun_halo.position.set(sun_x, sun_y, sun_z);
+
+                scene.add(sun);
+                scene.add(sun_halo);
+            }
+
+            function drawMoon(){
+                currentJD = new Date().getTime()/86400000 + 2440587.5;
+
+                moon_pos = astrojs.ephem.moonPos(currentJD);
+                moon_ra = moon_pos["lon"] * Math.PI/180;
+                moon_dec = moon_pos["lat"] * Math.PI/180;
+                moon_dec = (23.4 * Math.PI/180) - moon_dec;
+                console.log(moon_dec);
+
+                moon_rad = 2 * Math.PI * r * 0.5/360;
+                moon_halo_rad = sun_rad * 10;
+
+                var geometry = new THREE.SphereGeometry(moon_rad, 32, 32);
+                var halo_geometry = new THREE.SphereGeometry(moon_halo_rad, 32, 32);
+
+                var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+                var halo_material = new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 0.3} );
+
+                var moon = new THREE.Mesh( geometry, material );
+                var moon_halo = new THREE.Mesh( halo_geometry, halo_material );   
+
+                moon_x = r * Math.cos(moon_ra) * Math.cos(moon_dec);
+                moon_y = r * Math.sin(moon_dec);
+                moon_z = r * Math.sin(moon_ra) * Math.cos(moon_dec);
+
+                moon.position.set(moon_x, moon_y, moon_z);
+                moon_halo.position.set(moon_x, moon_y, moon_z);
+
+                scene.add(moon);
+                scene.add(moon_halo);
+            }
+
+            var ra = 0;
+            var raoffset = 0;
+            var raoffset_raw = 0;
+            var raoffsetdelta = Math.PI/180;
+
+            function offsetRA(change, reset=false){
+                raoffset += change * Math.PI/180;
+                raoffset_raw += change*4
+                if (reset==true){
+                    raoffset = 0;
+                    raoffset_raw = 0;
+                }
+
+                d = document.getElementById("totaloffset");
+                d.innerHTML = "<input type='button' class='button' style='--bcolor: #66DD66; --fsize: 15px;' value='Total Time Offset (min): " + raoffset_raw + "'>";
+            }
+
+            function animate() {
+                ra = calculateSiderealTime(false);
+                ra = ra.split(":");
+
+                final_ra = ra[0] * 1;
+                final_ra += ra[1] / 60;
+                final_ra += ra[2] / 3600;
+                final_ra = final_ra * 15;
+                final_ra = final_ra * Math.PI / 180;
+                ra = final_ra;// - Math.PI/2;
+                ra += raoffset;
+
+                camx = r * Math.cos(ra) * Math.cos(dec);
+                camy = r * Math.sin(dec);
+                camz = r * Math.sin(ra) * Math.cos(dec);
+                camera.lookAt(camx, camy, camz);
+                //redoAltAz(camx, camy, camz);
+                
+                //camera.rotation.setFromVector3(new THREE.Vector3(camx, camy, camz));
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+
+            };
+
+            function redoAltAz(x, y, z){
+                angles = [0, Math.PI/6, Math.PI/4, Math.PI/3, 5*Math.PI/12];
+                for (var i = scene.children.length - 1; i >= 0; i--) {
+                    if(scene.children[i].group == "altaz"){
+                        if (scene.children[i].name == "textlabel"){
+                            //scene.remove(scene.children[i]);
+                        }
+                        else{
+                            scene.children[i].lookAt(x, y, z);
+                        }
+                    }
+                }
+            }
+
+            function drawAltAz(x, y, z){
+
+                angles = [0, Math.PI/6, Math.PI/4, Math.PI/3, 5*Math.PI/12];
+
+                for (i = 0; i < angles.length; i++){
+                    ring_rad = r * (Math.cos(angles[i]));
+                    ring_width = 0.06
+                    var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
+                    var material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
+                    line = new THREE.Mesh( geometry, material );
+                    //line.position.set(0, 0, 0);
+                    //line.quaternion.copy(camera.quaternion);
+                    line.lookAt(x, y, z);
+                    line.group = "altaz";
+                    camera.add(line);
+                }
+
+                //now draw the lines
+                var material = new THREE.LineBasicMaterial({color: 0xffff00});
+                ys = [r, 0, -r, 0];
+                n_ys = [0, r, 0, -r];
+                for (i = 0; i < ys.length; i++){
+                    points = [];
+                    points.push(new THREE.Vector3(0, 0, 0));
+                    points.push(new THREE.Vector3(n_ys[i], ys[i], 0));
+                    var geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    var line = new THREE.Line( geometry, material );
+                    line.group = "altaz";
+                    line.lookAt(x, y, z);
+                    camera.add(line);
+                }
+
+                //draw the degree labels
+                for (i = 0; i < angles.length; i++){
+                    a = Math.round(angles[i] * 180 / Math.PI);
+                    temprad = r*Math.cos(angles[i]);
+                    xyangle = Math.PI/4;
+                    x = temprad * Math.sin(xyangle);
+                    y = temprad * Math.cos(xyangle)
+                    addText(a+String.fromCharCode("0176"), [x, y, -1], "altaz", addtocamera=true);
+                }
+
+                //label North
+                addText("N", [0.1, 9.5, -1], "altaz", addtocamera=true);
+            }
+
+            function redoLabels(){
+                for (var i = scene.children.length - 1; i >= 0; i--) {
+                    if(scene.children[i].name == "textlabel"){
+                        scene.children[i].quaternion.copy(camera.quaternion);
+                    }
+                }
+            }
+
+            startScene();
+            //drawAltAz(0, 0, 0);
+            addRALines();
+            writeRALabels();
+            addDecLines();
+            writeDecLabels();
+            camera.position.set(0,0,0);
+            
+
+            setInterval(animate(), 1000);
+            setInterval(redoLabels, 10);
+            //setInterval(drawAltAz(camx, camy, camz), 1000);
+            //setInterval(writeDecLabels(), 30000);
+            //setInterval(writeRALabels(), 30000);
+            //redraw sun every half day... hopefully you'll refresh by then...
+            setInterval(drawSun(), 43200000);
+            drawMoon();
+
+            if (draw_atnf == true){
+                drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
+            }
+            if (draw_frb == true){
+                drawObjects(frb_thetas, frb_phis, 0x00ff00, "FRB Catalog");
+            }
+        </script>
+        </gui>
+    </body>
+</html>

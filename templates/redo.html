@@ -1,0 +1,154 @@
+<html>
+    <head>
+        <title>Radio SkyGUIde</title>
+        <style>
+            body { margin: 0; text-align: center; background-color: #FFEEAA}
+            canvas { display: block; }
+            gui {position: fixed; left:50%; top:0px; transform: translate(-50%, -0%);}
+            .sidtime {position: fixed; left:5%; top:15%; font-family:Verdana; text-align: center;}
+            .leftdetails {position: fixed; left:5%; top:10%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
+            .rightdetails {position: fixed; left:80%; top:10%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
+            .button {
+              background-color: var(--bcolor);
+              border: none;
+              color: white;
+              padding: 15px 24px;
+              text-align: center;
+              text-decoration: none;
+              display: inline-block;
+              font-size: var(--fsize);
+              margin: 4px 2px;
+              cursor: pointer;
+            }
+        </style>
+    </head>
+    <body onload="fullReload();">
+        <div id="leftdetails" class="leftdetails">
+            <input type="button" class="button" style="--bcolor: #00DD00; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}"><br>
+            <div id="sidtime">
+                
+            </div>
+            <br><br><br><br><br>
+            <form action='/'>
+                <input type="Submit" class="button" style="--bcolor: #FF0000; --fsize: 15px;" value="Restart">
+            </form>
+        </div>
+        <div id='rightdetails' class='rightdetails'>
+            <input type="button" class="button" style="--bcolor: #00DDDD; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
+            <br><br>
+            Select Catalogs to Draw:<br><br>
+            <form action='/main'>
+                <input type="hidden" name="loc" value="{{loc_here}}">
+                <input type="checkbox" name="drawatnf" value="true" id="drawatnf" onclick="dealWithCheckboxes();">
+                <label for="drawatnf" style="color: #FF0000">ATNF Catalog</label><br><br>
+                <input type="checkbox" name="drawfrb" value="true" id="drawfrb" onclick="dealWithCheckboxes();">
+                <label for='drawfrb' style="color: #00FF00">FRB Catalog</label>
+                <br><br>
+            </form>
+            <br><br>
+            <div id="showing">
+                Currently Showing:
+            </div>
+            <br>
+
+        </div>
+        <gui id='gui'>
+        <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
+        <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script>
+
+            //basic initializing
+            astrojs.ready(function(e){
+
+            });
+            loc = "{{ loc_here }}";
+            if (loc == "Allen Telescope Array"){
+                longitude = -121.4695413
+            }
+            if (loc == "Green Bank Observatory"){
+                longitude = -79.8398566
+            }
+            if (loc == "Parkes Radio Telescope"){
+                longitude = 148.2626028
+            }
+            if (loc == "Atacama Large Millimeter Array"){
+                longitude = -67.7548021
+            }
+            
+            var frb_thetas = {{ frb_ra_dat_here }};
+            var frb_phis = {{ frb_dec_dat_here }}
+
+            var atnf_thetas = {{ atnf_ra_dat_here }};
+            var atnf_phis = {{ atnf_dec_dat_here }};
+
+
+            //THREE.JS SCENE INITIALIZATION
+            function startScene(){
+                var width = window.innerWidth;
+                var height = window.innerHeight;
+                camera = new THREE.OrthographicCamera( -r, r, r, -r, 0, 1000 );
+
+                renderer = new THREE.WebGLRenderer();
+                renderer.setSize(height, height);
+                document.getElementById('gui').appendChild(renderer.domElement);
+
+                scene = new THREE.Scene({canvas:gui});
+            }
+
+            //LINES FOR RA AND DEC
+            //
+            //
+            //
+            //
+            function addDecLines(){
+                angles = [0, Math.PI/6, -Math.PI/6, Math.PI/4, -Math.PI/4, Math.PI/3, -Math.PI/3, 5*Math.PI/12, -5*Math.PI/12];
+                color = 0xffff00
+                for (var angle = 0; angle < angles.length; angle++){
+                    if (angles[angle] == 0){
+                        color = 0xffa500;
+                    }
+                    else{
+                        color = 0xffff00;
+                    }
+                    ring_rad = r * Math.cos(angles[angle]);
+                    ring_width = 0.06
+                    var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
+                    var material = new THREE.MeshBasicMaterial( { color: color, side: THREE.DoubleSide } );
+                    line = new THREE.Mesh( geometry, material );
+                    line.position.set(0, r*Math.sin(angles[angle]), 0);
+                    line.rotation.setFromVector3(new THREE.Vector3(Math.PI/2, 0, Math.PI/2));
+                    line.group = "equatorial";
+                    scene.add(line);
+                }
+            }
+
+            //draw DEC lines
+
+            function addRALines(){
+                angles = [0, Math.PI/2];
+                for (var angle = 0; angle < angles.length; angle++){
+                    ring_rad = r;
+                    ring_width = 0.06
+                    var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
+                    var material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
+                    line = new THREE.Mesh( geometry, material );
+                    line.position.set(0, 0, 0);
+                    line.rotation.setFromVector3(new THREE.Vector3(0, angles[angle], angles[angle]));
+                    line.group = "equatorial";
+                    scene.add(line);
+                }
+            }
+            //
+            //
+            //
+            //
+            //LINES FOR RA AND DEC
+
+
+
+        </script>
+        </gui>
+    </body>
+</html>
