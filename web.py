@@ -109,6 +109,32 @@ for i in range(len(frb_data)-1):
 frb_ra_dat = process_ra(frb_ra_dat)
 frb_dec_dat = process_dec(frb_dec_dat)
 
+messier_data = open("messiercatalog.txt")
+messier_data = messier_data.read()
+messier_data = messier_data.split("\n")
+#messier_data.remove('')
+messier_ras = []
+messier_decs = []
+for i in range(len(messier_data)):
+    messier_data[i] = messier_data[i].split(" ")
+
+for i in range(len(messier_data)):
+    while '' in messier_data[i]:
+        messier_data[i].remove('')
+
+for i in range(len(messier_data)):
+    messier_ras += [messier_data[i][5] + ":" + messier_data[i][6]]
+    messier_decs += [messier_data[i][7] + ":" + messier_data[i][8] + ":" + "00"]
+
+for i in range(len(messier_ras)):
+    part2 = messier_ras[i].split(".")[1]
+    while part2 != '0' and part2[-1] == '0':
+        part2 = part2.replace(part2[-1], '')
+    messier_ras[i] = messier_ras[i].split(".")[0] + ":" + str(float(part2)*6)
+
+messier_ras = process_ra(messier_ras)
+messier_decs = process_dec(messier_decs)
+
 r = 10
 
 app = Flask(__name__)
@@ -163,7 +189,9 @@ def gui():
                                         draw_atnf = draw_atnf,
                                         draw_frb = draw_frb,
                                         frb_ra_dat_here = frb_ra_dat,
-                                        frb_dec_dat_here = frb_dec_dat)
+                                        frb_dec_dat_here = frb_dec_dat,
+                                        messier_ra_dat_here = messier_ras,
+                                        messier_dec_dat_here = messier_decs)
 
     # f = codecs.open("main.html", 'r')
     # mainhtml = f.read()

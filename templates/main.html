@@ -57,7 +57,9 @@
                 <input type="checkbox" name="drawatnf" value="true" id="drawatnf" onclick="dealWithCheckboxes();">
                 <label for="drawatnf" style="color: #FF0000">ATNF Catalog</label><br><br>
                 <input type="checkbox" name="drawfrb" value="true" id="drawfrb" onclick="dealWithCheckboxes();">
-                <label for='drawfrb' style="color: #00FF00">FRB Catalog</label>
+                <label for='drawfrb' style="color: #00FF00">FRB Catalog</label><br><br>
+                <input type="checkbox" name="drawmessier" value="true" id="drawmessier" onclick="dealWithCheckboxes();">
+                <label for='drawmessier' style="color: #00AAFF">Messier Catalog</label>
                 <br><br>
             </form>
             <br><br>
@@ -114,6 +116,7 @@
             function dealWithCheckboxes(){
                 atnfcheckbox = document.getElementById("drawatnf");
                 frbcheckbox = document.getElementById("drawfrb");
+                messiercheckbox = document.getElementById("drawmessier");
                 showing = document.getElementById("showing");
 
                 if (atnfcheckbox.checked){
@@ -144,6 +147,24 @@
                             scene.remove(scene.children[i]);
                     }   
                     var el = document.getElementById("FRBCatalog");
+                    if (el == null){
+
+                    }
+                    else{
+                        el.remove();
+                    }
+                }
+
+                if (messiercheckbox.checked){
+                    writeCatalog("Messier Catalog", "#00AAFF");
+                    drawObjects(messier_thetas, messier_phis, 0x00aaff, "Messier Catalog");
+                }
+                else{
+                    for (let i = scene.children.length - 1; i >= 0; i--){
+                        if (scene.children[i].type == "Points" && scene.children[i].name == "Messier Catalog")
+                            scene.remove(scene.children[i]);
+                    }
+                    var el = document.getElementById("MessierCatalog");
                     if (el == null){
 
                     }
@@ -336,6 +357,9 @@
 
             var atnf_thetas = {{ atnf_ra_dat_here }};
             var atnf_phis = {{ atnf_dec_dat_here }};
+
+            var messier_thetas = {{ messier_ra_dat_here }};
+            var messier_phis = {{ messier_dec_dat_here }};
 
             function drawObjects(thetas, phis, color, name) {
                 for (var i = 0; i < thetas.length; i++){
@@ -592,12 +616,12 @@
             setInterval(drawSun(), 43200000);
             drawMoon();
 
-            if (draw_atnf == true){
-                drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
-            }
-            if (draw_frb == true){
-                drawObjects(frb_thetas, frb_phis, 0x00ff00, "FRB Catalog");
-            }
+            //if (draw_atnf == true){
+            //    drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
+            //}
+            //if (draw_frb == true){
+            //    drawObjects(frb_thetas, frb_phis, 0x00ff00, "FRB Catalog");
+            //}
         </script>
         </gui>
     </body>
