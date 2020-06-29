@@ -9,6 +9,7 @@ import codecs
 import ephem
 from datetime import datetime
 import pytz
+import pandas as pd
 
 def process_ra(ra_dat):
     for i in range(len(ra_dat)):
@@ -163,17 +164,6 @@ def gui():
         declination = -23.023556
         abbr = "ALMA"
 
-
-
-    if loc == "Celestial North Pole":
-        declination = 90
-        abbr = "CNP"
-    if loc == "Celestial South Pole":
-        declination = -90
-        abbr = "CSP"
-    if loc == "Celestial Equator":
-        declination = 0
-        abbr = "CE"
 
     if draw_atnf == None:
         draw_atnf = 'false'

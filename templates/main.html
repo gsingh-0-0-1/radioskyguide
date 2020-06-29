@@ -270,6 +270,7 @@
             var scene;
             var camera;
             var renderer;
+            pixelratio = 1.5;
 
             function startScene(){
                 var width = window.innerWidth;
@@ -277,6 +278,7 @@
                 camera = new THREE.OrthographicCamera( -r, r, r, -r, 0, 1000 );
                 
                 renderer = new THREE.WebGLRenderer();
+                renderer.setPixelRatio( pixelratio, pixelratio );
                 renderer.setSize(height, height);
                 document.getElementById('gui').appendChild(renderer.domElement);
 
@@ -299,11 +301,12 @@
                     ring_rad = r * Math.cos(angles[angle]);
                     ring_width = 0.06
                     var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
-                    var material = new THREE.MeshBasicMaterial( { color: color, side: THREE.DoubleSide } );
+                    var material = new THREE.MeshBasicMaterial( { color: color } );
                     line = new THREE.Mesh( geometry, material );
                     line.position.set(0, r*Math.sin(angles[angle]), 0);
                     line.rotation.setFromVector3(new THREE.Vector3(Math.PI/2, 0, Math.PI/2));
                     line.group = "equatorial";
+                    line.material.shading = THREE.SmoothShading;
                     scene.add(line);
                 }
             }
@@ -317,10 +320,13 @@
                     ring_width = 0.06
                     var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
                     var material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
+
                     line = new THREE.Mesh( geometry, material );
+                    
                     line.position.set(0, 0, 0);
                     line.rotation.setFromVector3(new THREE.Vector3(0, angles[angle], angles[angle]));
                     line.group = "equatorial";
+                    line.material.shading = THREE.SmoothShading;
                     scene.add(line);
                 }
             }
@@ -361,7 +367,7 @@
             var messier_thetas = {{ messier_ra_dat_here }};
             var messier_phis = {{ messier_dec_dat_here }};
 
-            function drawObjects(thetas, phis, color, name) {
+            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false) {
                 for (var i = 0; i < thetas.length; i++){
                     theta = thetas[i];
                     phi = phis[i];
@@ -374,7 +380,21 @@
                     geometry.vertices.push(new THREE.Vector3(x, y, z))
                     var material = new THREE.PointsMaterial( { size: 2, sizeAttenuation: false, color: color } );
                     var point = new THREE.Points( geometry, material );
-                    point.name = name;
+                    if (listofnames==true){
+                        point.name = name[i]
+                    }
+                    else{
+                        point.name = name;
+                    }
+
+                    if (group != ''){
+                        point.group = group;
+                    }
+
+                    if (satellitemode==true){
+                        point.sat_tag = i;
+                    }
+
                     scene.add(point);
 
                         //point.position.set(x,y,z);
@@ -464,7 +484,6 @@
                 moon_ra = moon_pos["lon"] * Math.PI/180;
                 moon_dec = moon_pos["lat"] * Math.PI/180;
                 moon_dec = (23.4 * Math.PI/180) - moon_dec;
-                console.log(moon_dec);
 
                 moon_rad = 2 * Math.PI * r * 0.5/360;
                 moon_halo_rad = sun_rad * 10;
@@ -517,6 +536,7 @@
                 final_ra = final_ra * Math.PI / 180;
                 ra = final_ra;// - Math.PI/2;
                 ra += raoffset;
+                //ra = 0;
 
                 camx = r * Math.cos(ra) * Math.cos(dec);
                 camy = r * Math.sin(dec);
@@ -562,17 +582,22 @@
                 }
 
                 //now draw the lines
-                var material = new THREE.LineBasicMaterial({color: 0xffff00});
+                
                 ys = [r, 0, -r, 0];
                 n_ys = [0, r, 0, -r];
-                for (i = 0; i < ys.length; i++){
-                    points = [];
-                    points.push(new THREE.Vector3(0, 0, 0));
-                    points.push(new THREE.Vector3(n_ys[i], ys[i], 0));
-                    var geometry = new THREE.BufferGeometry().setFromPoints(points);
-                    var line = new THREE.Line( geometry, material );
+                for (i = 0; i < 2; i++){
+                    //points = [];
+                    //points.push(new THREE.Vector3(0, 0, 0));
+                    //points.push(new THREE.Vector3(n_ys[i], ys[i], 0));
+
+                    //var geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    var geometry = new THREE.CylinderGeometry(0.04, 0.04, r*2, 30);
+                    var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+                    var line = new THREE.Mesh( geometry, material );
                     line.group = "altaz";
-                    line.lookAt(x, y, z);
+                    line.position.set(0, 0, -1);
+                    line.rotation.set(0, 0, i * Math.PI/2);
+                    //line.lookAt(x, y, z);
                     camera.add(line);
                 }
 
@@ -598,6 +623,50 @@
                 }
             }
 
+            satellite_dictionary = {};
+            function drawSatellites(){
+                var data = new XMLHttpRequest();
+                data.open("GET", "/static/satellite_data.txt?time=" + new Date().getTime());
+                data.send();
+                data.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        data = this.responseText;
+                        data = data.split("$");
+                        for (var i = 0; i < data.length; i++)
+                            data[i] = data[i].replace("[", '').replace("]", '').split(",")
+
+                        drawObjects(data[0], data[1], 0xffffff, data[2], "Satellites", true, true);
+                    }
+                };
+            }
+
+            function updateSatellites(){
+                var data = new XMLHttpRequest();
+                data.open("GET", "/static/satellite_data.txt?time=" + new Date().getTime());
+                data.send();
+                data.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        data = this.responseText;
+                        data = data.split("$");
+                        for (var i = 0; i < data.length; i++)
+                            data[i] = data[i].replace("[", '').replace("]", '').split(",")
+
+                        for (var i = scene.children.length - 1; i >= 0; i--) {
+                            if(scene.children[i].group == "Satellites"){
+                                scene.remove(scene.children[i]);
+                                //console.log(scene.children[i].sat_tag);
+                                //var x = r * Math.cos(data[0][scene.children[i].sat_tag]) * Math.cos(data[1][scene.children[i].sat_tag]);
+                                //var y = r * Math.sin(data[1][scene.children[i].sat_tag]);
+                                //var z = r * Math.sin(data[0][scene.children[i].sat_tag]) * Math.cos(data[1][scene.children[i].sat_tag]);
+                                //scene.children[i].position.set(x, y, z);
+                            }
+                        }
+                        drawObjects(data[0], data[1], 0xffffff, data[2], "Satellites", true, true);
+                    }
+                };
+            }
+
+
             startScene();
             //drawAltAz(0, 0, 0);
             addRALines();
@@ -606,9 +675,11 @@
             writeDecLabels();
             camera.position.set(0,0,0);
             
-
+            animate();
             setInterval(animate(), 1000);
             setInterval(redoLabels, 10);
+            drawSatellites();
+            setInterval(updateSatellites, 1000);
             //setInterval(drawAltAz(camx, camy, camz), 1000);
             //setInterval(writeDecLabels(), 30000);
             //setInterval(writeRALabels(), 30000);
