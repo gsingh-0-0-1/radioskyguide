@@ -30,7 +30,7 @@
             </div>
             <br><br><br><br><br>
             <div>
-                Time:<br>
+                Time Modfier:<br>
                 <input type="button" class="button" style="--bcolor: #9999FF; --fsize: 15px;" value="+5m" onclick="offsetRA(1.25);">
                 <input type="button" class="button" style="--bcolor: #FF9999; --fsize: 15px;" value="-5m" onclick="offsetRA(-1.25);">
                 <br>
@@ -546,6 +546,7 @@
                     raoffset_raw = 0;
                 }
                 timeoffset = raoffset_raw;
+                updateSatellites();
 
                 d = document.getElementById("totaloffset");
                 d.innerHTML = "<input type='button' class='button' style='--bcolor: #66DD66; --fsize: 15px;' value='Total Time Offset (min): " + raoffset_raw + "'>";
