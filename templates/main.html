@@ -51,7 +51,7 @@
         <div id='rightdetails' class='rightdetails'>
             <input type="button" class="button" style="--bcolor: #00DDDD; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
             <br><br>
-            Select Catalogs to Draw:<br><br>
+            Select Objects to Draw:<br><br>
             <form action='/main'>
                 <input type="hidden" name="loc" value="{{loc_here}}">
                 <input type="checkbox" name="drawatnf" value="true" id="drawatnf" onclick="dealWithCheckboxes();">
@@ -59,7 +59,9 @@
                 <input type="checkbox" name="drawfrb" value="true" id="drawfrb" onclick="dealWithCheckboxes();">
                 <label for='drawfrb' style="color: #00FF00">FRB Catalog</label><br><br>
                 <input type="checkbox" name="drawmessier" value="true" id="drawmessier" onclick="dealWithCheckboxes();">
-                <label for='drawmessier' style="color: #00AAFF">Messier Catalog</label>
+                <label for='drawmessier' style="color: #00AAFF">Messier Catalog</label><br><br>
+                <input type="checkbox" name="drawsatellites" value="true" id="drawsatellites" onclick="dealWithCheckboxes();">
+                <label for='drawsatellites' style="color: #000000">Satellites</label>
                 <br><br>
             </form>
             <br><br>
@@ -82,6 +84,7 @@
         <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
         <script>
             astrojs.ready(function(e){
 
@@ -117,6 +120,7 @@
                 atnfcheckbox = document.getElementById("drawatnf");
                 frbcheckbox = document.getElementById("drawfrb");
                 messiercheckbox = document.getElementById("drawmessier");
+                satellitecheckbox = document.getElementById("drawsatellites");
                 showing = document.getElementById("showing");
 
                 if (atnfcheckbox.checked){
@@ -171,6 +175,25 @@
                     else{
                         el.remove();
                     }
+                }
+
+                if (satellitecheckbox.checked){
+                    writeCatalog("Satellites", "#000000");
+                    updateSatellites();
+                    satelliterefreshID = setInterval(updateSatellites, 1000);
+                }
+                else{
+                    clearInterval(satelliterefreshID);
+                    for (let i = scene.children.length - 1; i >= 0; i--){
+                        if (scene.children[i].name == "Satellite")
+                            scene.remove(scene.children[i]);
+                    }
+                    var el = document.getElementById("Satellites");
+                    if (el == null){
+                    }
+                    else{
+                        el.remove();
+                    }                 
                 }
             }
 
@@ -271,11 +294,12 @@
             var camera;
             var renderer;
             pixelratio = 1.5;
+            var rmod = 0;
 
             function startScene(){
                 var width = window.innerWidth;
                 var height = window.innerHeight;
-                camera = new THREE.OrthographicCamera( -r, r, r, -r, 0, 1000 );
+                camera = new THREE.OrthographicCamera( -(r+rmod), (r+rmod), (r+rmod), -(r+rmod), 0, 1000 );
                 
                 renderer = new THREE.WebGLRenderer();
                 renderer.setPixelRatio( pixelratio, pixelratio );
@@ -509,6 +533,7 @@
             }
 
             var ra = 0;
+            var timeoffset = 0;
             var raoffset = 0;
             var raoffset_raw = 0;
             var raoffsetdelta = Math.PI/180;
@@ -520,11 +545,13 @@
                     raoffset = 0;
                     raoffset_raw = 0;
                 }
+                timeoffset = raoffset_raw;
 
                 d = document.getElementById("totaloffset");
                 d.innerHTML = "<input type='button' class='button' style='--bcolor: #66DD66; --fsize: 15px;' value='Total Time Offset (min): " + raoffset_raw + "'>";
             }
 
+            var ra;
             function animate() {
                 ra = calculateSiderealTime(false);
                 ra = ra.split(":");
@@ -623,47 +650,65 @@
                 }
             }
 
-            satellite_dictionary = {};
+            var data = '';
             function drawSatellites(){
-                var data = new XMLHttpRequest();
-                data.open("GET", "/static/satellite_data.txt?time=" + new Date().getTime());
+                data = new XMLHttpRequest();
+                data.open("GET", "/static/newtle.txt?time=" + new Date().getTime());
                 data.send();
                 data.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         data = this.responseText;
-                        data = data.split("$");
-                        for (var i = 0; i < data.length; i++)
-                            data[i] = data[i].replace("[", '').replace("]", '').split(",")
-
-                        drawObjects(data[0], data[1], 0xffffff, data[2], "Satellites", true, true);
+                        data = data.split("\n0");
                     }
                 };
             }
 
             function updateSatellites(){
-                var data = new XMLHttpRequest();
-                data.open("GET", "/static/satellite_data.txt?time=" + new Date().getTime());
-                data.send();
-                data.onreadystatechange = function() {
-                    if (this.readyState == 4 && this.status == 200) {
-                        data = this.responseText;
-                        data = data.split("$");
-                        for (var i = 0; i < data.length; i++)
-                            data[i] = data[i].replace("[", '').replace("]", '').split(",")
-
-                        for (var i = scene.children.length - 1; i >= 0; i--) {
-                            if(scene.children[i].group == "Satellites"){
-                                scene.remove(scene.children[i]);
-                                //console.log(scene.children[i].sat_tag);
-                                //var x = r * Math.cos(data[0][scene.children[i].sat_tag]) * Math.cos(data[1][scene.children[i].sat_tag]);
-                                //var y = r * Math.sin(data[1][scene.children[i].sat_tag]);
-                                //var z = r * Math.sin(data[0][scene.children[i].sat_tag]) * Math.cos(data[1][scene.children[i].sat_tag]);
-                                //scene.children[i].position.set(x, y, z);
-                            }
-                        }
-                        drawObjects(data[0], data[1], 0xffffff, data[2], "Satellites", true, true);
+                for (var j = scene.children.length - 1; j >= 0; j--) {
+                    if(scene.children[j].name == "Satellite"){
+                        scene.remove(scene.children[j]);
                     }
-                };
+                }
+ 
+                for (var i = 0; i < data.length; i+=190){
+                    sat = data[i].split("\n")
+                    name = sat[0];
+                    line1 = sat[1];
+                    line2 = sat[2];
+
+                    var satrec = satellite.twoline2satrec(line1, line2);
+
+                    var oldDateObj = new Date();
+                    var newDateObj = new Date();
+                    newDateObj.setTime(oldDateObj.getTime() + (timeoffset * 60 * 1000));
+
+                    //var timeSinceTleEpochMinutes = Math.floor(new Date().getTime() / 60000);
+
+                    //console.log(timeSinceTleEpochMinutes);
+
+                    //var positionAndVelocity = satellite.sgp4(satrec, timeSinceTleEpochMinutes);
+                    var positionAndVelocity = satellite.propagate(satrec, newDateObj);
+
+                    var positionEci = positionAndVelocity.position,
+                        velocityEci = positionAndVelocity.velocity;
+
+                    var observerGd = {
+                        longitude: satellite.degreesToRadians(longitude),
+                        latitude: satellite.degreesToRadians(dec),
+                        height: 0.370
+                    };
+
+                    var gmst = satellite.gstime(new Date());
+
+                    var positionGd = satellite.eciToGeodetic(positionEci, gmst);
+
+                    var satlongitude = positionGd.longitude,
+                        satlatitude  = positionGd.latitude;
+
+                    drawObjects([satlongitude], [satlatitude], 0xffffff, "Satellite");
+
+                    
+                }
             }
 
 
@@ -678,7 +723,9 @@
             animate();
             setInterval(animate(), 1000);
             setInterval(redoLabels, 10);
-            //drawSatellites();
+
+            var satelliterefreshID = '';
+            drawSatellites();
             //setInterval(updateSatellites, 1000);
             //setInterval(drawAltAz(camx, camy, camz), 1000);
             //setInterval(writeDecLabels(), 30000);
