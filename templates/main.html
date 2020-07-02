@@ -33,7 +33,7 @@
             <div id="sidtime">
                 
             </div>
-            <br><br><br><br><br>
+            <br><br><br>
             <div>
                 <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Time Modfier:">
 
@@ -54,7 +54,7 @@
 
 
                 <br>
-                <input type="text" class="button" id="delaybox" style="--bcolor: #553555; --fsize: 15px;" value="Enter Custom Delay" onkeypress="javascript:doit_onkeypress(event);">
+                <input type="text" class="button" id="delaybox" style="--bcolor: #553555; --fsize: 15px;" placeholder="Enter Custom Delay" onkeypress="javascript:customRaOffset(event);">
 
                 <br>
                 <input type="button" class="button" style="--bcolor: #553555; --fsize: 15px;" value="Reset to Current Time" onclick="offsetRA(0, true);">
@@ -63,7 +63,7 @@
                     <input type="button" class="button" style="--bcolor: #444444; --fsize: 15px;" value="Total Time Offset (min): 0">
                 </div>
             </div>
-            <br><br><br>
+            <br>
             <form action='/'>
                 <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Restart">
             </form>
@@ -89,15 +89,19 @@
             </form>
             <br><br>
             <form>
-                <input type="checkbox" name="equatorialcheckbox" value="true" id="equatorialcheckbox" onclick="gridCheckboxes();" checked>
+                <input type="checkbox" name="equatorialcheckbox" value="true" id="equatorialcheckbox" onclick="gridCheckboxes();">
                 <label for="equatorialcheckbox" style="color: #9922FF">Equatorial Grid</label>
                 <br><br>
-                <input type="checkbox" name="altazcheckbox" value="true" id="altazcheckbox" onclick="gridCheckboxes();">
+                <input type="checkbox" name="altazcheckbox" value="true" id="altazcheckbox" onclick="gridCheckboxes();" checked>
                 <label for="altazcheckbox" style="color: #9922FF">Alt-Az Grid</label>
             </form>
             <br><br>
-            <div id="showing">
-                <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Currently Showing:">
+            <div id="modifyaltaz">
+                <input id="alt_box" type="text" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Altitude (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
+
+                <input id="az_box" type="text" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Azimuth: North = 0&#176" onkeypress="javascript:dealWithAltAzInput(event);">
+
+                <input id="fov_box" type="text" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="FOV (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
             </div>
             <br>
 
@@ -108,7 +112,22 @@
 
             });
 
-            function doit_onkeypress(event){
+            function dealWithAltAzInput(event){
+                if (event.keyCode == 13 || event.which == 13){
+                    alt_box = document.getElementById("alt_box");
+                    az_box = document.getElementById("az_box");
+                    fov_box = document.getElementById("fov_box");
+                    pointing_alt = alt_box.value;
+                    temp_az = parseFloat(az_box.value) * 1;
+                    console.log(temp_az);
+                    temp_az = 360 - temp_az;
+                    pointing_az = temp_az + 90;
+                    fov = fov_box.value;
+                }
+            }
+
+
+            function customRaOffset(event){
                 if (event.keyCode == 13 || event.which == 13){
                     delaybox = document.getElementById("delaybox");
                     offsetRA(delaybox.value/4);
@@ -132,16 +151,6 @@
             draw_atnf = {{ draw_atnf }}
             draw_frb = {{ draw_frb }}
 
-            function writeCatalog(catalog, color){
-                showing = document.getElementById("showing");
-                if (showing.innerHTML.includes(catalog)){
-                    console.log('none');
-                }
-                else{
-                    showing.innerHTML += "<div id="+catalog.replace(" ", '')+" style='color: "+color+"'><br>&#9745 "+catalog+"</div>"
-                }
-            }
-
             function dealWithCheckboxes(){
                 atnfcheckbox = document.getElementById("drawatnf");
                 frbcheckbox = document.getElementById("drawfrb");
@@ -150,7 +159,7 @@
                 showing = document.getElementById("showing");
 
                 if (atnfcheckbox.checked){
-                    writeCatalog("ATNF Catalog", "#FF0000");
+                    //writeCatalog("ATNF Catalog", "#FF0000");
                     drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
                 }
                 else{
@@ -168,7 +177,7 @@
                 }
 
                 if (frbcheckbox.checked){
-                    writeCatalog("FRB Catalog", "#00FF00");
+                    //writeCatalog("FRB Catalog", "#00FF00");
                     drawObjects(frb_thetas, frb_phis, 0x00ff00, "FRB Catalog");
                 }
                 else{
@@ -186,7 +195,7 @@
                 }
 
                 if (messiercheckbox.checked){
-                    writeCatalog("Messier Catalog", "#00AAFF");
+                    //writeCatalog("Messier Catalog", "#00AAFF");
                     drawObjects(messier_thetas, messier_phis, 0x00aaff, "Messier Catalog");
                 }
                 else{
@@ -204,7 +213,7 @@
                 }
 
                 if (satellitecheckbox.checked){
-                    writeCatalog("Satellites", "#FFFFFF");
+                    //writeCatalog("Satellites", "#FFFFFF");
                     updateSatellites();
                     clearInterval(satelliterefreshID);
                     satelliterefreshID = setInterval(updateSatellites, 1000);
@@ -590,7 +599,32 @@
             }
 
             var ra;
+            var mask = '';
+            var pointing_alt = 90;
+            var pointing_az = 0;
+            var fov = 90;
+
             function animate() {
+                camera.remove(mask);
+
+                viewrad = r * Math.sin(fov * Math.PI / 180);
+                alt_rectangular = r * Math.cos(pointing_alt * Math.PI / 180);
+
+                view_center_x = alt_rectangular * Math.cos(pointing_az * Math.PI / 180);
+                view_center_y = alt_rectangular * Math.sin(pointing_az * Math.PI / 180);
+
+                camera.top = view_center_y + viewrad;
+                camera.bottom = view_center_y - viewrad;
+                camera.left = view_center_x - viewrad;
+                camera.right = view_center_x + viewrad;
+
+                camera.updateProjectionMatrix();
+
+                mask_geo = new THREE.TorusGeometry(viewrad+5, 5, 2, 100);
+                mask_mat = new THREE.MeshBasicMaterial({color:0x000000});
+                mask = new THREE.Mesh(mask_geo, mask_mat);
+                camera.add(mask);
+                mask.position.set(view_center_x, view_center_y, 0);
 
                 ra = calculateSiderealTime(false);
                 ra = ra.split(":");
@@ -748,15 +782,16 @@
 
                     
                 }
+
             }
 
 
             startScene();
-            //drawAltAz(0, 0, 0);
-            addRALines();
-            writeRALabels();
-            addDecLines();
-            writeDecLabels();
+            drawAltAz(0, 0, 0);
+            //addRALines();
+            //writeRALabels();
+            //addDecLines();
+            //writeDecLabels();
             camera.position.set(0,0,0);
             
             animate();
