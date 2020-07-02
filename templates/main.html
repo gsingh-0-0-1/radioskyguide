@@ -184,7 +184,7 @@
                 if (satellitecheckbox.checked){
                     writeCatalog("Satellites", "#FFFFFF");
                     updateSatellites();
-                    //clearInterval(satelliterefreshID);
+                    clearInterval(satelliterefreshID);
                     satelliterefreshID = setInterval(updateSatellites, 1000);
                 }
                 else{
@@ -544,7 +544,7 @@
             var raoffsetdelta = Math.PI/180;
 
             function offsetRA(change, reset=false){
-                satbox = satellitecheckbox = document.getElementById("drawsatellites");
+                
                 raoffset += change * Math.PI/180;
                 raoffset_raw += change*4
                 if (reset==true){
@@ -679,7 +679,7 @@
                     }
                 }
  
-                for (var i = 0; i < data.length; i+=100){
+                for (var i = 0; i < data.length; i+=50){
                     sat = data[i].split("\n")
                     name = sat[0];
                     line1 = sat[1];
@@ -735,7 +735,6 @@
 
             var satelliterefreshID = '';
             drawSatellites();
-            //setInterval(updateSatellites, 1000);
             //setInterval(drawAltAz(camx, camy, camz), 1000);
             //setInterval(writeDecLabels(), 30000);
             //setInterval(writeRALabels(), 30000);
