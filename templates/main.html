@@ -36,20 +36,31 @@
             <br><br><br><br><br>
             <div>
                 <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Time Modfier:">
+
+
                 <br>
-                <input type="button" class="button" style="--bcolor: #9cbae3; --fsize: 15px;" value="+5m" onclick="offsetRA(1.25);">
-                <input type="button" class="button" style="--bcolor: #daa4a4; --fsize: 15px;" value="-5m" onclick="offsetRA(-1.25);">
+                <input type="button" class="button" style="--bcolor: #afc8e9; --fsize: 15px;" value="+1m" onclick="offsetRA(0.25);">
+                <input type="button" class="button" style="--bcolor: #e1b7b7; --fsize: 15px;" value="-1m" onclick="offsetRA(-0.25);">
+
+
+                <br>
+                <input type="button" class="button" style="--bcolor: #749fd8; --fsize: 15px;" value="+5m" onclick="offsetRA(1.25);">
+                <input type="button" class="button" style="--bcolor: #cb8080; --fsize: 15px;" value="-5m" onclick="offsetRA(-1.25);">
+                
+
                 <br>
                 <input type="button" class="button" style="--bcolor: #356fbb; --fsize: 15px;" value="+1h" onclick="offsetRA(15);">
                 <input type="button" class="button" style="--bcolor: #b54a4a; --fsize: 15px;" value="-1h" onclick="offsetRA(-15);">
                 <br>
+
+
                 <input type="button" class="button" style="--bcolor: #553555; --fsize: 15px;" value="Reset to Current Time" onclick="offsetRA(0, true);">
                 <br>
                 <div id="totaloffset">
                     <input type="button" class="button" style="--bcolor: #444444; --fsize: 15px;" value="Total Time Offset (min): 0">
                 </div>
             </div>
-            <br><br><br><br><br>
+            <br><br><br>
             <form action='/'>
                 <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Restart">
             </form>
@@ -544,6 +555,7 @@
             var raoffsetdelta = Math.PI/180;
 
             function offsetRA(change, reset=false){
+                satbox = satellitecheckbox = document.getElementById("drawsatellites");
                 
                 raoffset += change * Math.PI/180;
                 raoffset_raw += change*4
@@ -553,6 +565,7 @@
                 }
                 timeoffset = raoffset_raw;
                 if (satbox.checked){
+                    //clearInterval(satelliterefreshID);
                     updateSatellites();
                 }
 
@@ -562,6 +575,7 @@
 
             var ra;
             function animate() {
+
                 ra = calculateSiderealTime(false);
                 ra = ra.split(":");
 
@@ -735,6 +749,7 @@
 
             var satelliterefreshID = '';
             drawSatellites();
+            //setInterval(updateSatellites, 1000);
             //setInterval(drawAltAz(camx, camy, camz), 1000);
             //setInterval(writeDecLabels(), 30000);
             //setInterval(writeRALabels(), 30000);
