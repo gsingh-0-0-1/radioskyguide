@@ -238,29 +238,43 @@
                 equatorialcheckbox = document.getElementById("equatorialcheckbox");
 
                 if (equatorialcheckbox.checked){
-                    addRALines();
-                    writeRALabels();
-                    addDecLines();
-                    writeDecLabels();
+                    obj = 0;
+                    for (let i = scene.children.length - 1; i >= 0; i--) {
+                        if(scene.children[i].group == "equatorial"){
+                            scene.children[i].visible = true;
+                            obj += 1;
+                        }
+                    }
+                    if (obj == 0){
+                        addRALines();
+                        writeRALabels();
+                        addDecLines();
+                        writeDecLabels();
+                    }
                 }
                 else{
                     for (let i = scene.children.length - 1; i >= 0; i--) {
                         if(scene.children[i].group == "equatorial")
-                            scene.remove(scene.children[i]);
+                            scene.children[i].visible = false;
                     }    
                 }
 
                 if (altazcheckbox.checked){
-                    drawAltAz(0, 0, 0);
+                    obj = 0;
+                    for (let i = camera.children.length - 1; i >= 0; i--) {
+                        if(camera.children[i].group == "altaz"){
+                            camera.children[i].visible = true;
+                            obj += 1;
+                        }
+                    }
+                    if (obj == 0){
+                        drawAltAz(0, 0, 0);
+                    }
                 }
                 else{
-                    //for (let i = scene.children.length - 1; i >= 0; i--) {
-                    //    if(scene.children[i].group == "altaz")
-                    //        scene.remove(scene.children[i]);
-                    //}
                     for (let i = camera.children.length - 1; i >= 0; i--){
                         if (camera.children[i].group == "altaz")
-                            camera.remove(camera.children[i]);
+                            camera.children[i].visible = false;
                     }                        
                 }
             }
@@ -785,12 +799,7 @@
 
             }
 
-            //add significant object labels
-            function addObjectLabels(){
-                //Crab Pulsar
-                right_asc = [5, 34, 31.973];
-                decl = [22, 0, 52.06];
-
+            function processRaDec(right_asc, decl){
                 right_asc = (right_asc[0] * 15) + (right_asc[1] / 4) + (right_asc[2] / 240);
                 decl = (decl[0]) + (decl[1] / 60) + (decl[2] / 3600);
 
@@ -801,9 +810,38 @@
                 y = r * Math.sin(decl);
                 z = r * Math.sin(right_asc) * Math.cos(decl);
 
+                return [x, y, z, right_asc, decl];
+            }
+
+            //add significant object labels
+            function addObjectLabels(){
+                //Crab Pulsar
+                right_asc = [5, 34, 31.973];
+                decl = [22, 0, 52.06];
+
+                l = processRaDec(right_asc, decl);
+                x = l[0];
+                y = l[1];
+                z = l[2];
+                right_asc = l[3];
+                decl = l[4];
+
                 addText("Crab Pulsar", [x - 0.05, y, z - 0.05], '', false, 0.2);
                 drawObjects([right_asc], [decl], 0x9400d3, "Important Objects", size=1)
 
+                //J0332+5434
+                right_asc = [3, 32, 59.4096];
+                decl = [54, 34, 43.329];
+
+                l = processRaDec(right_asc, decl);
+                x = l[0];
+                y = l[1];
+                z = l[2];
+                right_asc = l[3];
+                decl = l[4];
+
+                addText("J0332+5434", [x - 0.05, y, z - 0.05], '', false, 0.2);
+                drawObjects([right_asc], [decl], 0x9400d3, "Important Objects", size=1)
             }
 
 
