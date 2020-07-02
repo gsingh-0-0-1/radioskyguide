@@ -51,9 +51,12 @@
                 <br>
                 <input type="button" class="button" style="--bcolor: #356fbb; --fsize: 15px;" value="+1h" onclick="offsetRA(15);">
                 <input type="button" class="button" style="--bcolor: #b54a4a; --fsize: 15px;" value="-1h" onclick="offsetRA(-15);">
+
+
                 <br>
+                <input type="text" class="button" id="delaybox" style="--bcolor: #553555; --fsize: 15px;" value="Enter Custom Delay" onkeypress="javascript:doit_onkeypress(event);">
 
-
+                <br>
                 <input type="button" class="button" style="--bcolor: #553555; --fsize: 15px;" value="Reset to Current Time" onclick="offsetRA(0, true);">
                 <br>
                 <div id="totaloffset">
@@ -104,6 +107,14 @@
             astrojs.ready(function(e){
 
             });
+
+            function doit_onkeypress(event){
+                if (event.keyCode == 13 || event.which == 13){
+                    delaybox = document.getElementById("delaybox");
+                    offsetRA(delaybox.value/4);
+                }
+            }
+
             loc = "{{ loc_here }}";
             if (loc == "Allen Telescope Array"){
                 longitude = -121.47173
@@ -569,8 +580,13 @@
                     updateSatellites();
                 }
 
+                //get the decimal places right with some float to string and then back to float conversion
+                //raoffset_raw = (1 * raoffset_raw).toFixed(3);
+                //raoffset_raw = 1 * raoffset_raw;
+                //raoffset_raw = raoffset_raw.toString();
+
                 d = document.getElementById("totaloffset");
-                d.innerHTML = "<input type='button' class='button' style='--bcolor: #444444; --fsize: 15px;' value='Total Time Offset (min): " + raoffset_raw + "'>";
+                d.innerHTML = "<input type='button' class='button' style='--bcolor: #444444; --fsize: 15px;' value='Total Time Offset (min): " + raoffset_raw.toFixed(2) + "'>";
             }
 
             var ra;
