@@ -117,6 +117,15 @@
                     alt_box = document.getElementById("alt_box");
                     az_box = document.getElementById("az_box");
                     fov_box = document.getElementById("fov_box");
+                    if (alt_box.value == ''){
+                        alt_box.value = 90
+                    }
+                    if (az_box.value ==''){
+                        az_box.value = 0
+                    }
+                    if (fov_box.value ==''){
+                        fov_box.value = 90
+                    }
                     pointing_alt = alt_box.value;
                     temp_az = parseFloat(az_box.value) * 1;
                     console.log(temp_az);
