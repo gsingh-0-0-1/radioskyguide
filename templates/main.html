@@ -1,13 +1,14 @@
 <html>
     <head>
         <title>Radio SkyGUIde</title>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
         <style>
-            body { margin: 0; text-align: center; background-color: #FFEEAA}
+            body { margin: 0; text-align: center; background-color: #000000}
             canvas { display: block; }
             gui {position: fixed; left:50%; top:0px; transform: translate(-50%, -0%);}
             .sidtime {position: fixed; left:5%; top:15%; font-family:Verdana; text-align: center;}
-            .leftdetails {position: fixed; left:5%; top:10%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
-            .rightdetails {position: fixed; left:80%; top:10%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
+            .leftdetails {position: fixed; left:5%; top:5%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
+            .rightdetails {position: fixed; left:80%; top:5%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
             .button {
               background-color: var(--bcolor);
               border: none;
@@ -21,47 +22,55 @@
               cursor: pointer;
             }
         </style>
+        <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
+        <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
     </head>
     <body onload="fullReload();">
         <div id="leftdetails" class="leftdetails">
-            <input type="button" class="button" style="--bcolor: #00DD00; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}"><br>
+            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}"><br>
             <div id="sidtime">
                 
             </div>
             <br><br><br><br><br>
             <div>
-                Time Modfier:<br>
-                <input type="button" class="button" style="--bcolor: #9999FF; --fsize: 15px;" value="+5m" onclick="offsetRA(1.25);">
-                <input type="button" class="button" style="--bcolor: #FF9999; --fsize: 15px;" value="-5m" onclick="offsetRA(-1.25);">
+                <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Time Modfier:">
                 <br>
-                <input type="button" class="button" style="--bcolor: #6666FF; --fsize: 15px;" value="+1h" onclick="offsetRA(15);">
-                <input type="button" class="button" style="--bcolor: #FF6666; --fsize: 15px;" value="-1h" onclick="offsetRA(-15);">
+                <input type="button" class="button" style="--bcolor: #9cbae3; --fsize: 15px;" value="+5m" onclick="offsetRA(1.25);">
+                <input type="button" class="button" style="--bcolor: #daa4a4; --fsize: 15px;" value="-5m" onclick="offsetRA(-1.25);">
                 <br>
-                <input type="button" class="button" style="--bcolor: #77AA77; --fsize: 15px;" value="Reset to Current Time" onclick="offsetRA(0, true);">
+                <input type="button" class="button" style="--bcolor: #356fbb; --fsize: 15px;" value="+1h" onclick="offsetRA(15);">
+                <input type="button" class="button" style="--bcolor: #b54a4a; --fsize: 15px;" value="-1h" onclick="offsetRA(-15);">
+                <br>
+                <input type="button" class="button" style="--bcolor: #553555; --fsize: 15px;" value="Reset to Current Time" onclick="offsetRA(0, true);">
                 <br>
                 <div id="totaloffset">
-                    <input type="button" class="button" style="--bcolor: #66DD66; --fsize: 15px;" value="Total Time Offset (min): 0">
+                    <input type="button" class="button" style="--bcolor: #444444; --fsize: 15px;" value="Total Time Offset (min): 0">
                 </div>
             </div>
             <br><br><br><br><br>
             <form action='/'>
-                <input type="Submit" class="button" style="--bcolor: #FF0000; --fsize: 15px;" value="Restart">
+                <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Restart">
             </form>
         </div>
         <div id='rightdetails' class='rightdetails'>
-            <input type="button" class="button" style="--bcolor: #00DDDD; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
+            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
             <br><br>
-            Select Objects to Draw:<br><br>
-            <form action='/main'>
-                <input type="hidden" name="loc" value="{{loc_here}}">
+            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="-Select Objects to Draw-"><br><br>
+            <form>
+
                 <input type="checkbox" name="drawatnf" value="true" id="drawatnf" onclick="dealWithCheckboxes();">
                 <label for="drawatnf" style="color: #FF0000">ATNF Catalog</label><br><br>
+
                 <input type="checkbox" name="drawfrb" value="true" id="drawfrb" onclick="dealWithCheckboxes();">
                 <label for='drawfrb' style="color: #00FF00">FRB Catalog</label><br><br>
+
                 <input type="checkbox" name="drawmessier" value="true" id="drawmessier" onclick="dealWithCheckboxes();">
                 <label for='drawmessier' style="color: #00AAFF">Messier Catalog</label><br><br>
+
                 <input type="checkbox" name="drawsatellites" value="true" id="drawsatellites" onclick="dealWithCheckboxes();">
-                <label for='drawsatellites' style="color: #000000">Satellites</label>
+                <label for='drawsatellites' style="color: #FFFFFF">Satellites</label>
                 <br><br>
             </form>
             <br><br>
@@ -74,17 +83,12 @@
             </form>
             <br><br>
             <div id="showing">
-                Currently Showing:
+                <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Currently Showing:">
             </div>
             <br>
 
         </div>
         <gui id='gui'>
-        <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
-        <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
         <script>
             astrojs.ready(function(e){
 
@@ -178,8 +182,9 @@
                 }
 
                 if (satellitecheckbox.checked){
-                    writeCatalog("Satellites", "#000000");
+                    writeCatalog("Satellites", "#FFFFFF");
                     updateSatellites();
+                    //clearInterval(satelliterefreshID);
                     satelliterefreshID = setInterval(updateSatellites, 1000);
                 }
                 else{
@@ -283,7 +288,7 @@
 
             function fullReload() {
                 sid = document.getElementById("sidtime");
-                sid.innerHTML = "<input type='button' class='button' style='--bcolor: #00DD00; --fsize: 15px;' value=" +calculateSiderealTime(false) + ">";
+                sid.innerHTML = "<input type='button' class='button' style='--bcolor: #123456; --fsize: 15px;' value=" +calculateSiderealTime(false) + ">";
                 setTimeout(fullReload, 500);
             }
 
@@ -539,6 +544,7 @@
             var raoffsetdelta = Math.PI/180;
 
             function offsetRA(change, reset=false){
+                satbox = satellitecheckbox = document.getElementById("drawsatellites");
                 raoffset += change * Math.PI/180;
                 raoffset_raw += change*4
                 if (reset==true){
@@ -546,10 +552,12 @@
                     raoffset_raw = 0;
                 }
                 timeoffset = raoffset_raw;
-                updateSatellites();
+                if (satbox.checked){
+                    updateSatellites();
+                }
 
                 d = document.getElementById("totaloffset");
-                d.innerHTML = "<input type='button' class='button' style='--bcolor: #66DD66; --fsize: 15px;' value='Total Time Offset (min): " + raoffset_raw + "'>";
+                d.innerHTML = "<input type='button' class='button' style='--bcolor: #444444; --fsize: 15px;' value='Total Time Offset (min): " + raoffset_raw + "'>";
             }
 
             var ra;
