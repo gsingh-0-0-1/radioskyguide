@@ -391,14 +391,14 @@
                 }
             }
 
-            function addText(text, pos, group, addtocamera=false){
+            function addText(text, pos, group, addtocamera=false, size=0.35){
                 var loader = new THREE.FontLoader();
                 loader.load( '/static/examples/fonts/helvetiker_bold.typeface.json', function (font){
                     var textGeo = new THREE.TextGeometry( text, {
                         font: font,
-                        size: 0.35,
+                        size: size,
                         height: 0.35,
-                        curveSegments: 12,
+                        curveSegments: 24,
                         bevelEnabled: false
 
                     } );
@@ -427,7 +427,7 @@
             var messier_thetas = {{ messier_ra_dat_here }};
             var messier_phis = {{ messier_dec_dat_here }};
 
-            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false) {
+            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=2) {
                 for (var i = 0; i < thetas.length; i++){
                     theta = thetas[i];
                     phi = phis[i];
@@ -438,7 +438,7 @@
 
                     var geometry = new THREE.Geometry();
                     geometry.vertices.push(new THREE.Vector3(x, y, z))
-                    var material = new THREE.PointsMaterial( { size: 2, sizeAttenuation: false, color: color } );
+                    var material = new THREE.PointsMaterial( { size: size, sizeAttenuation: false, color: color } );
                     var point = new THREE.Points( geometry, material );
                     if (listofnames==true){
                         point.name = name[i]
@@ -785,6 +785,27 @@
 
             }
 
+            //add significant object labels
+            function addObjectLabels(){
+                //Crab Pulsar
+                right_asc = [5, 34, 31.973];
+                decl = [22, 0, 52.06];
+
+                right_asc = (right_asc[0] * 15) + (right_asc[1] / 4) + (right_asc[2] / 240);
+                decl = (decl[0]) + (decl[1] / 60) + (decl[2] / 3600);
+
+                right_asc = + right_asc * Math.PI / 180;
+                decl = decl * Math.PI / 180;
+
+                x = r * Math.cos(right_asc) * Math.cos(decl);
+                y = r * Math.sin(decl);
+                z = r * Math.sin(right_asc) * Math.cos(decl);
+
+                addText("Crab Pulsar", [x - 0.05, y, z - 0.05], '', false, 0.2);
+                drawObjects([right_asc], [decl], 0x9455d3, "Important Objects", size=1)
+
+            }
+
 
             startScene();
             drawAltAz(0, 0, 0);
@@ -807,6 +828,7 @@
             //redraw sun every half day... hopefully you'll refresh by then...
             setInterval(drawSun(), 43200000);
             drawMoon();
+            addObjectLabels();
 
             //if (draw_atnf == true){
             //    drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
