@@ -100,10 +100,13 @@
             <br><br>
             <div id="modifyaltaz">
                 <input id="alt_box" type="text" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Altitude (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
+                <br>
 
                 <input id="az_box" type="text" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Azimuth: North = 0&#176" onkeypress="javascript:dealWithAltAzInput(event);">
+                <br>
 
                 <input id="fov_box" type="text" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="FOV (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
+                <br>
             </div>
             <br>
 
@@ -170,30 +173,54 @@
                 importantcheckbox = document.getElementById("drawimportant");
 
                 if (atnfcheckbox.checked){
-                    //writeCatalog("ATNF Catalog", "#FF0000");
-                    drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
+                    obj = 0; 
+                    for (let i = scene.children.length - 1; i >= 0; i--) {
+                        if(scene.children[i].group == "ATNF Catalog"){
+                            scene.children[i].visible = true;
+                            obj += 1;
+                        }
+                    }
+                    if (obj == 0){
+                        drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
+                    }
                 }
                 else{
                     for (let i = scene.children.length - 1; i >= 0; i--) {
                         if(scene.children[i].type === "Points" && scene.children[i].name == "ATNF Catalog")
-                            scene.remove(scene.children[i]);
+                            scene.children[i].visible = false;
                     }
                 }
 
                 if (frbcheckbox.checked){
-                    //writeCatalog("FRB Catalog", "#00FF00");
-                    drawObjects(frb_thetas, frb_phis, 0x00ff00, "FRB Catalog");
+                    obj = 0; 
+                    for (let i = scene.children.length - 1; i >= 0; i--) {
+                        if(scene.children[i].group == "FRB Catalog"){
+                            scene.children[i].visible = true;
+                            obj += 1;
+                        }
+                    }
+                    if (obj == 0){
+                        drawObjects(frb_thetas, frb_phis, 0x00ff00, "FRB Catalog");
+                    }
                 }
                 else{
                     for (let i = scene.children.length - 1; i >= 0; i--) {
                         if(scene.children[i].type === "Points" && scene.children[i].name == "FRB Catalog")
-                            scene.remove(scene.children[i]);
+                            scene.children[i].visible = false;
                     }   
                 }
 
                 if (messiercheckbox.checked){
-                    //writeCatalog("Messier Catalog", "#00AAFF");
-                    drawObjects(messier_thetas, messier_phis, 0x00aaff, "Messier Catalog");
+                    obj = 0; 
+                    for (let i = scene.children.length - 1; i >= 0; i--) {
+                        if(scene.children[i].group == "Messier Catalog"){
+                            scene.children[i].visible = true;
+                            obj += 1;
+                        }
+                    }
+                    if (obj == 0){
+                        drawObjects(messier_thetas, messier_phis, 0x00aaff, "Messier Catalog");
+                    }
                 }
                 else{
                     for (let i = scene.children.length - 1; i >= 0; i--){
@@ -203,7 +230,6 @@
                 }
 
                 if (satellitecheckbox.checked){
-                    //writeCatalog("Satellites", "#FFFFFF");
                     updateSatellites();
                     clearInterval(satelliterefreshID);
                     satelliterefreshID = setInterval(updateSatellites, 1000);
@@ -829,7 +855,7 @@
                 right_asc = l[3];
                 decl = l[4];
 
-                addText("Crab Pulsar", [x - 0.05, y, z - 0.05], "Important Objects", false, 0.2);
+                addText("Crab Pulsar", [x, y + 0.1, z], "Important Objects", false, 0.2);
                 drawObjects([right_asc], [decl], 0x9400d3, '', group="Important Objects", size=1)
 
                 //J0332+5434
@@ -843,8 +869,23 @@
                 right_asc = l[3];
                 decl = l[4];
 
-                addText("J0332+5434", [x - 0.05, y, z - 0.05], "Important Objects", false, 0.2);
+                addText("J0332+5434", [x, y + 0.1, z], "Important Objects", false, 0.2);
                 drawObjects([right_asc], [decl], 0x9400d3, '', group="Important Objects", size=1)
+
+                //SGR 1935+2154
+                right_asc = [19, 35, 0];
+                decl = [21, 54, 0];
+
+                l = processRaDec(right_asc, decl);
+                x = l[0];
+                y = l[1];
+                z = l[2];
+                right_asc = l[3];
+                decl = l[4];
+
+                addText("SGR 1935+2154", [x, y + 0.1, z], "Important Objects", false, 0.2);
+                drawObjects([right_asc], [decl], 0x9400d3, '', group="Important Objects", size=1)
+
             }
 
 

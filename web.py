@@ -259,5 +259,9 @@ def sidtime():
         sidereal_s = "0" + str(sidereal_s)
 
     return str(sidereal_h)+":"+str(sidereal_m)+":"+str(sidereal_s)
-    
+
+@app.route('/importantobjs')
+def importantobjs():
+    return render_template('importantobjs.html')
+
 app.run(host = '0.0.0.0', debug = True, port = 80) 
