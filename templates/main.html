@@ -84,8 +84,10 @@
                 <label for='drawmessier' style="color: #00AAFF">Messier Catalog</label><br><br>
 
                 <input type="checkbox" name="drawsatellites" value="true" id="drawsatellites" onclick="dealWithCheckboxes();">
-                <label for='drawsatellites' style="color: #FFFFFF">Satellites</label>
-                <br><br>
+                <label for='drawsatellites' style="color: #FFFFFF">Satellites</label><br><br>
+
+                <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
+                <label for='drawsatellites' style="color: #00FFF8">Important Objects</label><br><br>
             </form>
             <br><br>
             <form>
@@ -165,7 +167,7 @@
                 frbcheckbox = document.getElementById("drawfrb");
                 messiercheckbox = document.getElementById("drawmessier");
                 satellitecheckbox = document.getElementById("drawsatellites");
-                showing = document.getElementById("showing");
+                importantcheckbox = document.getElementById("drawimportant");
 
                 if (atnfcheckbox.checked){
                     //writeCatalog("ATNF Catalog", "#FF0000");
@@ -175,13 +177,6 @@
                     for (let i = scene.children.length - 1; i >= 0; i--) {
                         if(scene.children[i].type === "Points" && scene.children[i].name == "ATNF Catalog")
                             scene.remove(scene.children[i]);
-                    }
-                    var el = document.getElementById("ATNFCatalog");
-                    if (el == null){
-
-                    }
-                    else{
-                        el.remove();
                     }
                 }
 
@@ -194,13 +189,6 @@
                         if(scene.children[i].type === "Points" && scene.children[i].name == "FRB Catalog")
                             scene.remove(scene.children[i]);
                     }   
-                    var el = document.getElementById("FRBCatalog");
-                    if (el == null){
-
-                    }
-                    else{
-                        el.remove();
-                    }
                 }
 
                 if (messiercheckbox.checked){
@@ -211,13 +199,6 @@
                     for (let i = scene.children.length - 1; i >= 0; i--){
                         if (scene.children[i].type == "Points" && scene.children[i].name == "Messier Catalog")
                             scene.remove(scene.children[i]);
-                    }
-                    var el = document.getElementById("MessierCatalog");
-                    if (el == null){
-
-                    }
-                    else{
-                        el.remove();
                     }
                 }
 
@@ -232,13 +213,26 @@
                     for (let i = scene.children.length - 1; i >= 0; i--){
                         if (scene.children[i].name == "Satellite")
                             scene.remove(scene.children[i]);
+                    }              
+                }
+
+                if (importantcheckbox.checked){
+                    obj = 0; 
+                    for (let i = scene.children.length - 1; i >= 0; i--) {
+                        if(scene.children[i].group == "Important Objects"){
+                            scene.children[i].visible = true;
+                            obj += 1;
+                        }
                     }
-                    var el = document.getElementById("Satellites");
-                    if (el == null){
+                    if (obj == 0){
+                        addObjectLabels();
                     }
-                    else{
-                        el.remove();
-                    }                 
+                }
+                else{
+                    for (let i = scene.children.length - 1; i >= 0; i--){
+                        if (scene.children[i].group == "Important Objects")
+                            scene.children[i].visible = false;
+                    }             
                 }
             }
 
@@ -414,7 +408,7 @@
                 }
             }
 
-            function addText(text, pos, group, addtocamera=false, size=0.35){
+            function addText(text, pos, group, addtocamera=false, size=0.35, color=0x00fff8){
                 var loader = new THREE.FontLoader();
                 loader.load( '/static/examples/fonts/helvetiker_bold.typeface.json', function (font){
                     var textGeo = new THREE.TextGeometry( text, {
@@ -425,7 +419,7 @@
                         bevelEnabled: false
 
                     } );
-                    var textMaterial = new THREE.MeshBasicMaterial( { color: 0x00fff8 } );
+                    var textMaterial = new THREE.MeshBasicMaterial( { color: color } );
 
                     var mesh = new THREE.Mesh( textGeo, textMaterial );
                     if (addtocamera==true){
@@ -835,8 +829,8 @@
                 right_asc = l[3];
                 decl = l[4];
 
-                addText("Crab Pulsar", [x - 0.05, y, z - 0.05], '', false, 0.2);
-                drawObjects([right_asc], [decl], 0x9400d3, "Important Objects", size=1)
+                addText("Crab Pulsar", [x - 0.05, y, z - 0.05], "Important Objects", false, 0.2);
+                drawObjects([right_asc], [decl], 0x9400d3, '', group="Important Objects", size=1)
 
                 //J0332+5434
                 right_asc = [3, 32, 59.4096];
@@ -849,8 +843,8 @@
                 right_asc = l[3];
                 decl = l[4];
 
-                addText("J0332+5434", [x - 0.05, y, z - 0.05], '', false, 0.2);
-                drawObjects([right_asc], [decl], 0x9400d3, "Important Objects", size=1)
+                addText("J0332+5434", [x - 0.05, y, z - 0.05], "Important Objects", false, 0.2);
+                drawObjects([right_asc], [decl], 0x9400d3, '', group="Important Objects", size=1)
             }
 
 
