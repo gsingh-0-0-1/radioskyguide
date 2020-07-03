@@ -29,7 +29,7 @@
     </head>
     <body onload="fullReload();">
         <div id="leftdetails" class="leftdetails">
-            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}"><br>
+            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Approximate LST at the ATA"><br>
             <div id="sidtime">
                 
             </div>
@@ -69,7 +69,7 @@
             </form>
         </div>
         <div id='rightdetails' class='rightdetails'>
-            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
+            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Radio Sky Above the ATA">
             <br><br>
             <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="-Select Objects to Draw-"><br><br>
             <form>
@@ -84,7 +84,7 @@
                 <label for='drawmessier' style="color: #00AAFF">Messier Catalog</label><br><br>
 
                 <input type="checkbox" name="drawsatellites" value="true" id="drawsatellites" onclick="dealWithCheckboxes();">
-                <label for='drawsatellites' style="color: #FFFFFF">Satellites</label><br><br>
+                <label for='drawsatellites' style="color: #FFFFFF">Starlink Satellites</label><br><br>
 
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
                 <label for='drawsatellites' style="color: #00FFF8">Important Objects</label><br><br>
@@ -148,7 +148,7 @@
                 }
             }
 
-            loc = "{{ loc_here }}";
+            loc = "Allen Telescope Array";
             if (loc == "Allen Telescope Array"){
                 longitude = -121.47173
             }
@@ -506,7 +506,7 @@
 
 
 
-            var dec = "{{ declination_here }}" * Math.PI / 180;
+            var dec = "40.8178049" * Math.PI / 180;
             var ra = 0;
 
             //write declination labels
@@ -775,6 +775,7 @@
                     if (this.readyState == 4 && this.status == 200) {
                         data = this.responseText;
                         data = data.split("\n0");
+                        data = data.filter(element => element.includes("STARLINK"));
                     }
                 };
             }
@@ -786,7 +787,7 @@
                     }
                 }
  
-                for (var i = 0; i < data.length; i+=50){
+                for (var i = 0; i < data.length; i+=1){
                     sat = data[i].split("\n")
                     name = sat[0];
                     line1 = sat[1];
@@ -821,8 +822,9 @@
                     var satlongitude = positionGd.longitude,
                         satlatitude  = positionGd.latitude;
 
+                    //if ( Math.abs(satlatitude - dec) < 0.1 && Math.abs(satlongitude - ra) < 0.1){
                     drawObjects([satlongitude], [satlatitude], 0xffffff, "Satellite");
-
+                    //}
                     
                 }
 
