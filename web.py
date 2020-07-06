@@ -171,6 +171,13 @@ def gui():
     if draw_frb == None:
         draw_frb = 'false'
 
+    moon = ephem.Moon(datetime.utcnow())
+    moon_ra = str(moon.ra)
+    moon_dec = str(moon.dec)
+    moon_ra = process_ra([moon_ra])
+    moon_dec = process_dec([moon_dec])
+    print(moon_ra, moon_dec)
+
     return render_template('main.html', atnf_ra_dat_here = atnf_ra_dat,
                                         atnf_dec_dat_here = atnf_dec_dat,
                                         declination_here = str(declination),
@@ -181,7 +188,9 @@ def gui():
                                         frb_ra_dat_here = frb_ra_dat,
                                         frb_dec_dat_here = frb_dec_dat,
                                         messier_ra_dat_here = messier_ras,
-                                        messier_dec_dat_here = messier_decs)
+                                        messier_dec_dat_here = messier_decs,
+                                        moon_dec_here = moon_dec,
+                                        moon_ra_here = moon_ra)
 
     # f = codecs.open("main.html", 'r')
     # mainhtml = f.read()

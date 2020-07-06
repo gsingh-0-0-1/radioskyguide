@@ -584,10 +584,13 @@
             function drawMoon(){
                 currentJD = new Date().getTime()/86400000 + 2440587.5;
 
-                moon_pos = astrojs.ephem.moonPos(currentJD);
-                moon_ra = moon_pos["lon"] * Math.PI/180;
-                moon_dec = moon_pos["lat"] * Math.PI/180;
-                moon_dec = (23.4 * Math.PI/180) - moon_dec;
+                //moon_pos = astrojs.ephem.moonPos(currentJD);
+                //moon_ra = moon_pos["lon"] * Math.PI/180;
+                //moon_dec = moon_pos["lat"] * Math.PI/180;
+                //moon_dec = (23.4 * Math.PI/180) - moon_dec;
+
+                moon_ra = {{ moon_ra_here }};
+                moon_dec = {{ moon_dec_here }};
 
                 moon_rad = 2 * Math.PI * r * 0.5/360;
                 moon_halo_rad = sun_rad * 10;
