@@ -146,6 +146,15 @@ def startup():
 
 @app.route('/main')
 def gui():
+    ip = request.remote_addr
+
+    if os.path.isfile('visitors/'+str(ip)+'.txt'):
+        with open('visitors/'+str(ip)+'.txt', 'a+') as f:
+            f.write(str(datetime.utcnow())+'\n')
+    else:
+        with open('visitors/'+str(ip)+'.txt', 'w') as f:
+            f.write(str(datetime.utcnow())+'\n')
+
     declination = 0
     longitude = 0
     loc = request.args.get('loc')
