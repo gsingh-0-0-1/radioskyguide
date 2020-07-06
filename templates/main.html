@@ -133,7 +133,9 @@
             }
 
             function dealWithAltAzInput(event){
+                console.log(event.keyCode);
                 if (event.keyCode == 13 || event.which == 13){
+                    console.log("here");
                     alt_box = document.getElementById("alt_box");
                     az_box = document.getElementById("az_box");
                     fov_box = document.getElementById("fov_box");
@@ -672,6 +674,12 @@
             var pointing_alt = alt_box.value;
             var pointing_az = az_box.value;
             var fov = fov_box.value;
+
+            //create dummy event to pass to function
+            var e = new Object();
+            e.keyCode = 13;
+            e.which = 13;
+            dealWithAltAzInput(e);
 
             function animate() {
                 camera.remove(mask);
