@@ -185,7 +185,6 @@ def gui():
     moon_dec = str(moon.dec)
     moon_ra = process_ra([moon_ra])
     moon_dec = process_dec([moon_dec])
-    print(moon_ra, moon_dec)
 
     return render_template('main.html', atnf_ra_dat_here = atnf_ra_dat,
                                         atnf_dec_dat_here = atnf_dec_dat,
