@@ -100,13 +100,13 @@
             </form>
             <br><br>
             <div id="modifyaltaz">
-                <input id="alt_box" type="text" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Altitude (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
+                <input id="alt_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Altitude (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
                 <br>
 
-                <input id="az_box" type="text" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Azimuth: North = 0&#176" onkeypress="javascript:dealWithAltAzInput(event);">
+                <input id="az_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Azimuth: North = 0&#176" onkeypress="javascript:dealWithAltAzInput(event);">
                 <br>
 
-                <input id="fov_box" type="text" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="FOV (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
+                <input id="fov_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="FOV (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
                 <br>
             </div>
             <br>
@@ -757,6 +757,9 @@
 
                 //label North
                 addText("N", [0.1, 9.5, -1], "altaz", addtocamera=true);
+
+                //label East
+                addText("E", [9.5, 0.1, -1], "altaz", addtocamera=true);
             }
 
             function redoLabels(){
