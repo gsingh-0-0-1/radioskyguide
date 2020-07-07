@@ -31,13 +31,25 @@
     <body onload="fullReload();">
         <div id="leftdetails" class="leftdetails">
             <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}"><br>
-            <div id="sidtime">
-                
-            </div>
-            <br><br><br>
-            <div>
-                <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Time Modfier:">
+            <span id="sidtime">
+            </span>
+            <br>
 
+            <input type="button" class="button" style="--bcolor: #3f1166; --fsize: 15px;" value="Available Antennae (Simulated)">
+            <br>
+            <input type="button" class="button" style="--bcolor: #3f1111; --fsize: 15px; padding: 10px 20px;" value="1a" onclick="javascript:changeAntenna('1a');">
+            <input type="button" class="button" style="--bcolor: #3f115a; --fsize: 15px; padding: 10px 20px;" value="1f" onclick="javascript:changeAntenna('1f');">
+            <input type="button" class="button" style="--bcolor: #3f1199; --fsize: 15px; padding: 10px 20px;" value="1c" onclick="javascript:changeAntenna('1c');">
+            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;; padding: 10px 20px;" value="2a" onclick="javascript:changeAntenna('2a');">
+            <br>
+            <input type="button" class="button" style="--bcolor: #3f1111; --fsize: 15px; padding: 10px 20px;" value="2b" onclick="javascript:changeAntenna('2b');">
+            <input type="button" class="button" style="--bcolor: #3f1177; --fsize: 15px; padding: 10px 20px;" value="4g" onclick="javascript:changeAntenna('4g');">
+            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;" value="5c" onclick="javascript:changeAntenna('5c');">
+            
+            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;" value="None" onclick="javascript:changeAntenna('none');">
+
+            <br>
+            <div>
 
                 <br>
                 <input type="button" class="button" style="--bcolor: #afc8e9; --fsize: 15px;" value="+1m" onclick="offsetRA(0.25);">
@@ -663,6 +675,14 @@
 
             var ra;
             var mask = '';
+            var pointing_az;
+            var pointing_alt;
+            var antenna = GetURLParameter("antenna");
+            console.log(antenna);
+            //create dummy event to pass to function
+            var e = new Object();
+            e.keyCode = 13;
+            e.which = 13;
 
             var alt_box = document.getElementById("alt_box");
             var az_box = document.getElementById("az_box");
@@ -670,16 +690,57 @@
             alt_box.value = GetURLParameter('alt');
             az_box.value = GetURLParameter('az');
             fov_box.value = GetURLParameter('fov');
- 
+
             var pointing_alt = alt_box.value;
             var pointing_az = az_box.value;
             var fov = fov_box.value;
 
-            //create dummy event to pass to function
-            var e = new Object();
-            e.keyCode = 13;
-            e.which = 13;
             dealWithAltAzInput(e);
+
+            function updateAltAz(this_antenna){
+                console.log(this_antenna);
+                if (antenna == "none"){
+                }
+                else{
+                    var alt_box = document.getElementById("alt_box");
+                    var az_box = document.getElementById("az_box");
+                    var fov_box = document.getElementById("fov_box");
+                    altaz = getAntennaData(this_antenna)
+                    pointing_alt = altaz[0]
+                    pointing_az = altaz[1]
+                    console.log(pointing_alt, pointing_az)
+                    alt_box.value = pointing_alt;
+                    az_box.value = Math.round(pointing_az);
+                    fov_box.value = 30;
+                }
+            }
+            var current_antenna_interval = setInterval(function () {
+                updateAltAz(antenna);
+                dealWithAltAzInput(e);
+            }, 1000);
+
+            function changeAntenna(new_antenna){
+                antenna = new_antenna;
+                updateAltAz(new_antenna);
+                dealWithAltAzInput(e);
+                clearInterval(current_antenna_interval);
+                if (new_antenna == "none"){
+                    var alt_box = document.getElementById("alt_box");
+                    var az_box = document.getElementById("az_box");
+                    var fov_box = document.getElementById("fov_box");  
+                    alt_box.value = 90;
+                    az_box.value = 0;
+                    fov_box.value = 90;  
+                    dealWithAltAzInput(e);
+                    current_antenna_interval = '';
+                }
+                else{
+                    current_antenna_interval = setInterval(function () {
+                        updateAltAz(new_antenna);
+                        dealWithAltAzInput(e);
+                    }, 1000);
+                }
+            }
 
             function animate() {
                 camera.remove(mask);
@@ -925,6 +986,27 @@
                 addText("SGR 1935+2154", [x, y + 0.1, z], "Important Objects", false, 0.2);
                 drawObjects([right_asc], [decl], 0x9400d3, '', group="Important Objects", size=1)
 
+            }
+
+            function getAntennaData(this_antenna){
+                if (this_antenna == "1a")
+                    alt = 90
+                if (this_antenna == "1f")
+                    alt = 75
+                if (this_antenna == "1c")
+                    alt = 60
+                if (this_antenna == "2a")
+                    alt = 45
+                if (this_antenna == "2b")
+                    alt = 30
+                if (this_antenna == "4g")
+                    alt = 15
+                if (this_antenna == "5c")
+                    alt = 0
+                az = new Date().getTime() / 1000
+                az = az % 200
+                az = az/200 * 360
+                return ([alt, az])
             }
 
 

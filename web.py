@@ -210,72 +210,10 @@ def gui():
 
     # return mainhtml
 
-@app.route('/sidtime')
-def sidtime():
-    longitude = 0
+@app.route('/selectantenna')
+def selectantenna():
+    return render_template('selectantenna.html')
 
-    loc = request.args.get('loc')
-
-    if loc == "Allen Telescope Array":
-        longitude = -121.4695413
-    if loc == "Green Bank Observatory":
-        longitude = -79.8398566
-    if loc == "Parkes Radio Telescope":
-        longitude = 148.2626028
-
-    month_days = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
-    days_since_j2000 = 0
-    datenow = datetime.now()
-    datenow = list(datenow.timetuple())
-
-    #get the years * 365
-    days_since_j2000 += (datenow[0] - 2000) * 365
-
-    #add leap days
-    days_since_j2000 += int((datenow[0]-2000)/4)
-
-    #add days in months
-    for rep in range(datenow[1]-1):
-        days_since_j2000 += month_days[rep]
-
-    days_since_j2000 += datenow[2]
-
-    day_frac = datenow
-    day_frac = day_frac[3] + day_frac[4]/60 + day_frac[5]/3600
-    day_frac = day_frac / 24
-
-    days_since_j2000 += day_frac
-
-    hours_passed = list(datetime.utcnow().timetuple())
-    hours_passed = hours_passed[3] + hours_passed[4]/60 + hours_passed[5]/3600
-
-    sidereal = 100.46
-    sidereal += (0.985647 * days_since_j2000)
-    sidereal += longitude
-    sidereal += 15*hours_passed
-
-    sidereal = sidereal%360
-    sidereal = sidereal/15
-
-    sidereal_h = int(sidereal)
-    sidereal_m = sidereal - sidereal_h
-    sidereal_m = (sidereal_m * 60)
-    sidereal_s = sidereal_m - int(sidereal_m)
-    sidereal_m = int(sidereal_m)
-
-    sidereal_s = int(sidereal_s * 60)
-
-    if len(str(sidereal_h)) < 2:
-        sidereal_h = "0" + str(sidereal_h)
-
-    if len(str(sidereal_m)) < 2:
-        sidereal_m = "0" + str(sidereal_m)
-
-    if len(str(sidereal_s)) < 2:
-        sidereal_s = "0" + str(sidereal_s)
-
-    return str(sidereal_h)+":"+str(sidereal_m)+":"+str(sidereal_s)
 
 @app.route('/importantobjs')
 def importantobjs():
