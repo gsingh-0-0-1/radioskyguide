@@ -33,7 +33,7 @@
             <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}"><br>
             <span id="sidtime">
             </span>
-            <br>
+            <br><br><br>
 
             <input type="button" class="button" style="--bcolor: #3f1166; --fsize: 15px;" value="Available Antennae (Simulated)">
             <br>
@@ -50,11 +50,6 @@
 
             <br>
             <div>
-
-                <br>
-                <input type="button" class="button" style="--bcolor: #afc8e9; --fsize: 15px;" value="+1m" onclick="offsetRA(0.25);">
-                <input type="button" class="button" style="--bcolor: #e1b7b7; --fsize: 15px;" value="-1m" onclick="offsetRA(-0.25);">
-
 
                 <br>
                 <input type="button" class="button" style="--bcolor: #749fd8; --fsize: 15px;" value="+5m" onclick="offsetRA(1.25);">
@@ -732,7 +727,7 @@
                     az_box.value = 0;
                     fov_box.value = 90;  
                     dealWithAltAzInput(e);
-                    current_antenna_interval = '';
+                    current_antenna_interval = ''
                 }
                 else{
                     current_antenna_interval = setInterval(function () {
