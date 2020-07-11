@@ -47,7 +47,7 @@
             <input type="button" class="button" style="--bcolor: #3f1177; --fsize: 15px; padding: 10px 20px;" value="4g" onclick="javascript:changeAntenna('4g');">
             <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;" value="5c" onclick="javascript:changeAntenna('5c');">
             
-            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;" value="None" onclick="javascript:changeAntenna('none');">
+            <input id="nonebutton" type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;" value="None" onclick="javascript:changeAntenna('none');">
 
             <br>
             <div>
@@ -1042,6 +1042,8 @@
                 drawObjects(window[catshorthands[i]+"_thetas"], window[catshorthands[i]+"_phis"], catcolors[i], '', group=catnames[i]);
             }
             dealWithCheckboxes();
+
+            document.getElementById("nonebutton").click();
 
         </script>
         </gui>
