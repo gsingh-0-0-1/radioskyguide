@@ -2,12 +2,13 @@
     <head>
         <title>Radio SkyGUIde</title>
         <style>
-            body { margin: 0; text-align: center; background-color: #FFEEAA}
+            body { margin: 0; text-align: center; background-color: #000000}
             canvas { display: block; }
             gui {position: fixed; left:50%; top:0px; transform: translate(-50%, -0%);}
             .sidtime {position: fixed; left:5%; top:15%; font-family:Verdana; text-align: center;}
             .leftdetails {position: fixed; left:5%; top:10%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
             .rightdetails {position: fixed; left:80%; top:10%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
+            .rightborder {position:fixed; left:95%; top:10%;}
             .button {
               background-color: var(--bcolor);
               border: none;
@@ -20,134 +21,242 @@
               margin: 4px 2px;
               cursor: pointer;
             }
+            .button:focus {
+                outline: 0 !important;
+            }
+            .dot {
+              height: 15px;
+              width: 15px;
+              background-color: var(--bcolor);
+              border-radius: 50%;
+              display: inline-block;
+              margin: 15px 0px;
+            }
         </style>
     </head>
-    <body onload="fullReload();">
+    <body>
         <div id="leftdetails" class="leftdetails">
-            <input type="button" class="button" style="--bcolor: #00DD00; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}"><br>
-            <div id="sidtime">
-                
-            </div>
-            <br><br><br><br><br>
-            <form action='/'>
-                <input type="Submit" class="button" style="--bcolor: #FF0000; --fsize: 15px;" value="Restart">
-            </form>
         </div>
         <div id='rightdetails' class='rightdetails'>
-            <input type="button" class="button" style="--bcolor: #00DDDD; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
-            <br><br>
-            Select Catalogs to Draw:<br><br>
-            <form action='/main'>
-                <input type="hidden" name="loc" value="{{loc_here}}">
-                <input type="checkbox" name="drawatnf" value="true" id="drawatnf" onclick="dealWithCheckboxes();">
-                <label for="drawatnf" style="color: #FF0000">ATNF Catalog</label><br><br>
-                <input type="checkbox" name="drawfrb" value="true" id="drawfrb" onclick="dealWithCheckboxes();">
-                <label for='drawfrb' style="color: #00FF00">FRB Catalog</label>
-                <br><br>
-            </form>
-            <br><br>
-            <div id="showing">
-                Currently Showing:
-            </div>
+            <input id="ATNF Catalog_button" type="button" class="button" style="--bcolor: #AA0000; --fsize: 15px; border-radius: 20px" value="ATNF Catalog" onclick="javascript:handleCheckboxInput(value, 0xff0000)">
+            <span id="dot_ATNF Catalog" style='color: #000000; font-size: 30px'>&#9745;</span>
             <br>
 
+            <input id="FRB Catalog_button" type="button" class="button" style="--bcolor: #00AA00; --fsize: 15px; border-radius: 20px" value="FRB Catalog" onclick="javascript:handleCheckboxInput(value, 0x00ff00)">
+            <span id="dot_FRB Catalog" style='color: #000000; font-size: 30px'>&#9745;</span>
+            <br>
+
+            <input id="Messier Catalog_button" type="button" class="button" style="--bcolor: #0055AA; --fsize: 15px; border-radius: 20px" value="Messier Catalog" onclick="javascript:handleCheckboxInput(value, 0x0099ff)">
+            <span id="dot_Messier Catalog" style='color: #000000; font-size: 30px'>&#9745;</span>
+        </div>
+        <div id="rightborder" class="rightborder">
         </div>
         <gui id='gui'>
         <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
         <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://threejs.org/build/three.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
+        <script src="/static/examples/js/controls/OrbitControls.js"></script>
         <script>
+            function hex_to_ascii(str1)
+             {
+                var hex  = str1.toString();
+                var str = '';
+                for (var n = 0; n < hex.length; n += 2) {
+                    str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+                }
+                return str;
+             }
 
-            //basic initializing
+            //var main_ra = {{ longitude_here }};
+            //var main_dec = {{ declination_here }};
+            var main_ra = 0;
+            var main_dec = 40.8178049 * Math.PI / 180;
+
+            var ra_offset;
+
+            var r = 10;
+            var rmod = 0;
+            var pixelratio = 1.5;
+
+            var camera;
+            var scene;
+            var renderer;
+
+            var clock = new THREE.Clock();
+
             astrojs.ready(function(e){
 
             });
-            loc = "{{ loc_here }}";
-            if (loc == "Allen Telescope Array"){
-                longitude = -121.4695413
-            }
-            if (loc == "Green Bank Observatory"){
-                longitude = -79.8398566
-            }
-            if (loc == "Parkes Radio Telescope"){
-                longitude = 148.2626028
-            }
-            if (loc == "Atacama Large Millimeter Array"){
-                longitude = -67.7548021
-            }
-            
-            var frb_thetas = {{ frb_ra_dat_here }};
-            var frb_phis = {{ frb_dec_dat_here }}
 
-            var atnf_thetas = {{ atnf_ra_dat_here }};
-            var atnf_phis = {{ atnf_dec_dat_here }};
+            //BASIC INITIALIZATION FUNCTIONS
 
-
-            //THREE.JS SCENE INITIALIZATION
             function startScene(){
                 var width = window.innerWidth;
                 var height = window.innerHeight;
-                camera = new THREE.OrthographicCamera( -r, r, r, -r, 0, 1000 );
-
+                camera = new THREE.OrthographicCamera( -(r+rmod), (r+rmod), (r+rmod), -(r+rmod), 0, 1000 );
+                
                 renderer = new THREE.WebGLRenderer();
+                renderer.setPixelRatio( pixelratio, pixelratio );
                 renderer.setSize(height, height);
                 document.getElementById('gui').appendChild(renderer.domElement);
 
                 scene = new THREE.Scene({canvas:gui});
+                scene.add(camera);
+
+                camera.position.set(0, 0, 0);
             }
 
-            //LINES FOR RA AND DEC
-            //
-            //
-            //
-            //
-            function addDecLines(){
-                angles = [0, Math.PI/6, -Math.PI/6, Math.PI/4, -Math.PI/4, Math.PI/3, -Math.PI/3, 5*Math.PI/12, -5*Math.PI/12];
-                color = 0xffff00
-                for (var angle = 0; angle < angles.length; angle++){
-                    if (angles[angle] == 0){
-                        color = 0xffa500;
+
+            //DEALING WITH CATALOG DATA
+
+            function collectCatalogData(url, catalog){
+                var req = new XMLHttpRequest();
+                req.open("GET", "/"+url);
+                req.send()
+                req.onreadystatechange = function() {
+                    if (this.readyState == 4 && this.status == 200) {
+                        data = this.responseText;
+                        data = data.split("$");
+                        window[catalog+"_ra_data"] = data[0];
+                        window[catalog+"_dec_data"] = data[1];
+
+                        window[catalog+"_ra_data"] = window[catalog+"_ra_data"].replace("[", "").replace("]", "");
+                        window[catalog+"_dec_data"] = window[catalog+"_dec_data"].replace("[", "").replace("]", "");
+
+                        window[catalog+"_ra_data"] = window[catalog+"_ra_data"].split(",");
+                        window[catalog+"_dec_data"] = window[catalog+"_dec_data"].split(",");
+
+                        window[catalog+"_drawn"] = false;
+
                     }
-                    else{
-                        color = 0xffff00;
-                    }
-                    ring_rad = r * Math.cos(angles[angle]);
-                    ring_width = 0.06
-                    var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
-                    var material = new THREE.MeshBasicMaterial( { color: color, side: THREE.DoubleSide } );
-                    line = new THREE.Mesh( geometry, material );
-                    line.position.set(0, r*Math.sin(angles[angle]), 0);
-                    line.rotation.setFromVector3(new THREE.Vector3(Math.PI/2, 0, Math.PI/2));
-                    line.group = "equatorial";
-                    scene.add(line);
+                };
+            }
+
+            function plotCatalogData(ras, decs, catalogname, color){
+                window[catalogname+"_objectlist"] = [];
+                for (var i = 0; i < ras.length; i++){
+                    theta = ras[i];
+                    //if (Math.abs((theta-Math.PI)-main_ra) < Math.PI/2){
+                    //    continue
+                    //}
+                    phi = decs[i];
+
+                    x = r * Math.cos(theta) * Math.cos(phi);
+                    y = r * Math.sin(phi);
+                    z = r * Math.sin(theta) * Math.cos(phi);
+
+                    var geometry = new THREE.Geometry();
+                    geometry.vertices.push(new THREE.Vector3(x, y, z));
+                    var material = new THREE.PointsMaterial( { size: 2, sizeAttenuation: false, color: color } );
+                    var point = new THREE.Points( geometry, material );
+
+                    point.group = catalogname;
+
+                    window[catalogname+"_objectlist"].push(point);
+
+                    scene.add(point);
+                }
+                document.getElementById("dot_"+catalogname).style.color = window.getComputedStyle(document.getElementById(catalogname+"_button")).backgroundColor
+                window[catalogname+"_drawn"] = true;
+            }
+
+            function removeCatalogData(catalogname){
+                for (var i = 0; i < window[catalogname+"_objectlist"].length; i++){
+                    scene.remove(window[catalogname+"_objectlist"][i]);
+                }
+                document.getElementById("dot_"+catalogname).style.color = "#000000"
+            }
+
+            function handleCheckboxInput(value, color){
+                if (window[value+"_drawn"] == true){
+                    removeCatalogData(value);
+                    window[value+"_drawn"] = false;
+                }
+                else{
+                    plotCatalogData(window[value+"_ra_data"], window[value+"_dec_data"], value, color, 2);
+                    window[value+"_drawn"] = true;
                 }
             }
 
-            //draw DEC lines
+            var longitude = -121.47173
+            function calculateSiderealTime(raw){
 
-            function addRALines(){
-                angles = [0, Math.PI/2];
-                for (var angle = 0; angle < angles.length; angle++){
-                    ring_rad = r;
-                    ring_width = 0.06
-                    var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
-                    var material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
-                    line = new THREE.Mesh( geometry, material );
-                    line.position.set(0, 0, 0);
-                    line.rotation.setFromVector3(new THREE.Vector3(0, angles[angle], angles[angle]));
-                    line.group = "equatorial";
-                    scene.add(line);
+                //get the time in UTC
+                seconds_since_j2000 = Math.floor(Date.now()/1000) - 946684800;
+
+                seconds = seconds_since_j2000 % 86400;
+
+                hours = Math.floor(seconds/3600);
+                minutes = Math.floor(seconds/60) - hours*60;
+                seconds = seconds - minutes*60 - hours*3600;
+
+                days_since_j2000 = seconds_since_j2000 / 86400;
+
+                hours_passed = seconds_since_j2000 % 86400
+                hours_passed = hours_passed / 3600
+
+                siderealtime = 100.46;
+                siderealtime += (0.985647 * days_since_j2000);
+                siderealtime += longitude;
+
+                siderealtime += 15*hours_passed;
+
+                siderealtime = siderealtime % 360;
+                siderealtime = siderealtime / 15;
+
+                if (raw==true){
+                
+                    return siderealtime;
+                }
+
+                else{
+                    hours = Math.floor(siderealtime);
+                    siderealtime = siderealtime - hours;
+                    minutes = Math.floor(siderealtime*60);
+                    siderealtime = siderealtime - minutes/60;
+                    seconds = Math.floor(siderealtime*3600);
+
+                    if (String(hours).length < 2){
+                        hours = '0' + hours;
+                    }
+                    if (String(minutes).length < 2){
+                        minutes = '0' + minutes;
+                    }
+                    if (String(seconds).length < 2){
+                        seconds = '0' + seconds;
+                    }
+
+                    return hours + ":" + minutes + ":" + seconds;
                 }
             }
-            //
-            //
-            //
-            //
-            //LINES FOR RA AND DEC
 
+            function animate(){
+                main_ra = calculateSiderealTime(true);
 
+                camx = r * Math.cos(main_ra) * Math.cos(main_dec);
+                camy = r * Math.sin(main_dec);
+                camz = r * Math.sin(main_ra) * Math.cos(main_dec);
+                camera.position.set(-camx/1000, 0, -camz/1000)
+                camera.lookAt(camx, camy, camz);
 
+                requestAnimationFrame(animate);
+                //controls.update();
+                renderer.render(scene, camera);
+            }
+
+            startScene();
+
+            //var controls = new THREE.OrbitControls(camera, renderer.domElement);
+            //controls.update();
+            //controls.target.set(10, 0, 0)
+
+            collectCatalogData("atnfdata", "ATNF Catalog");
+            collectCatalogData("frbdata", "FRB Catalog");
+            collectCatalogData("messierdata", "Messier Catalog");
+
+            setInterval(animate, 1000);
+        
         </script>
         </gui>
     </body>

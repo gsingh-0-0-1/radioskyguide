@@ -8,7 +8,7 @@
             canvas { display: block; }
             gui {position: fixed; left:50%; top:0px; transform: translate(-50%, -0%);}
             .sidtime {position: fixed; left:5%; top:15%; font-family:Verdana; text-align: center;}
-            .leftdetails {position: fixed; left:5%; top:5%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
+            .leftdetails {position: fixed; left:5%; top:5%; font-family:Verdana; text-align: center; transform: translate(-5%,0%); overflow-y: scroll; height: 95% }
             .rightdetails {position: fixed; left:80%; top:5%; font-family:Verdana; text-align: center; transform: translate(-5%,0%)}
             .button {
               background-color: var(--bcolor);
@@ -25,8 +25,9 @@
         </style>
         <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
         <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
+        <script src="https://threejs.org/build/three.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
+        <script src="/static/examples/js/controls/OrbitControls.js"></script>
     </head>
     <body onload="fullReload();">
         <div id="leftdetails" class="leftdetails">
@@ -74,6 +75,15 @@
             <br>
             <form action='/'>
                 <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Restart">
+            </form>
+            <form action='/main'>
+                <input type="hidden" name="alt" value="90">
+                <input type="hidden" name="az" value="0">
+                <input type="hidden" name="fov" value="90">
+                <input type="hidden" name="antenna" value="none">
+                <input type="hidden" name="loc" value="Allen Telescope Array">
+                <input type="hidden" name="controls" id="controls" value="tobefilled">
+                <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Toggle Interactive Mode">
             </form>
         </div>
         <div id='rightdetails' class='rightdetails'>
@@ -125,6 +135,15 @@
 
             });
 
+            //deal with the controls on/off situation
+            c = document.getElementById("controls");
+            if (GetURLParameter("controls") == "true"){
+                c.value = "false"
+            }
+            else{
+                c.value = "true"
+            }
+
             function GetURLParameter(sParam){
 
                 var sPageURL = window.location.search.substring(1);
@@ -140,9 +159,7 @@
             }
 
             function dealWithAltAzInput(event){
-                console.log(event.keyCode);
                 if (event.keyCode == 13 || event.which == 13){
-                    console.log("here");
                     alt_box = document.getElementById("alt_box");
                     az_box = document.getElementById("az_box");
                     fov_box = document.getElementById("fov_box");
@@ -157,7 +174,6 @@
                     }
                     pointing_alt = alt_box.value;
                     temp_az = parseFloat(az_box.value) * 1;
-                    console.log(temp_az);
                     temp_az = 360 - temp_az;
                     pointing_az = temp_az + 90;
                     fov = fov_box.value;
@@ -186,70 +202,39 @@
                 longitude = -67.7548021
             }
 
-            draw_atnf = {{ draw_atnf }}
-            draw_frb = {{ draw_frb }}
+            var atnfcheckbox = document.getElementById("drawatnf");
+            var frbcheckbox = document.getElementById("drawfrb");
+            var messiercheckbox = document.getElementById("drawmessier");
+            var satellitecheckbox = document.getElementById("drawsatellites");
+            var importantcheckbox = document.getElementById("drawimportant");
+            var catboxlist = [atnfcheckbox, frbcheckbox, messiercheckbox];
+            var catnames = ["ATNF Catalog", "FRB Catalog", "Messier Catalog"];
+            var catshorthands = ["atnf", "frb", "messier"]
+            var catcolors = [0xff0000, 0x00ff00, 0x00aaff];
+            for (var i = 0; i < catboxlist.length; i++){
+                window[catnames[i]+"_list"] = [];
+            }
 
             function dealWithCheckboxes(){
-                atnfcheckbox = document.getElementById("drawatnf");
-                frbcheckbox = document.getElementById("drawfrb");
-                messiercheckbox = document.getElementById("drawmessier");
-                satellitecheckbox = document.getElementById("drawsatellites");
-                importantcheckbox = document.getElementById("drawimportant");
 
-                if (atnfcheckbox.checked){
-                    obj = 0; 
-                    for (let i = scene.children.length - 1; i >= 0; i--) {
-                        if(scene.children[i].group == "ATNF Catalog"){
-                            scene.children[i].visible = true;
-                            obj += 1;
+                for (var iter = 0; iter < catboxlist.length; iter++){
+                    box = catboxlist[iter];
+                    if (box.checked){
+                        if (window[catnames[iter]+"_list"].length > 0){
+                            for (var j = 0; j < window[catnames[iter]+"_list"].length; j++){
+                                window[catnames[iter]+"_list"][j].visible = true;
+                            }
+                        }
+                        else{
+                            drawObjects(window[catshorthands[iter]+"_thetas"], window[catshorthands[iter]+"_phis"], catcolors[iter], '', group=catnames[iter]);
                         }
                     }
-                    if (obj == 0){
-                        drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
-                    }
-                }
-                else{
-                    for (let i = scene.children.length - 1; i >= 0; i--) {
-                        if(scene.children[i].type === "Points" && scene.children[i].name == "ATNF Catalog")
-                            scene.children[i].visible = false;
-                    }
-                }
-
-                if (frbcheckbox.checked){
-                    obj = 0; 
-                    for (let i = scene.children.length - 1; i >= 0; i--) {
-                        if(scene.children[i].group == "FRB Catalog"){
-                            scene.children[i].visible = true;
-                            obj += 1;
-                        }
-                    }
-                    if (obj == 0){
-                        drawObjects(frb_thetas, frb_phis, 0x00ff00, "FRB Catalog");
-                    }
-                }
-                else{
-                    for (let i = scene.children.length - 1; i >= 0; i--) {
-                        if(scene.children[i].type === "Points" && scene.children[i].name == "FRB Catalog")
-                            scene.children[i].visible = false;
-                    }   
-                }
-
-                if (messiercheckbox.checked){
-                    obj = 0; 
-                    for (let i = scene.children.length - 1; i >= 0; i--) {
-                        if(scene.children[i].group == "Messier Catalog"){
-                            scene.children[i].visible = true;
-                            obj += 1;
-                        }
-                    }
-                    if (obj == 0){
-                        drawObjects(messier_thetas, messier_phis, 0x00aaff, "Messier Catalog");
-                    }
-                }
-                else{
-                    for (let i = scene.children.length - 1; i >= 0; i--){
-                        if (scene.children[i].type == "Points" && scene.children[i].name == "Messier Catalog")
-                            scene.remove(scene.children[i]);
+                    else{
+                        if (window[catnames[iter]+"_list"].length > 0){
+                            for (var j = 0; j < window[catnames[iter]+"_list"].length; j++){
+                                window[catnames[iter]+"_list"][j].visible = false;
+                            }
+                        } 
                     }
                 }
 
@@ -516,6 +501,8 @@
 
                     if (group != ''){
                         point.group = group;
+                        if (group.includes("Catalog"))
+                            window[group+"_list"].push(point)
                     }
 
                     if (satellitemode==true){
@@ -673,7 +660,6 @@
             var pointing_az;
             var pointing_alt;
             var antenna = GetURLParameter("antenna");
-            console.log(antenna);
             //create dummy event to pass to function
             var e = new Object();
             e.keyCode = 13;
@@ -693,7 +679,6 @@
             dealWithAltAzInput(e);
 
             function updateAltAz(this_antenna){
-                console.log(this_antenna);
                 if (antenna == "none"){
                 }
                 else{
@@ -703,7 +688,6 @@
                     altaz = getAntennaData(this_antenna)
                     pointing_alt = altaz[0]
                     pointing_az = altaz[1]
-                    console.log(pointing_alt, pointing_az)
                     alt_box.value = pointing_alt;
                     az_box.value = Math.round(pointing_az);
                     fov_box.value = 30;
@@ -736,52 +720,6 @@
                     }, 1000);
                 }
             }
-
-            function animate() {
-                camera.remove(mask);
-
-                viewrad = r * Math.sin(fov * Math.PI / 180);
-                alt_rectangular = r * Math.cos(pointing_alt * Math.PI / 180);
-
-                view_center_x = alt_rectangular * Math.cos(pointing_az * Math.PI / 180);
-                view_center_y = alt_rectangular * Math.sin(pointing_az * Math.PI / 180);
-
-                camera.top = view_center_y + viewrad;
-                camera.bottom = view_center_y - viewrad;
-                camera.left = view_center_x - viewrad;
-                camera.right = view_center_x + viewrad;
-
-                camera.updateProjectionMatrix();
-
-                mask_geo = new THREE.TorusGeometry(viewrad+5, 5, 2, 100);
-                mask_mat = new THREE.MeshBasicMaterial({color:0x000000});
-                mask = new THREE.Mesh(mask_geo, mask_mat);
-                camera.add(mask);
-                mask.position.set(view_center_x, view_center_y, 0);
-
-                ra = calculateSiderealTime(false);
-                ra = ra.split(":");
-
-                final_ra = ra[0] * 1;
-                final_ra += ra[1] / 60;
-                final_ra += ra[2] / 3600;
-                final_ra = final_ra * 15;
-                final_ra = final_ra * Math.PI / 180;
-                ra = final_ra;// - Math.PI/2;
-                ra += raoffset;
-                //ra = 0;
-
-                camx = r * Math.cos(ra) * Math.cos(dec);
-                camy = r * Math.sin(dec);
-                camz = r * Math.sin(ra) * Math.cos(dec);
-                camera.lookAt(camx, camy, camz);
-                //redoAltAz(camx, camy, camz);
-                
-                //camera.rotation.setFromVector3(new THREE.Vector3(camx, camy, camz));
-                requestAnimationFrame(animate);
-                renderer.render(scene, camera);
-
-            };
 
             function redoAltAz(x, y, z){
                 angles = [0, Math.PI/6, Math.PI/4, Math.PI/3, 5*Math.PI/12];
@@ -1004,36 +942,76 @@
                 return ([alt, az])
             }
 
+            var camx, camy, camz;
+            function animate() {
+                camera.remove(mask);
+
+                viewrad = r * Math.sin(fov * Math.PI / 180);
+                alt_rectangular = r * Math.cos(pointing_alt * Math.PI / 180);
+
+                view_center_x = alt_rectangular * Math.cos(pointing_az * Math.PI / 180);
+                view_center_y = alt_rectangular * Math.sin(pointing_az * Math.PI / 180);
+
+                camera.top = view_center_y + viewrad;
+                camera.bottom = view_center_y - viewrad;
+                camera.left = view_center_x - viewrad;
+                camera.right = view_center_x + viewrad;
+
+                camera.updateProjectionMatrix();
+
+                mask_geo = new THREE.TorusGeometry(viewrad+5, 5, 2, 100);
+                mask_mat = new THREE.MeshBasicMaterial({color:0x000000});
+                mask = new THREE.Mesh(mask_geo, mask_mat);
+                camera.add(mask);
+                mask.position.set(view_center_x, view_center_y, 0);
+
+                ra = calculateSiderealTime(false);
+                ra = ra.split(":");
+
+                final_ra = ra[0] * 1;
+                final_ra += ra[1] / 60;
+                final_ra += ra[2] / 3600;
+                final_ra = final_ra * 15;
+                final_ra = final_ra * Math.PI / 180;
+                ra = final_ra;// - Math.PI/2;
+                ra += raoffset;
+                //ra = 0;
+
+                camx = r * Math.cos(ra) * Math.cos(dec);
+                camy = r * Math.sin(dec);
+                camz = r * Math.sin(ra) * Math.cos(dec);
+                camera.lookAt(camx, camy, camz);
+                //redoAltAz(camx, camy, camz);
+                //camera.rotation.setFromVector3(new THREE.Vector3(camx, camy, camz));
+                requestAnimationFrame(animate);
+                if (GetURLParameter("controls") == "true")
+                    controls.update();
+                renderer.render(scene, camera);
+
+            };
 
             startScene();
             drawAltAz(0, 0, 0);
-            //addRALines();
-            //writeRALabels();
-            //addDecLines();
-            //writeDecLabels();
-            camera.position.set(0,0,0);
+            camera.position.set(0, 0.01, 0);
+
+            if (GetURLParameter("controls") == "true"){
+                var controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.target.set(0, 0, 0);
+                controls.update();
+                controls.rotateSpeed = -1;
+            }
             
             animate();
-            setInterval(animate(), 1000);
+            //setInterval(animate, 1000);
             setInterval(redoLabels, 10);
 
             var satelliterefreshID = '';
             drawSatellites();
-            //setInterval(updateSatellites, 1000);
-            //setInterval(drawAltAz(camx, camy, camz), 1000);
-            //setInterval(writeDecLabels(), 30000);
-            //setInterval(writeRALabels(), 30000);
             //redraw sun every half day... hopefully you'll refresh by then...
             setInterval(drawSun(), 43200000);
             drawMoon();
             addObjectLabels();
 
-            //if (draw_atnf == true){
-            //    drawObjects(atnf_thetas, atnf_phis, 0xff0000, "ATNF Catalog");
-            //}
-            //if (draw_frb == true){
-            //    drawObjects(frb_thetas, frb_phis, 0x00ff00, "FRB Catalog");
-            //}
         </script>
         </gui>
     </body>

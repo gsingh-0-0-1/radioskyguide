@@ -162,15 +162,19 @@ def gui():
     draw_frb = request.args.get('drawfrb')
     if loc == "Allen Telescope Array":
         declination = 40.8178049
+        longitude = -121.47173
         abbr = "ATA"
     if loc == "Green Bank Observatory":
         declination = 38.4329869
+        longitude = -79.8398566
         abbr = "GBO"
     if loc == "Parkes Radio Telescope":
         declination = -32.9980473
+        longitude = 148.2626028
         abbr = "PRT"
     if loc == "Atacama Large Millimeter Array":
         declination = -23.023556
+        longitude = -67.7548021
         abbr = "ALMA"
 
 
@@ -189,6 +193,7 @@ def gui():
     return render_template('main.html', atnf_ra_dat_here = atnf_ra_dat,
                                         atnf_dec_dat_here = atnf_dec_dat,
                                         declination_here = str(declination),
+                                        longitude_here = str(longitude),
                                         loc_here = str(loc),
                                         abbr_here = str(abbr),
                                         draw_atnf = draw_atnf,
@@ -210,13 +215,21 @@ def gui():
 
     # return mainhtml
 
-@app.route('/selectantenna')
-def selectantenna():
-    return render_template('selectantenna.html')
+@app.route('/atnfdata')
+def displayatnfdata():
+    return str(atnf_ra_dat)+"$"+str(atnf_dec_dat)
 
+@app.route('/messierdata')
+def displaymessierdata():
+    return str(messier_ras)+"$"+str(messier_decs)
 
-@app.route('/importantobjs')
-def importantobjs():
-    return render_template('importantobjs.html')
+@app.route('/frbdata')
+def displayfrbdata():
+    return str(frb_ra_dat)+"$"+str(frb_dec_dat)
+
+@app.route('/redo')
+def submain():
+    return render_template('redo.html')
+
 
 app.run(host = '0.0.0.0', debug = True, port = 80) 
