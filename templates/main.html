@@ -510,8 +510,10 @@
 
                     var geometry = new THREE.Geometry();
                     geometry.vertices.push(new THREE.Vector3(x, y, z))
-                    //var material = new THREE.PointsMaterial( { size: size, sizeAttenuation: false, color: color } );
-                    var material = new THREE.PointsMaterial({
+                    if (name == "Satellite" || group == "Satellite")
+                        var material = new THREE.PointsMaterial( { size: size, sizeAttenuation: false, color: color } );
+                    else
+                        var material = new THREE.PointsMaterial({
                                       size: 3,
                                       map: createCircleTexture(color, 64),
                                       transparent: false,
