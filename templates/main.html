@@ -36,6 +36,7 @@
             </span>
             <br><br><br>
 
+            <span id="antennae">
             <input type="button" class="button" style="--bcolor: #3f1166; --fsize: 15px;" value="Available Antennae (Simulated)">
             <br>
             <input type="button" class="button" style="--bcolor: #3f1111; --fsize: 15px; padding: 10px 20px;" value="1a" onclick="javascript:changeAntenna('1a');">
@@ -48,6 +49,7 @@
             <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;" value="5c" onclick="javascript:changeAntenna('5c');">
             
             <input id="nonebutton" type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;" value="None" onclick="javascript:changeAntenna('none');">
+            </span>
 
             <br>
             <div>
@@ -142,6 +144,10 @@
             }
             else{
                 c.value = "true"
+            }
+
+            if (GetURLParameter("loc") != "Allen+Telescope+Array"){
+                document.getElementById("antennae").innerHTML = ''
             }
 
             function GetURLParameter(sParam){
