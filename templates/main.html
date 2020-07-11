@@ -284,10 +284,11 @@
                         }
                     }
                     if (obj == 0){
-                        addRALines();
+                        //addRALines();
                         writeRALabels();
-                        addDecLines();
+                        //addDecLines();
                         writeDecLabels();
+                        equatorialGrid();
                     }
                 }
                 else{
@@ -441,6 +442,26 @@
                     line.material.shading = THREE.SmoothShading;
                     scene.add(line);
                 }
+            }
+
+            function equatorialGrid(){
+                var radius = r;
+                var latSegments = 18;
+                var longSegments = 16;
+
+                var geometry = new THREE.SphereBufferGeometry( radius, longSegments, latSegments);
+                var edges = new THREE.EdgesGeometry( geometry );
+                var sphere = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+
+                sphere.group = "equatorial"
+                scene.add( sphere );
+
+                var geometry = new THREE.CircleGeometry( 10, 36 );
+                var edges = new THREE.EdgesGeometry( geometry );
+                var equator = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffa500 } ) );
+                equator.lookAt(0, 10, 0);
+                equator.group = "equatorial";
+                scene.add(equator)
             }
 
             function addText(text, pos, group, addtocamera=false, size=0.35, color=0x00fff8){
@@ -767,38 +788,11 @@
 
                 angles = [0, Math.PI/6, Math.PI/4, Math.PI/3, 5*Math.PI/12];
 
-                for (i = 0; i < angles.length; i++){
-                    ring_rad = r * (Math.cos(angles[i]));
-                    ring_width = 0.06
-                    var geometry = new THREE.TorusGeometry(ring_rad, ring_width/2, 16, 48);
-                    var material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide } );
-                    line = new THREE.Mesh( geometry, material );
-                    //line.position.set(0, 0, 0);
-                    //line.quaternion.copy(camera.quaternion);
-                    line.lookAt(x, y, z);
-                    line.group = "altaz";
-                    camera.add(line);
-                }
-
-                //now draw the lines
-                
-                ys = [r, 0, -r, 0];
-                n_ys = [0, r, 0, -r];
-                for (i = 0; i < 2; i++){
-                    //points = [];
-                    //points.push(new THREE.Vector3(0, 0, 0));
-                    //points.push(new THREE.Vector3(n_ys[i], ys[i], 0));
-
-                    //var geometry = new THREE.BufferGeometry().setFromPoints(points);
-                    var geometry = new THREE.CylinderGeometry(0.04, 0.04, r*2, 30);
-                    var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-                    var line = new THREE.Mesh( geometry, material );
-                    line.group = "altaz";
-                    line.position.set(0, 0, -1);
-                    line.rotation.set(0, 0, i * Math.PI/2);
-                    //line.lookAt(x, y, z);
-                    camera.add(line);
-                }
+                var helper = new THREE.PolarGridHelper( r, 16, 6, 64 );
+                camera.add( helper );
+                helper.group = "altaz"
+                helper.position.set(0, 0, -5)
+                helper.rotation.set(0, Math.PI/2, Math.PI/2)
 
                 //draw the degree labels
                 for (i = 0; i < angles.length; i++){
