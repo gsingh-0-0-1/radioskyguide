@@ -479,7 +479,27 @@
             var messier_thetas = {{ messier_ra_dat_here }};
             var messier_phis = {{ messier_dec_dat_here }};
 
+            function createCircleTexture(color, size) {
+              var matCanvas = document.createElement('canvas');
+              matCanvas.width = matCanvas.height = size;
+              var matContext = matCanvas.getContext('2d');
+              // create texture object from canvas.
+              var texture = new THREE.Texture(matCanvas);
+              // Draw a circle
+              var center = size / 2;
+              matContext.beginPath();
+              matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
+              matContext.closePath();
+              matContext.fillStyle = color;
+              matContext.fill();
+              // need to set needsUpdate
+              texture.needsUpdate = true;
+              // return a texture made from the canvas
+              return texture;
+            }
+
             function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=2) {
+                color = "#" + color.toString(16).padStart(6, '0');
                 for (var i = 0; i < thetas.length; i++){
                     theta = thetas[i];
                     phi = phis[i];
@@ -490,7 +510,13 @@
 
                     var geometry = new THREE.Geometry();
                     geometry.vertices.push(new THREE.Vector3(x, y, z))
-                    var material = new THREE.PointsMaterial( { size: size, sizeAttenuation: false, color: color } );
+                    //var material = new THREE.PointsMaterial( { size: size, sizeAttenuation: false, color: color } );
+                    var material = new THREE.PointsMaterial({
+                                      size: 3,
+                                      map: createCircleTexture(color, 64),
+                                      transparent: false,
+                                      depthWrite: false
+                                    });
                     var point = new THREE.Points( geometry, material );
                     if (listofnames==true){
                         point.name = name[i]
@@ -1011,6 +1037,11 @@
             setInterval(drawSun(), 43200000);
             drawMoon();
             addObjectLabels();
+
+            for (var i = 0; i < catshorthands.length; i++){
+                drawObjects(window[catshorthands[i]+"_thetas"], window[catshorthands[i]+"_phis"], catcolors[i], '', group=catnames[i]);
+            }
+            dealWithCheckboxes();
 
         </script>
         </gui>
