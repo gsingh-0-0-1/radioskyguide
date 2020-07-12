@@ -83,7 +83,9 @@
                 <input type="hidden" name="az" value="0">
                 <input type="hidden" name="fov" value="90">
                 <input type="hidden" name="antenna" value="none">
-                <input type="hidden" name="loc" value="Allen Telescope Array">
+                <input type="hidden" name="loc" value="{{ loc_here }}">
+                <input type="hidden" name="longitude" value="{{ longitude_here }}">
+                <input type="hidden" name="latitude" value="{{ declination_here }}">
                 <input type="hidden" name="controls" id="controls" value="tobefilled">
                 <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Toggle Interactive Mode">
             </form>
@@ -194,19 +196,8 @@
                 }
             }
 
-            loc = "{{ loc_here }}";
-            if (loc == "Allen Telescope Array"){
-                longitude = -121.47173
-            }
-            if (loc == "Green Bank Observatory"){
-                longitude = -79.8398566
-            }
-            if (loc == "Parkes Radio Telescope"){
-                longitude = 148.2626028
-            }
-            if (loc == "Atacama Large Millimeter Array"){
-                longitude = -67.7548021
-            }
+            var loc = "{{ loc_here }}";
+            var longitude = {{ longitude_here }};
 
             var atnfcheckbox = document.getElementById("drawatnf");
             var frbcheckbox = document.getElementById("drawfrb");
@@ -579,7 +570,7 @@
 
 
 
-            var dec = "40.8178049" * Math.PI / 180;
+            var dec = {{ declination_here }} * Math.PI / 180;
             var ra = 0;
 
             //write declination labels

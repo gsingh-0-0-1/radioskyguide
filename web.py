@@ -164,25 +164,22 @@ def gui():
         declination = 40.8178049
         longitude = -121.47173
         abbr = "ATA"
-    if loc == "Green Bank Observatory":
+    elif loc == "Green Bank Observatory":
         declination = 38.4329869
         longitude = -79.8398566
         abbr = "GBO"
-    if loc == "Parkes Radio Telescope":
+    elif loc == "Parkes Radio Telescope":
         declination = -32.9980473
         longitude = 148.2626028
         abbr = "PRT"
-    if loc == "Atacama Large Millimeter Array":
+    elif loc == "Atacama Large Millimeter Array":
         declination = -23.023556
         longitude = -67.7548021
         abbr = "ALMA"
-
-
-    if draw_atnf == None:
-        draw_atnf = 'false'
-
-    if draw_frb == None:
-        draw_frb = 'false'
+    else:
+        declination = request.args.get("latitude")
+        longitude = request.args.get("longitude")
+        abbr = "--"
 
     moon = ephem.Moon(datetime.utcnow())
     moon_ra = str(moon.ra)
