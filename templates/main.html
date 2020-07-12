@@ -64,6 +64,25 @@ input[type="checkbox"]:checked + label:before {
   -webkit-transform: rotate(45deg);
   transform: rotate(45deg);
 }
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #222;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #456789;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #345678;
+}
         </style>
         <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
         <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
@@ -81,33 +100,66 @@ input[type="checkbox"]:checked + label:before {
             <span id="antennae">
             <input type="button" class="button" style="--bcolor: #3f1166; --fsize: 15px;" value="Available Antennae (Simulated)">
             <br>
-            <input type="button" class="button" style="--bcolor: #3f1111; --fsize: 15px; padding: 10px 20px;" value="1a" onclick="javascript:changeAntenna('1a');">
-            <input type="button" class="button" style="--bcolor: #3f115a; --fsize: 15px; padding: 10px 20px;" value="1f" onclick="javascript:changeAntenna('1f');">
-            <input type="button" class="button" style="--bcolor: #3f1199; --fsize: 15px; padding: 10px 20px;" value="1c" onclick="javascript:changeAntenna('1c');">
-            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;; padding: 10px 20px;" value="2a" onclick="javascript:changeAntenna('2a');">
-            <br>
-            <input type="button" class="button" style="--bcolor: #3f1111; --fsize: 15px; padding: 10px 20px;" value="2b" onclick="javascript:changeAntenna('2b');">
-            <input type="button" class="button" style="--bcolor: #3f1177; --fsize: 15px; padding: 10px 20px;" value="4g" onclick="javascript:changeAntenna('4g');">
-            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;" value="5c" onclick="javascript:changeAntenna('5c');">
-            
-            <input id="nonebutton" type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px;" value="None" onclick="javascript:changeAntenna('none');">
+            <table>
+            <tr>
+            <td>
+            <input type="button" class="button" style="--bcolor: #3f1111; --fsize: 15px; padding: 10px 20px; font-family: courier" value="1a" onclick="javascript:changeAntenna('1a');">
+            </td>
+            <td>
+            <input type="button" class="button" style="--bcolor: #3f115a; --fsize: 15px; padding: 10px 20px; font-family: courier" value="1f" onclick="javascript:changeAntenna('1f');">
+            </td>
+            <td>
+            <input type="button" class="button" style="--bcolor: #3f1199; --fsize: 15px; padding: 10px 20px; font-family: courier" value="1c" onclick="javascript:changeAntenna('1c');">
+            </td>
+            <td>
+            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px; font-family: courier" value="2a" onclick="javascript:changeAntenna('2a');">
+            </td>
+            </tr>
+
+            <tr>
+            <td>
+            <input type="button" class="button" style="--bcolor: #3f1111; --fsize: 15px; padding: 10px 20px; font-family: courier" value="2b" onclick="javascript:changeAntenna('2b');">
+            </td>
+            <td>
+            <input type="button" class="button" style="--bcolor: #3f1177; --fsize: 15px; padding: 10px 20px; font-family: courier" value="4g" onclick="javascript:changeAntenna('4g');">
+            </td>
+            <td>
+            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px; font-family: courier" value="5c" onclick="javascript:changeAntenna('5c');">
+            </td>
+            <td>
+            <input id="nonebutton" type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px; font-family: courier" value="NA" onclick="javascript:changeAntenna('none');">
+            </td>
+            </tr>
+            </table>
             </span>
 
             <br>
             <div>
 
                 <br>
-                <input type="button" class="button" style="--bcolor: #749fd8; --fsize: 15px;" value="+5m" onclick="offsetRA(1.25);">
-                <input type="button" class="button" style="--bcolor: #cb8080; --fsize: 15px;" value="-5m" onclick="offsetRA(-1.25);">
+                <table style="text-align: center; display:inline;">
+                <tr>
+                <td>
+                <input type="button" class="button" style="--bcolor: #749fd8; --fsize: 15px; font-family: courier" value="+5m" onclick="offsetRA(1.25);">
+                </td>
+                <td>
+                <input type="button" class="button" style="--bcolor: #cb8080; --fsize: 15px; font-family: courier" value="-5m" onclick="offsetRA(-1.25);">
+                </td>
+                </tr>
                 
+                <tr>
+                <td>
+                <input type="button" class="button" style="--bcolor: #356fbb; --fsize: 15px; font-family: courier" value="+1h" onclick="offsetRA(15);">
+                </td>
+                <td>
+                <input type="button" class="button" style="--bcolor: #b54a4a; --fsize: 15px; font-family: courier" value="-1h" onclick="offsetRA(-15);">
+                </td>
+                </table>
 
                 <br>
-                <input type="button" class="button" style="--bcolor: #356fbb; --fsize: 15px;" value="+1h" onclick="offsetRA(15);">
-                <input type="button" class="button" style="--bcolor: #b54a4a; --fsize: 15px;" value="-1h" onclick="offsetRA(-15);">
-
-
+                <input type="text" class="button" id="delaybox" style="--bcolor: #553555; --fsize: 15px;" placeholder="Custom Time Offset" onkeypress="javascript:customRaOffset(event);">
                 <br>
-                <input type="text" class="button" id="delaybox" style="--bcolor: #553555; --fsize: 15px;" placeholder="Enter Custom Time" onkeypress="javascript:customRaOffset(event);">
+                <input type="text" class="button" id="cont_del_box" style="--bcolor: #553555; --fsize: 15px;" placeholder="Animate (Min/Sec)" onkeypress="javascript:delayAnimate(event)">
 
                 <br>
                 <input type="button" class="button" style="--bcolor: #553555; --fsize: 15px;" value="Reset to Current Time" onclick="offsetRA(0, true);">
@@ -194,6 +246,20 @@ input[type="checkbox"]:checked + label:before {
 
             if (GetURLParameter("loc") != "Allen+Telescope+Array"){
                 document.getElementById("antennae").innerHTML = ''
+            }
+
+            var continuousDelayAnimateInterval;
+
+            function delayAnimate(event){
+                if (event.keyCode == 13 || event.which == 13){
+                    clearInterval(continuousDelayAnimateInterval);
+                    if (document.getElementById("cont_del_box").value*1 != 0){
+                        val = document.getElementById("cont_del_box").value;
+                        continuousDelayAnimateInterval = setInterval(function(){
+                            offsetRA(val/10, 100)
+                        }, 100)
+                    }
+                }
             }
 
             function GetURLParameter(sParam){
