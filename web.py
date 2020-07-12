@@ -138,6 +138,24 @@ messier_decs = process_dec(messier_decs)
 
 r = 10
 
+#Take care of some TLE stuff...
+f = open('static/origtle.txt')
+f = f.read()
+f = f.split('\n0')
+def checkforstarlink(s):
+    if "STARLINK" in s:
+        return True
+    else:
+        return False
+
+for i in range(len(f)):
+    f[i] = "0 " + f[i]
+
+sat_data = filter(checkforstarlink, f)
+
+with open('static/newtle.txt', 'w') as f:
+    f.write('\n'.join(sat_data))
+
 app = Flask(__name__)
 
 @app.route('/')

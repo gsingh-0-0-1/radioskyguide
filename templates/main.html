@@ -22,6 +22,48 @@
               margin: 4px 2px;
               cursor: pointer;
             }
+/*Checkboxes styles*/
+input[type="checkbox"] { display: none; }
+
+input[type="checkbox"] + label {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 20px;
+  color: #ddd;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+input[type="checkbox"] + label:last-child { margin-bottom: 0; }
+
+input[type="checkbox"] + label:before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #6cc0e5;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: .6;
+  -webkit-transition: all .12s, border-color .08s;
+  transition: all .12s, border-color .08s;
+}
+
+input[type="checkbox"]:checked + label:before {
+  width: 10px;
+  top: -5px;
+  left: 5px;
+  border-radius: 0;
+  opacity: 1;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  -webkit-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
         </style>
         <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
         <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
@@ -94,31 +136,33 @@
             <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
             <br><br>
             <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="-Select Objects to Draw-"><br><br>
+            <div style="text-align: left">
             <form>
 
-                <input type="checkbox" name="drawatnf" value="true" id="drawatnf" onclick="dealWithCheckboxes();">
-                <label for="drawatnf" style="color: #FF0000">ATNF Catalog</label><br><br>
+                <input type="checkbox" name="drawatnf" value="true" id="drawatnf" onclick="dealWithCheckboxes();" checked>
+                <label for="drawatnf" style="color: #FF0000; display:inline">ATNF Catalog</label><br><br>
 
                 <input type="checkbox" name="drawfrb" value="true" id="drawfrb" onclick="dealWithCheckboxes();">
-                <label for='drawfrb' style="color: #00FF00">FRB Catalog</label><br><br>
+                <label for='drawfrb' style="color: #00FF00; display:inline">FRB Catalog</label><br><br>
 
                 <input type="checkbox" name="drawmessier" value="true" id="drawmessier" onclick="dealWithCheckboxes();">
-                <label for='drawmessier' style="color: #00AAFF">Messier Catalog</label><br><br>
+                <label for='drawmessier' style="color: #00AAFF; display:inline">Messier Catalog</label><br><br>
 
                 <input type="checkbox" name="drawsatellites" value="true" id="drawsatellites" onclick="dealWithCheckboxes();">
-                <label for='drawsatellites' style="color: #FFFFFF">Starlink Satellites</label><br><br>
+                <label for='drawsatellites' style="color: #FFFFFF; display:inline">Starlink Satellites</label><br><br>
 
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
-                <label for='drawsatellites' style="color: #00FFF8">Important Objects</label><br><br>
+                <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
             </form>
             <br><br>
             <form>
                 <input type="checkbox" name="equatorialcheckbox" value="true" id="equatorialcheckbox" onclick="gridCheckboxes();">
-                <label for="equatorialcheckbox" style="color: #9922FF">Equatorial Grid</label>
+                <label for="equatorialcheckbox" style="color: #9922FF; display:inline">Equatorial Grid</label>
                 <br><br>
                 <input type="checkbox" name="altazcheckbox" value="true" id="altazcheckbox" onclick="gridCheckboxes();" checked>
-                <label for="altazcheckbox" style="color: #9922FF">Alt-Az Grid</label>
+                <label for="altazcheckbox" style="color: #9922FF; display:inline">Alt-Az Grid</label>
             </form>
+            </div>
             <br><br>
             <div id="modifyaltaz">
                 <input id="alt_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Altitude (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
@@ -523,7 +567,7 @@
               return texture;
             }
 
-            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=2) {
+            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=2, visible=true) {
                 color = "#" + color.toString(16).padStart(6, '0');
                 for (var i = 0; i < thetas.length; i++){
                     theta = thetas[i];
@@ -562,6 +606,7 @@
                         point.sat_tag = i;
                     }
 
+                    point.visible = visible;
                     scene.add(point);
 
                         //point.position.set(x,y,z);
@@ -832,7 +877,7 @@
                     if (this.readyState == 4 && this.status == 200) {
                         data = this.responseText;
                         data = data.split("\n0");
-                        data = data.filter(element => element.includes("STARLINK"));
+                        //data = data.filter(element => element.includes("STARLINK"));
                     }
                 };
             }
@@ -1026,22 +1071,18 @@
                 controls.update();
                 controls.rotateSpeed = -1;
             }
-            
+
             animate();
             //setInterval(animate, 1000);
             setInterval(redoLabels, 10);
 
-            var satelliterefreshID = '';
+            var satelliterefreshID;
             drawSatellites();
             //redraw sun every half day... hopefully you'll refresh by then...
             setInterval(drawSun(), 43200000);
             drawMoon();
             addObjectLabels();
-
-            for (var i = 0; i < catshorthands.length; i++){
-                drawObjects(window[catshorthands[i]+"_thetas"], window[catshorthands[i]+"_phis"], catcolors[i], '', group=catnames[i]);
-            }
-            dealWithCheckboxes();
+            drawObjects(atnf_thetas, atnf_phis, 0xff0000, '', "ATNF Catalog", '', '', '', true);
 
             document.getElementById("nonebutton").click();
 
