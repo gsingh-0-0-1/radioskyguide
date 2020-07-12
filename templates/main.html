@@ -353,7 +353,7 @@ input[type="checkbox"]:checked + label:before {
                 else{
                     clearInterval(satelliterefreshID);
                     for (let i = scene.children.length - 1; i >= 0; i--){
-                        if (scene.children[i].name == "Satellite")
+                        if (scene.children[i].name == "Satellite" || scene.children[i].group == "Satellite")
                             scene.remove(scene.children[i]);
                     }              
                 }
@@ -950,7 +950,7 @@ input[type="checkbox"]:checked + label:before {
 
             function updateSatellites(){
                 for (var j = scene.children.length - 1; j >= 0; j--) {
-                    if(scene.children[j].name == "Satellite"){
+                    if(scene.children[j].group == "Satellite"){
                         scene.remove(scene.children[j]);
                     }
                 }
@@ -991,7 +991,7 @@ input[type="checkbox"]:checked + label:before {
                         satlatitude  = positionGd.latitude;
 
                     //if ( Math.abs(satlatitude - dec) < 0.1 && Math.abs(satlongitude - ra) < 0.1){
-                    drawObjects([satlongitude], [satlatitude], 0xffffff, "Satellite");
+                    drawObjects([satlongitude], [satlatitude], 0xffffff, [name], "Satellite");
                     //}
                     
                 }
@@ -1118,6 +1118,11 @@ input[type="checkbox"]:checked + label:before {
                 camy = r * Math.sin(dec);
                 camz = r * Math.sin(ra) * Math.cos(dec);
                 camera.lookAt(camx, camy, camz);
+                for (var i = scene.children.length - 1; i >= 0; i--) {
+                    if(scene.children[i].name == "textlabel"){
+                        scene.children[i].quaternion.copy(camera.quaternion);
+                    }
+                }
                 //redoAltAz(camx, camy, camz);
                 //camera.rotation.setFromVector3(new THREE.Vector3(camx, camy, camz));
                 requestAnimationFrame(animate);
@@ -1140,7 +1145,7 @@ input[type="checkbox"]:checked + label:before {
 
             animate();
             //setInterval(animate, 1000);
-            setInterval(redoLabels, 10);
+            //setInterval(redoLabels, 10);
 
             var satelliterefreshID;
             drawSatellites();
