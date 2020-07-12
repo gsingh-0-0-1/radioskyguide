@@ -256,7 +256,7 @@ input[type="checkbox"]:checked + label:before {
                     if (document.getElementById("cont_del_box").value*1 != 0){
                         val = document.getElementById("cont_del_box").value;
                         continuousDelayAnimateInterval = setInterval(function(){
-                            offsetRA(val/10, 100)
+                            customRaOffset(val/10, 100)
                         }, 100)
                     }
                 }
