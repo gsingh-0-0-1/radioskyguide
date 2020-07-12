@@ -843,7 +843,8 @@ input[type="checkbox"]:checked + label:before {
             dealWithAltAzInput(e);
 
             function updateAltAz(this_antenna){
-                if (antenna == "none"){
+                if (this_antenna == "none"){
+                    console.log(this_antenna)
                 }
                 else{
                     var alt_box = document.getElementById("alt_box");
@@ -859,7 +860,7 @@ input[type="checkbox"]:checked + label:before {
             }
             var current_antenna_interval = setInterval(function () {
                 updateAltAz(antenna);
-                dealWithAltAzInput(e);
+                //dealWithAltAzInput(e);
             }, 1000);
 
             function changeAntenna(new_antenna){
