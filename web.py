@@ -155,6 +155,15 @@ def gui():
         with open('visitors/'+str(ip)+'.txt', 'w') as f:
             f.write(str(datetime.utcnow())+'\n')
 
+    utcdate = str(datetime.utcnow()).split(" ")[0]
+
+    if os.path.isfile('logs/'+utcdate+'.txt'):
+        with open('logs/'+utcdate+'.txt', 'a+') as f:
+            f.write(str(datetime.utcnow())+"\t"+str(ip)+'\n')
+    else:
+        with open('logs/'+utcdate+'.txt', 'w') as f:
+            f.write(str(datetime.utcnow())+"\t"+str(ip)+'\n')        
+
     declination = 0
     longitude = 0
     loc = request.args.get('loc')
