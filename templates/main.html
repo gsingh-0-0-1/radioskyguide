@@ -578,6 +578,8 @@ input[type="checkbox"]:checked + label:before {
                 scene.add(equator)
             }
 
+            var scenetextobjects = [];
+
             function addText(text, pos, group, addtocamera=false, size=0.35, color=0x00fff8){
                 var loader = new THREE.FontLoader();
                 loader.load( '/static/examples/fonts/helvetiker_bold.typeface.json', function (font){
@@ -601,6 +603,8 @@ input[type="checkbox"]:checked + label:before {
                     mesh.position.set(pos[0], pos[1], pos[2]);
                     mesh.name = "textlabel";
                     mesh.group = group;
+                    if (addtocamera==false)
+                        scenetextobjects.push(mesh);
                 } );
             }
 
@@ -928,10 +932,13 @@ input[type="checkbox"]:checked + label:before {
             }
 
             function redoLabels(){
-                for (var i = scene.children.length - 1; i >= 0; i--) {
+                /*for (var i = scene.children.length - 1; i >= 0; i--) {
                     if(scene.children[i].name == "textlabel"){
                         scene.children[i].quaternion.copy(camera.quaternion);
                     }
+                }*/
+                for (var i = 0; i < scenetextobjects.length; i++){
+                    scenetextobjects[i].quaternion.copy(camera.quaternion);
                 }
             }
 
@@ -1119,11 +1126,6 @@ input[type="checkbox"]:checked + label:before {
                 camy = r * Math.sin(dec);
                 camz = r * Math.sin(ra) * Math.cos(dec);
                 camera.lookAt(camx, camy, camz);
-                for (var i = scene.children.length - 1; i >= 0; i--) {
-                    if(scene.children[i].name == "textlabel"){
-                        scene.children[i].quaternion.copy(camera.quaternion);
-                    }
-                }
                 //redoAltAz(camx, camy, camz);
                 //camera.rotation.setFromVector3(new THREE.Vector3(camx, camy, camz));
                 requestAnimationFrame(animate);
@@ -1146,7 +1148,7 @@ input[type="checkbox"]:checked + label:before {
 
             animate();
             //setInterval(animate, 1000);
-            //setInterval(redoLabels, 10);
+            setInterval(redoLabels, 10);
 
             var satelliterefreshID;
             drawSatellites();
