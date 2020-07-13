@@ -2,7 +2,6 @@
     <head>
 
         <title>Radio SkyGUIde</title>
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css">
         <style>
             body { margin: 0; text-align: center; background-color: #000000}
             canvas { display: block; }
@@ -83,12 +82,20 @@ input[type="checkbox"]:checked + label:before {
 ::-webkit-scrollbar-thumb:hover {
   background: #345678;
 }
+
+swal.fire({
+  icon: 'warning',
+  title: 'Quick Note',
+  text: 'Interactive mode is in development, and might be a little buggy. It is also not compatible with the antennae view - please switch back to non-interactive to use those.',
+  footer: 'Radio SkyGUIde'
+})
         </style>
         <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
         <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
         <script src="https://threejs.org/build/three.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
         <script src="/static/examples/js/controls/OrbitControls.js"></script>
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     </head>
     <body onload="fullReload();">
         <div id="leftdetails" class="leftdetails">
@@ -248,6 +255,10 @@ input[type="checkbox"]:checked + label:before {
                 document.getElementById("antennae").innerHTML = ''
             }
 
+            if (GetURLParameter("controls") == "true"){
+                swal("Interactive Mode Note", "Interactive mode is still being worked on, and might be a little buggy. It's also not easily compatible with the antenna view - please revert back to non-interactive before using the antennae buttons.", "warning")
+            }
+
             var continuousDelayAnimateInterval;
 
             function delayAnimate(event){
@@ -330,6 +341,7 @@ input[type="checkbox"]:checked + label:before {
                         if (window[catnames[iter]+"_list"].length > 0){
                             for (var j = 0; j < window[catnames[iter]+"_list"].length; j++){
                                 window[catnames[iter]+"_list"][j].visible = true;
+                                window[catnames[iter]+"_list"][j].hid_override = false;
                             }
                         }
                         else{
@@ -340,6 +352,7 @@ input[type="checkbox"]:checked + label:before {
                         if (window[catnames[iter]+"_list"].length > 0){
                             for (var j = 0; j < window[catnames[iter]+"_list"].length; j++){
                                 window[catnames[iter]+"_list"][j].visible = false;
+                                window[catnames[iter]+"_list"][j].hid_override = true;
                             }
                         } 
                     }
@@ -363,6 +376,7 @@ input[type="checkbox"]:checked + label:before {
                     for (let i = scene.children.length - 1; i >= 0; i--) {
                         if(scene.children[i].group == "Important Objects"){
                             scene.children[i].visible = true;
+                            scene.children[i].hid_override = false;
                             obj += 1;
                         }
                     }
@@ -374,6 +388,7 @@ input[type="checkbox"]:checked + label:before {
                     for (let i = scene.children.length - 1; i >= 0; i--){
                         if (scene.children[i].group == "Important Objects")
                             scene.children[i].visible = false;
+                            scene.children[i].hid_override = true;
                     }             
                 }
             }
@@ -586,7 +601,7 @@ input[type="checkbox"]:checked + label:before {
                     var textGeo = new THREE.TextGeometry( text, {
                         font: font,
                         size: size,
-                        height: 0.35,
+                        height: 0.01,
                         curveSegments: 24,
                         bevelEnabled: false
 
@@ -1088,6 +1103,7 @@ input[type="checkbox"]:checked + label:before {
             }
 
             var camx, camy, camz;
+            var backmask = '';
             function animate() {
                 camera.remove(mask);
 
@@ -1129,19 +1145,35 @@ input[type="checkbox"]:checked + label:before {
                 //redoAltAz(camx, camy, camz);
                 //camera.rotation.setFromVector3(new THREE.Vector3(camx, camy, camz));
                 requestAnimationFrame(animate);
-                if (GetURLParameter("controls") == "true")
+                if (GetURLParameter("controls") == "true"){
+                    controls.target = new THREE.Vector3(camx/100, camy/100, camz/100);
                     controls.update();
+                    /*for (var i = 1; i < scene.children.length; i++){
+                        if (scene.children[i].geometry.type == "Geometry"){
+                            x = scene.children[i].geometry.vertices[0].x
+                            y = scene.children[i].geometry.vertices[0].y
+                            z = scene.children[i].geometry.vertices[0].z
+                            d = Math.sqrt((camx-x)*(camx-x) + (camy-y)*(camy-y))
+                            d = Math.sqrt(d*d + (camz-z)*(camz-z))
+                            if (scene.children[i].hid_override == false){
+                                if (d > 10*Math.sqrt(2))
+                                    scene.children[i].visible = false;
+                                else
+                                    scene.children[i].visible = true;
+                            }
+                        }
+                    }*/
+                }
                 renderer.render(scene, camera);
 
             };
 
             startScene();
             drawAltAz(0, 0, 0);
-            camera.position.set(0, 0.01, 0);
+            camera.position.set(0, 0, 0);
 
             if (GetURLParameter("controls") == "true"){
                 var controls = new THREE.OrbitControls(camera, renderer.domElement);
-                controls.target.set(0, 0, 0);
                 controls.update();
                 controls.rotateSpeed = -1;
             }
