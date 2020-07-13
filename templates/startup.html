@@ -28,6 +28,9 @@
 			  background-color: #345678;
 			  opacity: .6
 			}
+			.vid:focus{
+				outline: none;
+			}
 		</style>
 		<body>
 			<main>
@@ -64,6 +67,9 @@
 					<input type="text" class="button" style="background-color: #888888; --fsize: 16px;" placeholder="Longitude" name="longitude">
 				</form>
 			</main>
+			<video class="vid" width="700" style="position: fixed; top:30%; left:40%" autoPlay loop controls>
+				<source src="static/screenrec.mov" type="video/mp4" />
+			</video>
 		</body>
 	</head>
 </html>
