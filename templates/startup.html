@@ -2,14 +2,14 @@
 	<head>
 		<title>Radio SkyGUIde</title>
 		<style>
-			body {background-image: url('/static/betelgeuse.JPG'); background-position: -370px -180px; background-size:100%;}
-			main {position:fixed; text-align:center; left:50%; top:30px; transform:translate(-50%, -0%); font-family: Verdana; font-size: 40px; color:white;}
-			.submain {font-size: 28px; color:white;}
+			body {background-color: #000000; background-image: url('/static/betelgeuse.JPG'); background-position: 200px -180px; background-size:100%;}
+			main {position:fixed; text-align:left; left:5%; top:30px; transform:translate(0%, -0%); font-family: Verdana; font-size: 40px; color:#4555ff;}
+			.submain {font-size: 28px; color:#789aff;}
 			.button {
-			  background-color: var(--bcolor);
+			  background-image: linear-gradient(to right, var(--bcolor) , rgba(0,0,0,0.9));
 			  border: none;
 			  color: white;
-			  padding: 15px 24px;
+			  padding: 15px 20px;
 			  text-align: center;
 			  text-decoration: none;
 			  display: inline-block;
@@ -18,25 +18,32 @@
 			  cursor: pointer;
 			}
 			.button:focus {
-                outline: 0 !important;
+                outline: 3px solid rgba(60, 120, 200, 0.7);
             }
 			::placeholder {
-			   color:    #DDDDDD;
+			   color: #DDDDDD;
+			}.spacer {
+			  height: 20px;
+			  width: 100%;
+			  background-color: #345678;
+			  opacity: .6
 			}
 		</style>
 		<body>
 			<main>
 				Radio SkyGUIde
+				<br><br>
+				<div class="spacer" style=""></div>
 				<div class="submain"><br>
 				Select Location
-				</div><br>
+				</div>
 				<form action='/main'>
 					<input type="hidden" name="alt" value="90">
 					<input type="hidden" name="az" value="0">
 					<input type="hidden" name="fov" value="90">
 					<input type="hidden" name="antenna" value="none">
 					<input type="hidden" name="controls" value="false">
-					<input type="Submit" class="button" style="--bcolor: #DD11AA; --fsize: 16px;" value="Allen Telescope Array" name="loc">
+					<input type="Submit" class="button" style="--bcolor: #AA11AA; --fsize: 16px;" value="Allen Telescope Array" name="loc">
 					<br>
 					<input type="Submit" class="button" style="--bcolor: #33AA99; --fsize: 16px;" value="Green Bank Observatory" name="loc">
 					<br>
@@ -51,10 +58,10 @@
 					<input type="hidden" name="fov" value="90">
 					<input type="hidden" name="antenna" value="none">
 					<input type="hidden" name="controls" value="false">
-					<input type="Submit" class="button" style="color: #000000; --bcolor: #DDDDDD; --fsize: 16px;" value="Custom Location">
+					<input type="Submit" class="button" style="color: #000000; background-color: #DDDDDD; --fsize: 16px;" value="Custom Location">
 					<br>
-					<input type="text" class="button" style="--bcolor: #888888; --fsize: 16px;" placeholder="Latitude" name="latitude">
-					<input type="text" class="button" style="--bcolor: #888888; --fsize: 16px;" placeholder="Longitude" name="longitude">
+					<input type="text" class="button" style="background-color: #888888; --fsize: 16px;" placeholder="Latitude" name="latitude">
+					<input type="text" class="button" style="background-color: #888888; --fsize: 16px;" placeholder="Longitude" name="longitude">
 				</form>
 			</main>
 		</body>
