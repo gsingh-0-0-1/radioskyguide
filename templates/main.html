@@ -176,20 +176,6 @@ swal.fire({
                 </div>
             </div>
             <br>
-            <form action='/'>
-                <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Restart">
-            </form>
-            <form action='/main'>
-                <input type="hidden" name="alt" value="90">
-                <input type="hidden" name="az" value="0">
-                <input type="hidden" name="fov" value="90">
-                <input type="hidden" name="antenna" value="none">
-                <input type="hidden" name="loc" value="{{ loc_here }}">
-                <input type="hidden" name="longitude" value="{{ longitude_here }}">
-                <input type="hidden" name="latitude" value="{{ declination_here }}">
-                <input type="hidden" name="controls" id="controls" value="tobefilled">
-                <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Toggle Interactive Mode">
-            </form>
         </div>
         <div id='rightdetails' class='rightdetails'>
             <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
@@ -223,14 +209,32 @@ swal.fire({
             </form>
             </div>
             <br><br>
+            <form action='/main'>
+                <input type="hidden" name="alt" value="90">
+                <input type="hidden" name="az" value="0">
+                <input type="hidden" name="fov" value="90">
+                <input type="hidden" name="antenna" value="none">
+                <input type="hidden" name="loc" value="{{ loc_here }}">
+                <input type="hidden" name="longitude" value="{{ longitude_here }}">
+                <input type="hidden" name="latitude" value="{{ declination_here }}">
+                <input type="hidden" name="controls" id="controls" value="tobefilled">
+                <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Toggle Interactive Mode">
+            </form>
+            <br>
+            <form action='/'>
+                <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Restart">
+            </form>
             <div id="modifyaltaz">
-                <input id="alt_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Altitude (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
+                <!--<input id="alt_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Altitude (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">-->
+                <input id="alt_box" type="hidden">
                 <br>
 
-                <input id="az_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Azimuth: North = 0&#176" onkeypress="javascript:dealWithAltAzInput(event);">
+                <!--<input id="az_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Azimuth: North = 0&#176" onkeypress="javascript:dealWithAltAzInput(event);">-->
+                <input id="az_box" type="hidden">
                 <br>
 
-                <input id="fov_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="FOV (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">
+                <!--<input id="fov_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="FOV (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">-->
+                <input id="fov_box" type="hidden">
                 <br>
             </div>
             <br>
