@@ -516,7 +516,7 @@ swal.fire({
                 var height = window.innerHeight;
                 camera = new THREE.OrthographicCamera( -(r+rmod), (r+rmod), (r+rmod), -(r+rmod), 0, 1000 );
                 
-                renderer = new THREE.WebGLRenderer();
+                renderer = new THREE.WebGLRenderer({antialias: true});
                 renderer.setPixelRatio( pixelratio, pixelratio );
                 renderer.setSize(height, height);
                 document.getElementById('gui').appendChild(renderer.domElement);
