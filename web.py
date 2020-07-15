@@ -7,9 +7,28 @@ import os
 import numpy as np
 import codecs
 import ephem
-from datetime import datetime
+import datetime
 import pytz
 import pandas as pd
+
+def get_phase_on_day(year,month,day):
+  """Returns a floating-point number from 0-1. where 0=new, 0.5=full, 1=new"""
+  #Ephem stores its date numbers as floating points, which the following uses
+  #to conveniently extract the percent time between one new moon and the next
+  #This corresponds (somewhat roughly) to the phase of the moon.
+
+  #Use Year, Month, Day as arguments
+  date=ephem.Date(datetime.date(year,month,day))
+
+  nnm = ephem.next_new_moon    (date)
+  pnm = ephem.previous_new_moon(date)
+
+  lunation=(date-pnm)/(nnm-pnm)
+
+  #Note that there is a ephem.Moon().phase() command, but this returns the
+  #percentage of the moon which is illuminated. This is not really what we want.
+
+  return lunation
 
 def process_ra(ra_dat):
     for i in range(len(ra_dat)):
@@ -168,19 +187,19 @@ def gui():
 
     if os.path.isfile('visitors/'+str(ip)+'.txt'):
         with open('visitors/'+str(ip)+'.txt', 'a+') as f:
-            f.write(str(datetime.utcnow())+'\n')
+            f.write(str(datetime.datetime.utcnow())+'\n')
     else:
         with open('visitors/'+str(ip)+'.txt', 'w') as f:
-            f.write(str(datetime.utcnow())+'\n')
+            f.write(str(datetime.datetime.utcnow())+'\n')
 
-    utcdate = str(datetime.utcnow()).split(" ")[0]
+    utcdate = str(datetime.datetime.utcnow()).split(" ")[0]
 
     if os.path.isfile('logs/'+utcdate+'.txt'):
         with open('logs/'+utcdate+'.txt', 'a+') as f:
-            f.write(str(datetime.utcnow())+"\t"+str(ip)+'\n')
+            f.write(str(datetime.datetime.utcnow())+"\t"+str(ip)+'\n')
     else:
         with open('logs/'+utcdate+'.txt', 'w') as f:
-            f.write(str(datetime.utcnow())+"\t"+str(ip)+'\n')        
+            f.write(str(datetime.datetime.utcnow())+"\t"+str(ip)+'\n')        
 
     declination = 0
     longitude = 0
@@ -208,11 +227,13 @@ def gui():
         longitude = request.args.get("longitude")
         abbr = "--"
 
-    moon = ephem.Moon(datetime.utcnow())
+    moon = ephem.Moon(datetime.datetime.utcnow())
     moon_ra = str(moon.ra)
     moon_dec = str(moon.dec)
     moon_ra = process_ra([moon_ra])
     moon_dec = process_dec([moon_dec])
+
+    utcdate = datetime.datetime.utcnow()
 
     return render_template('main.html', atnf_ra_dat_here = atnf_ra_dat,
                                         atnf_dec_dat_here = atnf_dec_dat,
@@ -227,7 +248,8 @@ def gui():
                                         messier_ra_dat_here = messier_ras,
                                         messier_dec_dat_here = messier_decs,
                                         moon_dec_here = moon_dec,
-                                        moon_ra_here = moon_ra)
+                                        moon_ra_here = moon_ra,
+                                        lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day))
 
     # f = codecs.open("main.html", 'r')
     # mainhtml = f.read()

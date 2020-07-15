@@ -95,6 +95,7 @@ swal.fire({
         <script src="https://threejs.org/build/three.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
         <script src="/static/examples/js/controls/OrbitControls.js"></script>
+        <script src="/static/examples/js/controls/TrackballControls.js"></script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     </head>
     <body onload="fullReload();">
@@ -515,19 +516,19 @@ swal.fire({
                 var width = window.innerWidth;
                 var height = window.innerHeight;
                 camera = new THREE.OrthographicCamera( -(r+rmod), (r+rmod), (r+rmod), -(r+rmod), 0, 1000 );
-                
                 renderer = new THREE.WebGLRenderer({antialias: true});
                 renderer.setPixelRatio( pixelratio, pixelratio );
                 renderer.setSize(height, height);
                 document.getElementById('gui').appendChild(renderer.domElement);
 
                 scene = new THREE.Scene({canvas:gui});
+                scene.background = new THREE.Color( 0x000029 );
                 scene.add(camera);
             }
 
             //draw RA lines
 
-            function addDecLines(){
+            function addDecLines(visible=true){
                 angles = [0, Math.PI/6, -Math.PI/6, Math.PI/4, -Math.PI/4, Math.PI/3, -Math.PI/3, 5*Math.PI/12, -5*Math.PI/12];
                 color = 0xffff00
                 for (var angle = 0; angle < angles.length; angle++){
@@ -548,14 +549,17 @@ swal.fire({
                     line.position.set(0, r*Math.sin(angles[angle]), 0);
                     line.rotation.setFromVector3(new THREE.Vector3(Math.PI/2, 0, Math.PI/2));
                     line.group = "equatorial";
-                    line.material.shading = THREE.SmoothShading;
+                    //line.material.shading = THREE.SmoothShading;
+                    if (visible == false){
+                        line.visible = false;
+                    }
                     scene.add(line);
                 }
             }
 
             //draw DEC lines
 
-            function addRALines(){
+            function addRALines(visible=true){
                 color = 0xffffff;
                 angles = [0, Math.PI/2];
                 for (var angle = 0; angle < angles.length; angle++){
@@ -573,6 +577,9 @@ swal.fire({
                     line.rotation.setFromVector3(new THREE.Vector3(0, angles[angle], angles[angle]));
                     line.group = "equatorial";
                     line.material.shading = THREE.SmoothShading;
+                    if (visible==false){
+                        line.visible = false;
+                    }
                     scene.add(line);
                 }
             }
@@ -613,6 +620,7 @@ swal.fire({
                     var textMaterial = new THREE.MeshBasicMaterial( { color: color } );
 
                     var mesh = new THREE.Mesh( textGeo, textMaterial );
+
                     if (addtocamera==true){
                         camera.add(mesh);
                     }
@@ -637,27 +645,29 @@ swal.fire({
             var messier_thetas = {{ messier_ra_dat_here }};
             var messier_phis = {{ messier_dec_dat_here }};
 
-            function createCircleTexture(color, size) {
-              var matCanvas = document.createElement('canvas');
-              matCanvas.width = matCanvas.height = size;
-              var matContext = matCanvas.getContext('2d');
-              // create texture object from canvas.
-              var texture = new THREE.Texture(matCanvas);
-              // Draw a circle
-              var center = size / 2;
-              matContext.beginPath();
-              matContext.arc(center, center, size/2, 0, 2 * Math.PI, false);
-              matContext.closePath();
-              matContext.fillStyle = color;
-              matContext.fill();
+            function createCircleTexture(color, size=400) {
+                var matCanvas = document.createElement('canvas');
+                matCanvas.width = matCanvas.height = size;
+                var matContext = matCanvas.getContext('2d');
+                // create texture object from canvas.
+                var texture = new THREE.Texture(matCanvas);
+                // Draw a circle
+                var center = size / 2;
+                matContext.beginPath();
+                matContext.shadowBlur = 50;
+                matContext.shadowColor = 'white';
+                matContext.arc(center, center, 50, 0, 2 * Math.PI, false);
+                matContext.fillStyle = color;
+                matContext.fill();
               // need to set needsUpdate
-              texture.needsUpdate = true;
+                texture.needsUpdate = true;
               // return a texture made from the canvas
-              return texture;
+                return texture;
             }
 
-            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=2, visible=true) {
+            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=7, visible=true) {
                 color = "#" + color.toString(16).padStart(6, '0');
+                thistexture = createCircleTexture(color);
                 for (var i = 0; i < thetas.length; i++){
                     theta = thetas[i];
                     phi = phis[i];
@@ -669,12 +679,12 @@ swal.fire({
                     var geometry = new THREE.Geometry();
                     geometry.vertices.push(new THREE.Vector3(x, y, z))
                     if (name == "Satellite" || group == "Satellite")
-                        var material = new THREE.PointsMaterial( { size: size, sizeAttenuation: false, color: color } );
+                        var material = new THREE.PointsMaterial( { size: 2, sizeAttenuation: false, color: color } );
                     else
                         var material = new THREE.PointsMaterial({
-                                      size: 3,
-                                      map: createCircleTexture(color, 64),
-                                      transparent: false,
+                                      size: size,
+                                      map: thistexture,
+                                      transparent: true,
                                       depthWrite: false
                                     });
                     var point = new THREE.Points( geometry, material );
@@ -708,7 +718,7 @@ swal.fire({
             var ra = 0;
 
             //write declination labels
-            function writeDecLabels(){
+            function writeDecLabels(visible=true){
                 labels = [-5*Math.PI/12, -Math.PI/3, -Math.PI/4, -Math.PI/6, Math.PI/6, Math.PI/4, Math.PI/3, 5*Math.PI/12];
                 for (var i = 0; i < labels.length; i++){
                     shift = 0.2;
@@ -723,7 +733,7 @@ swal.fire({
             }
 
             //write ra labels
-            function writeRALabels(){
+            function writeRALabels(visible=true){
                 labels = [0, Math.PI/2, Math.PI, 3*Math.PI/2];
                 for (var i = 0; i < labels.length; i++){
                     angle = labels[i];
@@ -776,9 +786,13 @@ swal.fire({
 
                 scene.add(sun);
                 scene.add(sun_halo);
+
             }
 
             function drawMoon(){
+                var lunation = {{ lunation_here }}
+                lunation = lunation * Math.PI * 2
+
                 currentJD = new Date().getTime()/86400000 + 2440587.5;
 
                 //moon_pos = astrojs.ephem.moonPos(currentJD);
@@ -795,6 +809,8 @@ swal.fire({
                 var geometry = new THREE.SphereGeometry(moon_rad, 32, 32);
                 var halo_geometry = new THREE.SphereGeometry(moon_halo_rad, 32, 32);
 
+                console.log(halo_geometry.vertices)
+
                 var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
                 var halo_material = new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 0.3} );
 
@@ -805,8 +821,10 @@ swal.fire({
                 moon_y = r * Math.sin(moon_dec);
                 moon_z = r * Math.sin(moon_ra) * Math.cos(moon_dec);
 
-                moon.position.set(moon_x, moon_y, moon_z);
-                moon_halo.position.set(moon_x, moon_y, moon_z);
+                var mult = 1;
+
+                moon.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
+                moon_halo.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
 
                 scene.add(moon);
                 scene.add(moon_halo);
@@ -867,7 +885,7 @@ swal.fire({
 
             function updateAltAz(this_antenna){
                 if (this_antenna == "none"){
-                    console.log(this_antenna)
+                    //console.log(this_antenna)
                 }
                 else{
                     var alt_box = document.getElementById("alt_box");
@@ -1178,8 +1196,9 @@ swal.fire({
 
             if (GetURLParameter("controls") == "true"){
                 var controls = new THREE.OrbitControls(camera, renderer.domElement);
-                controls.update();
-                controls.rotateSpeed = -1;
+                controls.rotateSpeed = -1.0
+                controls.enablePan = true;
+                controls.enableDamping = true;
             }
 
             animate();
@@ -1192,7 +1211,18 @@ swal.fire({
             setInterval(drawSun(), 43200000);
             drawMoon();
             addObjectLabels();
-            drawObjects(atnf_thetas, atnf_phis, 0xff0000, '', "ATNF Catalog", '', '', '', true);
+            drawObjects(atnf_thetas, atnf_phis, 0xff0000, '', "ATNF Catalog");
+            /*var background_geo = new THREE.SphereGeometry(12,100,100);
+            var bg_texture = new THREE.TextureLoader().load('static/bg.jpg')
+            //bg_texture.wrapS = bg_texture.wrapT = THREE.MirroredRepeatWrapping;
+
+            var background_mat = new THREE.MeshBasicMaterial( { map: bg_texture} );
+            var bg = new THREE.Mesh( background_geo, background_mat );
+            bg.position.set(0, 0, 0)
+            bg.material.side = THREE.DoubleSide
+            scene.add( bg );*/
+
+            //
 
             document.getElementById("nonebutton").click();
 
