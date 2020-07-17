@@ -158,7 +158,6 @@ messier_decs = process_dec(messier_decs)
 
 rrat_ras = process_ra(open("rrat_ras.txt").read().split("\n"))
 rrat_decs = process_dec(open("rrat_decs.txt").read().split("\n"))
-print(rrat_ras)
 
 
 
