@@ -156,8 +156,12 @@ messier_ras = process_ra(messier_ras)
 messier_decs = process_dec(messier_decs)
 
 
+
 rrat_ras = process_ra(open("rrat_ras.txt").read().split("\n"))
 rrat_decs = process_dec(open("rrat_decs.txt").read().split("\n"))
+
+nvss_ras = process_ra(open("nvss_ras.txt").read().split("\n"))
+nvss_decs = process_ra(open("nvss_decs.txt").read().split("\n"))
 
 
 
@@ -255,6 +259,8 @@ def gui():
                                         messier_dec_dat_here = messier_decs,
                                         rrat_ra_dat_here = rrat_ras,
                                         rrat_dec_dat_here = rrat_decs,
+                                        nvss_ra_dat_here = nvss_ras,
+                                        nvss_dec_dat_here = nvss_decs,
                                         moon_dec_here = moon_dec,
                                         moon_ra_here = moon_ra,
                                         lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day ))

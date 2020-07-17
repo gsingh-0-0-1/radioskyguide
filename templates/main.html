@@ -194,6 +194,9 @@ swal.fire({
                 <input type="checkbox" name="drawrrat" value="true" id="drawrrat" onclick="dealWithCheckboxes();">
                 <label for='drawrrat' style="color: #FFFF00; display:inline">RRATalog</label><br><br>
 
+                <input type="checkbox" name="drawnvss" value="true" id="drawnvss" onclick="dealWithCheckboxes();">
+                <label for='drawnvss' style="color: #9400d3; display:inline">NVSS Catalog (>0.5 Jy)</label><br><br>
+
                 <input type="checkbox" name="drawmessier" value="true" id="drawmessier" onclick="dealWithCheckboxes();">
                 <label for='drawmessier' style="color: #00AAFF; display:inline">Messier Catalog</label><br><br>
 
@@ -333,11 +336,12 @@ swal.fire({
             var messiercheckbox = document.getElementById("drawmessier");
             var satellitecheckbox = document.getElementById("drawsatellites");
             var rratcheckbox = document.getElementById("drawrrat");
+            var nvsscheckbox = document.getElementById("drawnvss");
             var importantcheckbox = document.getElementById("drawimportant");
-            var catboxlist = [atnfcheckbox, frbcheckbox, messiercheckbox, rratcheckbox];
-            var catnames = ["ATNF Catalog", "FRB Catalog", "Messier Catalog", "RRAT Catalog"];
-            var catshorthands = ["atnf", "frb", "messier", "rrat"]
-            var catcolors = [0xff0000, 0x00ff00, 0x00aaff, 0xffff00];
+            var catboxlist = [atnfcheckbox, frbcheckbox, messiercheckbox, rratcheckbox, nvsscheckbox];
+            var catnames = ["ATNF Catalog", "FRB Catalog", "Messier Catalog", "RRAT Catalog", "NVSS Catalog"];
+            var catshorthands = ["atnf", "frb", "messier", "rrat", "nvss"]
+            var catcolors = [0xff0000, 0x00ff00, 0x00aaff, 0xffff00, 0x9400d3];
             for (var i = 0; i < catboxlist.length; i++){
                 window[catnames[i]+"_list"] = [];
             }
@@ -653,6 +657,9 @@ swal.fire({
             var rrat_thetas = {{ rrat_ra_dat_here }}
             var rrat_phis = {{ rrat_dec_dat_here }}
 
+            var nvss_thetas = {{ nvss_ra_dat_here }};
+            var nvss_phis = {{ nvss_dec_dat_here }}
+
             function createCircleTexture(color, size=400) {
                 var matCanvas = document.createElement('canvas');
                 matCanvas.width = matCanvas.height = size;
@@ -782,7 +789,7 @@ swal.fire({
                 sun_halo_rad = sun_rad * 20;
 
                 var geometry = new THREE.SphereGeometry(sun_rad, 32, 32);
-                var halo_geometry = new THREE.SphereGeometry(sun_halo_rad, 32, 32)
+                var halo_geometry = new THREE.CircleGeometry(sun_halo_rad, 32) //SphereGeometry(sun_halo_rad, 32, 32)
 
                 var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
                 var halo_material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0.3} );
@@ -792,6 +799,7 @@ swal.fire({
 
                 sun.position.set(sun_x, sun_y, sun_z);
                 sun_halo.position.set(sun_x, sun_y, sun_z);
+                sun_halo.lookAt(camera.position)
 
                 scene.add(sun);
                 scene.add(sun_halo);
@@ -816,7 +824,7 @@ swal.fire({
                 moon_halo_rad = sun_rad * 10;
 
                 var geometry = new THREE.SphereGeometry(moon_rad, 32, 32);
-                var halo_geometry = new THREE.SphereGeometry(moon_halo_rad, 32, 32);
+                var halo_geometry = new THREE.CircleGeometry(moon_halo_rad, 32)//SphereGeometry(moon_halo_rad, 32, 32);
 
                 console.log(halo_geometry.vertices)
 
@@ -834,6 +842,7 @@ swal.fire({
 
                 moon.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
                 moon_halo.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
+                moon_halo.lookAt(camera.position)
 
                 scene.add(moon);
                 scene.add(moon_halo);
@@ -1080,7 +1089,7 @@ swal.fire({
                 decl = l[4];
 
                 addText("Crab Pulsar", [x, y + 0.1, z], "Important Objects", false, 0.2);
-                drawObjects([right_asc], [decl], 0x9400d3, '', group="Important Objects", size=1)
+                drawObjects([right_asc], [decl], 0x00fff8, '', group="Important Objects", size=1)
 
                 //J0332+5434
                 right_asc = [3, 32, 59.4096];
@@ -1094,7 +1103,7 @@ swal.fire({
                 decl = l[4];
 
                 addText("J0332+5434", [x, y + 0.1, z], "Important Objects", false, 0.2);
-                drawObjects([right_asc], [decl], 0x9400d3, '', group="Important Objects", size=1)
+                drawObjects([right_asc], [decl], 0x00fff8, '', group="Important Objects", size=1)
 
                 //SGR 1935+2154
                 right_asc = [19, 35, 0];
@@ -1108,7 +1117,7 @@ swal.fire({
                 decl = l[4];
 
                 addText("SGR 1935+2154", [x, y + 0.1, z], "Important Objects", false, 0.2);
-                drawObjects([right_asc], [decl], 0x9400d3, '', group="Important Objects", size=1)
+                drawObjects([right_asc], [decl], 0x00fff8, '', group="Important Objects", size=1)
 
             }
 
@@ -1243,6 +1252,7 @@ swal.fire({
             drawMoon();
             addObjectLabels();
             drawObjects(atnf_thetas, atnf_phis, 0xff0000, '', "ATNF Catalog");
+            //drawObjects(nvss_thetas, nvss_phis, 0xffff00, '', "NVSS Catalog")
 
             var zoomfactor = 1;
 
