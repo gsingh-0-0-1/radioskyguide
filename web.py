@@ -155,6 +155,13 @@ for i in range(len(messier_ras)):
 messier_ras = process_ra(messier_ras)
 messier_decs = process_dec(messier_decs)
 
+
+rrat_ras = process_ra(open("rrat_ras.txt").read().split("\n"))
+rrat_decs = process_dec(open("rrat_decs.txt").read().split("\n"))
+print(rrat_ras)
+
+
+
 r = 10
 
 #Take care of some TLE stuff...
@@ -247,9 +254,11 @@ def gui():
                                         frb_dec_dat_here = frb_dec_dat,
                                         messier_ra_dat_here = messier_ras,
                                         messier_dec_dat_here = messier_decs,
+                                        rrat_ra_dat_here = rrat_ras,
+                                        rrat_dec_dat_here = rrat_decs,
                                         moon_dec_here = moon_dec,
                                         moon_ra_here = moon_ra,
-                                        lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day))
+                                        lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day ))
 
     # f = codecs.open("main.html", 'r')
     # mainhtml = f.read()
@@ -277,5 +286,7 @@ def displayfrbdata():
 def submain():
     return render_template('redo.html')
 
-
-app.run(host = '0.0.0.0', debug = True, port = 80) 
+try:
+    app.run(host = sys.argv[1], debug = True, port = int(sys.argv[2])) 
+except IndexError:
+    raise IndexError("Please enter the target IP as the first argument, and the target port as the second.")

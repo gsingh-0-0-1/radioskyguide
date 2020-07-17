@@ -191,6 +191,9 @@ swal.fire({
                 <input type="checkbox" name="drawfrb" value="true" id="drawfrb" onclick="dealWithCheckboxes();">
                 <label for='drawfrb' style="color: #00FF00; display:inline">FRB Catalog</label><br><br>
 
+                <input type="checkbox" name="drawrrat" value="true" id="drawrrat" onclick="dealWithCheckboxes();">
+                <label for='drawrrat' style="color: #FFFF00; display:inline">RRATalog</label><br><br>
+
                 <input type="checkbox" name="drawmessier" value="true" id="drawmessier" onclick="dealWithCheckboxes();">
                 <label for='drawmessier' style="color: #00AAFF; display:inline">Messier Catalog</label><br><br>
 
@@ -329,11 +332,12 @@ swal.fire({
             var frbcheckbox = document.getElementById("drawfrb");
             var messiercheckbox = document.getElementById("drawmessier");
             var satellitecheckbox = document.getElementById("drawsatellites");
+            var rratcheckbox = document.getElementById("drawrrat");
             var importantcheckbox = document.getElementById("drawimportant");
-            var catboxlist = [atnfcheckbox, frbcheckbox, messiercheckbox];
-            var catnames = ["ATNF Catalog", "FRB Catalog", "Messier Catalog"];
-            var catshorthands = ["atnf", "frb", "messier"]
-            var catcolors = [0xff0000, 0x00ff00, 0x00aaff];
+            var catboxlist = [atnfcheckbox, frbcheckbox, messiercheckbox, rratcheckbox];
+            var catnames = ["ATNF Catalog", "FRB Catalog", "Messier Catalog", "RRAT Catalog"];
+            var catshorthands = ["atnf", "frb", "messier", "rrat"]
+            var catcolors = [0xff0000, 0x00ff00, 0x00aaff, 0xffff00];
             for (var i = 0; i < catboxlist.length; i++){
                 window[catnames[i]+"_list"] = [];
             }
@@ -645,6 +649,9 @@ swal.fire({
 
             var messier_thetas = {{ messier_ra_dat_here }};
             var messier_phis = {{ messier_dec_dat_here }};
+
+            var rrat_thetas = {{ rrat_ra_dat_here }}
+            var rrat_phis = {{ rrat_dec_dat_here }}
 
             function createCircleTexture(color, size=400) {
                 var matCanvas = document.createElement('canvas');
