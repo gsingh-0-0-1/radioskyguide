@@ -788,6 +788,7 @@ swal.fire({
 
                     if (satellitemode==true){
                         point.sat_tag = i;
+                        window[name] = point;
                     }
 
                     point.theta = theta
@@ -1128,7 +1129,7 @@ swal.fire({
                         satlatitude  = positionGd.latitude;
 
                     //if ( Math.abs(satlatitude - dec) < 0.1 && Math.abs(satlongitude - ra) < 0.1){
-                    drawObjects([satlongitude], [satlatitude], 0xffffff, [name], "Satellite");
+                    drawObjects([satlongitude], [satlatitude], 0xffffff, [name], "Satellite", false, true);
                     //}
                     
                 }
@@ -1343,8 +1344,9 @@ swal.fire({
             var selectedObject;
             var raycaster = new THREE.Raycaster();
             var crosshair;
+            var crosshairinterval;
             function onclick(event) {
-                raycaster.params.Points.threshold = 0.2/camera.zoom
+                raycaster.params.Points.threshold = 0.05/camera.zoom
                 var display = false;
                 var mouse = new THREE.Vector2();
                 var rect = renderer.domElement.getBoundingClientRect();
@@ -1405,7 +1407,11 @@ swal.fire({
                         crosshair.position.z = -1;*/
                         //crosshair.position.copy(selectedObject.object.geometry.vertices[0])
                         //if (selectedObject.object.geometry.vertices[0].x == 0 && selectedObject.object.geometry.vertices[0].y == 0 && selectedObject.object.geometry.vertices[0].z == 0)
+                        clearInterval(crosshairinterval)
                         crosshair.position.copy(selectedObject.object.position)
+                        if (selectedObject.object.group == "Satellite"){
+                            crosshairinterval = setInterval(function(){crosshair.position.copy(window[toprightname].position)}, 100)
+                        }
                         crosshair.hid_override = false;
                         //crosshair.quaternion.copy(camera.quaternion)
                         //keep crosshair pointing to camera
