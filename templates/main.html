@@ -458,7 +458,6 @@ swal.fire({
                             window["NVSS Catalog_list"][i].hid_override = false;
                         }
                         else{
-                            console.log(nvss_lum[i])
                             window["NVSS Catalog_list"][i].visible = false;
                             window["NVSS Catalog_list"][i].hid_override = true;
                         }
@@ -901,7 +900,6 @@ swal.fire({
 
                 var mult = 1;
 
-                console.log(moon_x)
                 moon.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
                 moon_halo.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
                 moon_halo.lookAt(camera.position)
@@ -1267,6 +1265,9 @@ swal.fire({
                     controls.target = new THREE.Vector3(camx/100, camy/100, camz/100);
                     controls.update();
                     for (var i = 1; i < scene.children.length; i++){
+                        if (scene.children[i].group == "equatorial"){
+                            continue
+                        }
                         if (scene.children[i].geometry.type == "Geometry") {
                             x = scene.children[i].geometry.vertices[0].x
                             y = scene.children[i].geometry.vertices[0].y
@@ -1287,9 +1288,6 @@ swal.fire({
                                 scene.children[i].visible = true;
                             }
                         }
-                        if (moon == scene.children[i]){
-                            console.log(x, y, z)
-                        }
 
                     }
                 }
@@ -1308,6 +1306,10 @@ swal.fire({
                 controls.enableZoom = true;
                 controls.keyPanSpeed = 0.2/camera.zoom;
                 controls.rotateSpeed = -1/camera.zoom;
+                setInterval(function(){
+                    controls.keyPanSpeed = 0.2/camera.zoom;
+                    controls.rotateSpeed = -1/camera.zoom;
+                }, 100)
                 //controls.dampingFactor = 0.1;
 
             }
@@ -1315,10 +1317,6 @@ swal.fire({
             animate();
             //setInterval(animate, 1000);
             setInterval(redoLabels, 10);
-            setInterval(function(){
-                controls.keyPanSpeed = 0.2/camera.zoom;
-                controls.rotateSpeed = -1/camera.zoom;
-            }, 100)
 
             var satelliterefreshID;
             drawSatellites();
@@ -1367,6 +1365,23 @@ swal.fire({
                 view_center_y = mousey
 
             }*/
+
+            /*renderer.domElement.addEventListener("click", onclick, true);
+            var selectedObject;
+            var raycaster = new THREE.Raycaster();
+            function onclick(event) {
+                var mouse = new THREE.Vector2();
+                mouse.x = ( (event.clientX-window.innerWidth/4) / window.innerWidth ) * 2 - 1;
+                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
+                var intersects = raycaster.intersectObjects(scene.children, true); //array
+                if (intersects.length > 0) {
+                    selectedObject = intersects[0];
+                    alert(selectedObject.group);
+                }
+            }*/
+
+
             document.getElementById("nonebutton").click();
 
         </script>
