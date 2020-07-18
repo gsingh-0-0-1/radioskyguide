@@ -131,12 +131,14 @@ frb_data = frb_data[1:]
 
 frb_ra_dat = []
 frb_dec_dat = []
+frb_names = []
 
 
 for i in range(len(frb_data)-1):
     frb_data[i] = frb_data[i].split(",")
     frb_ra_dat += [frb_data[i][3]]
     frb_dec_dat += [frb_data[i][4]]
+    frb_names += [frb_data[i][0]]
 
 frb_ra_dat = process_ra(frb_ra_dat)
 frb_dec_dat = process_dec(frb_dec_dat)
@@ -147,6 +149,7 @@ messier_data = messier_data.split("\n")
 #messier_data.remove('')
 messier_ras = []
 messier_decs = []
+messier_names = []
 for i in range(len(messier_data)):
     messier_data[i] = messier_data[i].split(" ")
 
@@ -155,6 +158,7 @@ for i in range(len(messier_data)):
         messier_data[i].remove('')
 
 for i in range(len(messier_data)):
+    messier_names += [messier_data[i][0]]
     messier_ras += [messier_data[i][5] + ":" + messier_data[i][6]]
     messier_decs += [messier_data[i][7] + ":" + messier_data[i][8] + ":" + "00"]
 
@@ -171,13 +175,17 @@ messier_decs = process_dec(messier_decs)
 
 rrat_ras = process_ra(open("rrat_ras.txt").read().split("\n"))
 rrat_decs = process_dec(open("rrat_decs.txt").read().split("\n"))
+rrat_names = open("rrat_names.txt").read().split("\n")
 
 nvss_ras = process_ra(open("nvss_ras.txt").read().split("\n"))
 nvss_decs = process_ra(open("nvss_decs.txt").read().split("\n"))
 nvss_lum = open("nvss_lum.txt").read().split("\n")
 for i in range(len(nvss_lum)):
     nvss_lum[i] = float(nvss_lum[i].replace(" ", ''))
-print(nvss_lum[:10])
+nvss_names = open("nvss_names.txt").read().split("\n")
+for i in range(len(nvss_names)):
+    nvss_names[i] = "NVSS J"+nvss_names[i]
+
 
 r = 10
 
@@ -270,13 +278,17 @@ def gui():
                                         draw_frb = draw_frb,
                                         frb_ra_dat_here = frb_ra_dat,
                                         frb_dec_dat_here = frb_dec_dat,
+                                        frb_name_dat_here = frb_names,
                                         messier_ra_dat_here = messier_ras,
                                         messier_dec_dat_here = messier_decs,
+                                        messier_name_dat_here = messier_names,
                                         rrat_ra_dat_here = rrat_ras,
                                         rrat_dec_dat_here = rrat_decs,
+                                        rrat_name_dat_here = rrat_names,
                                         nvss_ra_dat_here = nvss_ras,
                                         nvss_dec_dat_here = nvss_decs,
                                         nvss_lum_dat_here = nvss_lum,
+                                        nvss_name_dat_here = nvss_names,
                                         moon_dec_here = moon_dec,
                                         moon_ra_here = moon_ra,
                                         lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day ))

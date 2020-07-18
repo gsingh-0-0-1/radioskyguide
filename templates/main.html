@@ -213,9 +213,11 @@ swal.fire({
             <br>
         </div>
         <div id='rightdetails' class='rightdetails'>
-            <div id="currentlyshowing" style="display: inline"><input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Selected: None"></div>
+            <div id="currentlyshowing" style="display: inline; color: #56789a">Currently Selected<br><br>
+                <div id="currentobject">None</div>
+            </div>
             <br><br>
-            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="-Select Objects to Draw-"><br><br>
+            <!--<input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="-Select Objects to Draw-"><br><br>-->
             <div style="text-align: left">
             <form>
 
@@ -242,13 +244,13 @@ swal.fire({
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
                 <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
             </form>
-            <br><br>
+            
             <form>
                 <input type="checkbox" name="equatorialcheckbox" value="true" id="equatorialcheckbox" onclick="gridCheckboxes();">
-                <label for="equatorialcheckbox" style="color: #9922FF; display:inline">Equatorial Grid</label>
+                <label for="equatorialcheckbox" style="color: #999999; display:inline">Equatorial Grid</label>
                 <br><br>
                 <input type="checkbox" name="altazcheckbox" value="true" id="altazcheckbox" onclick="gridCheckboxes();" checked>
-                <label for="altazcheckbox" style="color: #9922FF; display:inline">Alt-Az Grid</label>
+                <label for="altazcheckbox" style="color: #999999; display:inline">Alt-Az Grid</label>
             </form>
             </div>
             <br><br>
@@ -707,6 +709,7 @@ swal.fire({
 
             var frb_thetas = {{ frb_ra_dat_here }};
             var frb_phis = {{ frb_dec_dat_here }}
+            var frb_names = {{ frb_name_dat_here | safe}}
 
             var atnf_thetas = {{ atnf_ra_dat_here }};
             var atnf_phis = {{ atnf_dec_dat_here }};
@@ -714,15 +717,18 @@ swal.fire({
 
             var messier_thetas = {{ messier_ra_dat_here }};
             var messier_phis = {{ messier_dec_dat_here }};
+            var messier_names = {{ messier_name_dat_here | safe }}
 
             var rrat_thetas = {{ rrat_ra_dat_here }}
             var rrat_phis = {{ rrat_dec_dat_here }}
+            var rrat_names = {{ rrat_name_dat_here | safe }}
 
             var nvss_thetas = {{ nvss_ra_dat_here }};
             var nvss_phis = {{ nvss_dec_dat_here }}
             var nvss_lum = {{ nvss_lum_dat_here }}
+            var nvss_names = {{ nvss_name_dat_here | safe }}
 
-            function createCircleTexture(color, size=400) {
+            function createCircleTexture(color, size=400, group) {
                 var matCanvas = document.createElement('canvas');
                 matCanvas.width = matCanvas.height = size;
                 var matContext = matCanvas.getContext('2d');
@@ -736,6 +742,7 @@ swal.fire({
                 matContext.arc(center, center, 70, 0, 2 * Math.PI, false);
                 matContext.fillStyle = color;
                 matContext.fill();
+
               // need to set needsUpdate
                 texture.needsUpdate = true;
               // return a texture made from the canvas
@@ -745,7 +752,7 @@ swal.fire({
             function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=7, visible=true) {
                 color = "#" + color.toString(16).padStart(6, '0');
                 if (name != "Satellite" && group != "Satellite")
-                    thistexture = createCircleTexture(color);
+                    thistexture = createCircleTexture(color, 400, group);
                 for (var i = 0; i < thetas.length; i++){
                     theta = thetas[i];
                     phi = phis[i];
@@ -755,7 +762,7 @@ swal.fire({
                     z = r * Math.sin(theta) * Math.cos(phi);
 
                     var geometry = new THREE.Geometry();
-                    geometry.vertices.push(new THREE.Vector3(x, y, z))
+                    geometry.vertices.push(new THREE.Vector3(0, 0, 0))
                     if (name == "Satellite" || group == "Satellite")
                         var material = new THREE.PointsMaterial( { size: 2, sizeAttenuation: false, color: color } );
                     else
@@ -788,7 +795,7 @@ swal.fire({
                     point.visible = visible;
                     scene.add(point);
 
-                        //point.position.set(x,y,z);
+                    point.position.set(x,y,z);
                 }
             }
 
@@ -867,6 +874,8 @@ swal.fire({
 
                 scene.add(sun);
                 scene.add(sun_halo);
+                sun.name = "Sun"
+                sun_halo.name = "Sun"
 
             }
 
@@ -909,6 +918,8 @@ swal.fire({
 
                 scene.add(moon);
                 scene.add(moon_halo);
+                moon.name = "Moon"
+                moon_halo.name = "Moon"
             }
 
             var ra = 0;
@@ -1152,7 +1163,7 @@ swal.fire({
                 decl = l[4];
 
                 addText("Crab Pulsar", [x, y + 0.1, z], "Important Objects", false, 0.2);
-                drawObjects([right_asc], [decl], 0x00fff8, 'Crab Pulsar', group="Important Objects", size=1)
+                drawObjects([right_asc], [decl], 0x00fff8, 'Crab Pulsar', group="Important Objects")
 
                 //J0332+5434
                 right_asc = [3, 32, 59.4096];
@@ -1166,7 +1177,7 @@ swal.fire({
                 decl = l[4];
 
                 addText("J0332+5434", [x, y + 0.1, z], "Important Objects", false, 0.2);
-                drawObjects([right_asc], [decl], 0x00fff8, 'J0332+5434', group="Important Objects", size=1)
+                drawObjects([right_asc], [decl], 0x00fff8, 'J0332+5434', group="Important Objects")
 
                 //SGR 1935+2154
                 right_asc = [19, 35, 0];
@@ -1180,7 +1191,7 @@ swal.fire({
                 decl = l[4];
 
                 addText("SGR 1935+2154", [x, y + 0.1, z], "Important Objects", false, 0.2);
-                drawObjects([right_asc], [decl], 0x00fff8, 'SGR 1935+2154', group="Important Objects", size=1)
+                drawObjects([right_asc], [decl], 0x00fff8, 'SGR 1935+2154', group="Important Objects")
 
             }
 
@@ -1271,16 +1282,9 @@ swal.fire({
                         if (scene.children[i].group == "equatorial"){
                             continue
                         }
-                        if (scene.children[i].geometry.type == "Geometry") {
-                            x = scene.children[i].geometry.vertices[0].x
-                            y = scene.children[i].geometry.vertices[0].y
-                            z = scene.children[i].geometry.vertices[0].z
-                        }
-                        else{
-                            x = scene.children[i].position.x
-                            y = scene.children[i].position.y
-                            z = scene.children[i].position.z
-                        }
+                        x = scene.children[i].position.x
+                        y = scene.children[i].position.y
+                        z = scene.children[i].position.z
                         d = Math.sqrt((camx-x)*(camx-x) + (camy-y)*(camy-y))
                         d = Math.sqrt(d*d + (camz-z)*(camz-z))
                         if (scene.children[i].hid_override != true || scene.children[i].hid_override == undefined){
@@ -1328,56 +1332,26 @@ swal.fire({
             drawMoon();
             addObjectLabels();
             drawObjects(atnf_thetas, atnf_phis, 0xff0000, atnf_names, "ATNF Catalog", true);
-            //drawObjects(nvss_thetas, nvss_phis, 0xffff00, '', "NVSS Catalog")
+            drawObjects(nvss_thetas, nvss_phis, 0x9400d3, nvss_names, "NVSS Catalog", true);
+            drawObjects(frb_thetas, frb_phis, 0x00ff00, frb_names, "FRB Catalog", true);
+            drawObjects(messier_thetas, messier_phis, 0x00aaff, messier_names, "Messier Catalog", true);
+            drawObjects(rrat_thetas, rrat_phis, 0xffff00, rrat_names, "RRAT Catalog", true);
+            dealWithCheckboxes();
 
-            var zoomfactor = 1;
-
-            /*if (GetURLParameter("controls") == "true"){
-                document.getElementById("gui").addEventListener('wheel', function(event){
-                    if (event.deltaY < 0){
-                        zoomfactor = zoomfactor * 1.05
-                    }
-                    else{
-                        zoomfactor = zoomfactor / 1.05
-                    }
-                    if (zoomfactor < 1){
-                        zoomfactor = 1
-                    }
-                    viewrad = r / zoomfactor
-
-                    mousex = view_center_x + viewrad * (( (event.clientX - window.innerHeight / 4) / window.innerHeight ) - 0.5);
-                    mousey = view_center_y + viewrad * (( event.clientY / window.innerHeight ) - 0.5);
-                    mousey = -mousey
-
-                    console.log(mousex, mousey)
-
-                    view_center_x = mousex
-                    view_center_y = mousey                
-                }, true)
-            }*/
-
-            /*function zoomToMouse(event){
-                viewrad = r * camera.zoom
-
-                mousex = ( event.clientX / window.innerWidth ) * 2 - 1;
-                mousey = - ( event.clientY / window.innerHeight ) * 2 + 1;
-
-                console.log(mousex, mousey)
-
-                view_center_x = mousex
-                view_center_y = mousey
-
-            }*/
 
             renderer.domElement.addEventListener("click", onclick, true);
             var selectedObject;
             var raycaster = new THREE.Raycaster();
+            var crosshair;
             function onclick(event) {
+                raycaster.params.Points.threshold = 0.1/camera.zoom
                 var display = false;
                 var mouse = new THREE.Vector2();
                 var rect = renderer.domElement.getBoundingClientRect();
-                mouse.x = ( (event.clientX - rect.left) / window.innerHeight ) * 2 - 1;
-                mouse.y = - ( (event.clientY - rect.top) / window.innerHeight ) * 2 + 1;
+                console.log(rect.left, rect.top)
+                mouse.x = ( (event.clientX - rect.left) / window.innerHeight ) * (2) - (1);
+                mouse.y = - ( (event.clientY - rect.top) / window.innerHeight ) * (2) + (1);
+
                 raycaster.setFromCamera(mouse, camera);
                 var intersects = raycaster.intersectObjects(scene.children, true); //array
                 selectedObject = intersects[0]
@@ -1385,7 +1359,7 @@ swal.fire({
                 toprightname = "undefined"
                 if (intersects.length > 0) {
                     display = true;
-                    while (selectedObject.object.group == "altaz" || selectedObject.object.group == "equatorial"){
+                    while (selectedObject.object.group == "altaz" || selectedObject.object.group == "equatorial" || selectedObject.object.name == "textlabel"){
                         i += 1;
                         if (i > intersects.length-1){
                             display = false;
@@ -1395,18 +1369,50 @@ swal.fire({
                     }
                     console.log(selectedObject)
                     if (display != false && selectedObject.object.visible == true){
+                        //selectedObject.object.visible = false;
+                        //selectedObject.object.hid_override = true;
                         toprightname = selectedObject.object.name;
-                    }
-                }
-                if (String(toprightname) != "undefined"){
-                    document.getElementById("currentlyshowing").innerHTML = "<input type='button' class='button' style='--bcolor: #123456; --fsize: 15px;' value='Selected: "+toprightname+"'>"
-                    /*for (var i = 0; i < camera.children.length; i++){
-                        if (camera.children[i].group == "topright"){
-                            camera.remove(camera.children[i])
-                        }
-                    }
-                    addText("Currently Selected:\n"+toprightname, [6, 9, -0.9], "topright", addtocamera=true, 0.3)*/
+                        document.getElementById("currentobject").innerHTML = toprightname//"<input type='button' class='button' style='--bcolor: #123456; --fsize: 15px; display: center' value='Selected: "+toprightname+"'>"
+                            var material = new THREE.LineBasicMaterial({ color: 0xAAFFAA });
 
+                        // crosshair size
+
+                        scene.remove(crosshair)
+                        var geometry = new THREE.Geometry();
+                        x = 0.5/camera.zoom;
+                        y = 0.5/camera.zoom;
+
+                        // crosshair
+                        geometry.vertices.push(new THREE.Vector3(0, y, 0));
+                        geometry.vertices.push(new THREE.Vector3(0, -y, 0));
+                        geometry.vertices.push(new THREE.Vector3(0, 0, 0));
+                        geometry.vertices.push(new THREE.Vector3(x, 0, 0));    
+                        geometry.vertices.push(new THREE.Vector3(-x, 0, 0));
+
+                        camera.remove(crosshair)
+
+                        crosshair = new THREE.Line( geometry, material );
+
+                        // place it in the center
+                        var crosshairPercentX = 50;
+                        var crosshairPercentY = 50;
+                        var crosshairPositionX = (crosshairPercentX / 100) * 2 - 1;
+                        var crosshairPositionY = (crosshairPercentY / 100) * 2 - 1;
+
+                        /*crosshair.position.x = 0+mouse.x//crosshairPositionX * camera.aspect;
+                        crosshair.position.y = 0+mouse.y//crosshairPositionY;
+
+                        crosshair.position.z = -1;*/
+                        //crosshair.position.copy(selectedObject.object.geometry.vertices[0])
+                        //if (selectedObject.object.geometry.vertices[0].x == 0 && selectedObject.object.geometry.vertices[0].y == 0 && selectedObject.object.geometry.vertices[0].z == 0)
+                        crosshair.position.copy(selectedObject.object.position)
+                        crosshair.hid_override = false;
+                        //crosshair.quaternion.copy(camera.quaternion)
+                        //keep crosshair pointing to camera
+                        crosshair.name = "textlabel"
+                        scenetextobjects.push(crosshair);
+                        scene.add(crosshair)
+                    }
                 }
             }
 
