@@ -204,7 +204,7 @@ swal.fire({
                 <input type="text" class="button" id="cont_del_box" style="--bcolor: #553555; --fsize: 15px;" placeholder="Animate (Min/Sec)" onkeypress="javascript:delayAnimate(event)">
 
                 <br>
-                <input type="button" class="button" style="--bcolor: #553555; --fsize: 15px;" value="Reset to Current Time" onclick="offsetRA(0, true);">
+                <input type="button" class="button" style="--bcolor: #553555; --fsize: 15px;" value="Reset and Re-center" onclick="offsetRA(0, true); controls.reset()">
                 <br>
                 <div id="totaloffset">
                     <input type="button" class="button" style="--bcolor: #444444; --fsize: 15px;" value="Total Time Offset (min): 0">
@@ -440,9 +440,10 @@ swal.fire({
                 }
                 else{
                     for (let i = scene.children.length - 1; i >= 0; i--){
-                        if (scene.children[i].group == "Important Objects")
+                        if (scene.children[i].group == "Important Objects"){
                             scene.children[i].visible = false;
                             scene.children[i].hid_override = true;
+                        }
                     }             
                 }
             }
@@ -454,10 +455,12 @@ swal.fire({
                     for (var i = 0; i < window["NVSS Catalog_list"].length; i++){
                         if (nvss_lum[i] >= min_val*1000){
                             window["NVSS Catalog_list"][i].visible = true;
+                            window["NVSS Catalog_list"][i].hid_override = false;
                         }
                         else{
                             console.log(nvss_lum[i])
                             window["NVSS Catalog_list"][i].visible = false;
+                            window["NVSS Catalog_list"][i].hid_override = true;
                         }
                     }
                 }
@@ -865,6 +868,7 @@ swal.fire({
 
             }
 
+            var moon;
             function drawMoon(){
                 var lunation = {{ lunation_here }}
                 lunation = lunation * Math.PI * 2
@@ -885,12 +889,10 @@ swal.fire({
                 var geometry = new THREE.SphereGeometry(moon_rad, 32, 32);
                 var halo_geometry = new THREE.CircleGeometry(moon_halo_rad, 32)//SphereGeometry(moon_halo_rad, 32, 32);
 
-                console.log(halo_geometry.vertices)
-
                 var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
                 var halo_material = new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 0.3} );
 
-                var moon = new THREE.Mesh( geometry, material );
+                moon = new THREE.Mesh( geometry, material );
                 var moon_halo = new THREE.Mesh( halo_geometry, halo_material );   
 
                 moon_x = r * Math.cos(moon_ra) * Math.cos(moon_dec);
@@ -899,6 +901,7 @@ swal.fire({
 
                 var mult = 1;
 
+                console.log(moon_x)
                 moon.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
                 moon_halo.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
                 moon_halo.lookAt(camera.position)
@@ -1241,18 +1244,16 @@ swal.fire({
                 camera.add(mask);
                 mask.position.set(view_center_x, view_center_y, 0);
 
-                if (GetURLParameter("controls") == "false"){
-                    ra = calculateSiderealTime(false);
-                    ra = ra.split(":");
+                ra = calculateSiderealTime(false);
+                ra = ra.split(":");
 
-                    final_ra = ra[0] * 1;
-                    final_ra += ra[1] / 60;
-                    final_ra += ra[2] / 3600;
-                    final_ra = final_ra * 15;
-                    final_ra = final_ra * Math.PI / 180;
-                    ra = final_ra;// - Math.PI/2;
-                    ra += raoffset;
-                }
+                final_ra = ra[0] * 1;
+                final_ra += ra[1] / 60;
+                final_ra += ra[2] / 3600;
+                final_ra = final_ra * 15;
+                final_ra = final_ra * Math.PI / 180;
+                ra = final_ra;// - Math.PI/2;
+                ra += raoffset;
                 //ra = 0;
 
                 camx = r * Math.cos(ra) * Math.cos(dec);
@@ -1265,21 +1266,32 @@ swal.fire({
                 if (GetURLParameter("controls") == "true"){
                     controls.target = new THREE.Vector3(camx/100, camy/100, camz/100);
                     controls.update();
-                    /*for (var i = 1; i < scene.children.length; i++){
-                        if (scene.children[i].geometry.type == "Geometry"){
+                    for (var i = 1; i < scene.children.length; i++){
+                        if (scene.children[i].geometry.type == "Geometry") {
                             x = scene.children[i].geometry.vertices[0].x
                             y = scene.children[i].geometry.vertices[0].y
                             z = scene.children[i].geometry.vertices[0].z
-                            d = Math.sqrt((camx-x)*(camx-x) + (camy-y)*(camy-y))
-                            d = Math.sqrt(d*d + (camz-z)*(camz-z))
-                            if (scene.children[i].hid_override == false){
-                                if (d > 10*Math.sqrt(2))
-                                    scene.children[i].visible = false;
-                                else
-                                    scene.children[i].visible = true;
+                        }
+                        else{
+                            x = scene.children[i].position.x
+                            y = scene.children[i].position.y
+                            z = scene.children[i].position.z
+                        }
+                        d = Math.sqrt((camx-x)*(camx-x) + (camy-y)*(camy-y))
+                        d = Math.sqrt(d*d + (camz-z)*(camz-z))
+                        if (scene.children[i].hid_override != true || scene.children[i].hid_override == undefined){
+                            if (d > 10*Math.sqrt(2)){
+                                scene.children[i].visible = false;
+                            }
+                            else{
+                                scene.children[i].visible = true;
                             }
                         }
-                    }*/
+                        if (moon == scene.children[i]){
+                            console.log(x, y, z)
+                        }
+
+                    }
                 }
                 renderer.render(scene, camera);
 
@@ -1291,11 +1303,11 @@ swal.fire({
 
             if (GetURLParameter("controls") == "true"){
                 var controls = new THREE.OrbitControls(camera, renderer.domElement);
-                controls.rotateSpeed = -1.0
                 controls.enablePan = true;
                 controls.enableDamping = true;
                 controls.enableZoom = true;
                 controls.keyPanSpeed = 0.2/camera.zoom;
+                controls.rotateSpeed = -1/camera.zoom;
                 //controls.dampingFactor = 0.1;
 
             }
@@ -1303,6 +1315,10 @@ swal.fire({
             animate();
             //setInterval(animate, 1000);
             setInterval(redoLabels, 10);
+            setInterval(function(){
+                controls.keyPanSpeed = 0.2/camera.zoom;
+                controls.rotateSpeed = -1/camera.zoom;
+            }, 100)
 
             var satelliterefreshID;
             drawSatellites();
@@ -1351,7 +1367,6 @@ swal.fire({
                 view_center_y = mousey
 
             }*/
-
             document.getElementById("nonebutton").click();
 
         </script>
