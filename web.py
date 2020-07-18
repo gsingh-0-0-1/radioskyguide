@@ -162,8 +162,10 @@ rrat_decs = process_dec(open("rrat_decs.txt").read().split("\n"))
 
 nvss_ras = process_ra(open("nvss_ras.txt").read().split("\n"))
 nvss_decs = process_ra(open("nvss_decs.txt").read().split("\n"))
-
-
+nvss_lum = open("nvss_lum.txt").read().split("\n")
+for i in range(len(nvss_lum)):
+    nvss_lum[i] = float(nvss_lum[i].replace(" ", ''))
+print(nvss_lum[:10])
 
 r = 10
 
@@ -261,6 +263,7 @@ def gui():
                                         rrat_dec_dat_here = rrat_decs,
                                         nvss_ra_dat_here = nvss_ras,
                                         nvss_dec_dat_here = nvss_decs,
+                                        nvss_lum_dat_here = nvss_lum,
                                         moon_dec_here = moon_dec,
                                         moon_ra_here = moon_ra,
                                         lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day ))

@@ -83,6 +83,40 @@ input[type="checkbox"]:checked + label:before {
   background: #345678;
 }
 
+
+
+.slidecontainer {
+  width: 100%; /* Width of the outside container */
+}
+
+/* The slider itself */
+.slider {
+  -webkit-appearance: none;  /* Override default CSS styles */
+  appearance: none;
+  width: 80%; /* Full-width */
+  height: 25px; /* Specified height */
+  background: #123456; /* Grey background */
+  outline: none; /* Remove outline */
+  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+  transition: opacity .2s;
+}
+
+/* Mouse-over effects */
+.slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #9400d3; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
 swal.fire({
   icon: 'warning',
   title: 'Quick Note',
@@ -195,7 +229,9 @@ swal.fire({
                 <label for='drawrrat' style="color: #FFFF00; display:inline">RRATalog</label><br><br>
 
                 <input type="checkbox" name="drawnvss" value="true" id="drawnvss" onclick="dealWithCheckboxes();">
-                <label for='drawnvss' style="color: #9400d3; display:inline">NVSS Catalog (>0.5 Jy)</label><br><br>
+                <label id='fornvss' for='drawnvss' style="color: #9400d3; display:inline">NVSS Catalog (>0.5 Jy)</label><br><br>
+
+                <input type="range" min="0.5" max="5" value="0" class="slider" id="nvss_slider" step="0.01" onchange="dealWithNVSSSlider();"><br><br>
 
                 <input type="checkbox" name="drawmessier" value="true" id="drawmessier" onclick="dealWithCheckboxes();">
                 <label for='drawmessier' style="color: #00AAFF; display:inline">Messier Catalog</label><br><br>
@@ -352,9 +388,14 @@ swal.fire({
                     box = catboxlist[iter];
                     if (box.checked){
                         if (window[catnames[iter]+"_list"].length > 0){
-                            for (var j = 0; j < window[catnames[iter]+"_list"].length; j++){
-                                window[catnames[iter]+"_list"][j].visible = true;
-                                window[catnames[iter]+"_list"][j].hid_override = false;
+                            if (box == nvsscheckbox){
+                                dealWithNVSSSlider();
+                            }
+                            else{
+                                for (var j = 0; j < window[catnames[iter]+"_list"].length; j++){
+                                    window[catnames[iter]+"_list"][j].visible = true;
+                                    window[catnames[iter]+"_list"][j].hid_override = false;
+                                }
                             }
                         }
                         else{
@@ -404,6 +445,23 @@ swal.fire({
                             scene.children[i].hid_override = true;
                     }             
                 }
+            }
+
+            function dealWithNVSSSlider(){
+                if (nvsscheckbox.checked){
+                    min_val = document.getElementById("nvss_slider").value * 1
+                    document.getElementById("fornvss").innerHTML = "NVSS Catalog (>" + min_val +" Jy)"
+                    for (var i = 0; i < window["NVSS Catalog_list"].length; i++){
+                        if (nvss_lum[i] >= min_val*1000){
+                            window["NVSS Catalog_list"][i].visible = true;
+                        }
+                        else{
+                            console.log(nvss_lum[i])
+                            window["NVSS Catalog_list"][i].visible = false;
+                        }
+                    }
+                }
+
             }
 
             function gridCheckboxes(){
@@ -659,6 +717,7 @@ swal.fire({
 
             var nvss_thetas = {{ nvss_ra_dat_here }};
             var nvss_phis = {{ nvss_dec_dat_here }}
+            var nvss_lum = {{ nvss_lum_dat_here }}
 
             function createCircleTexture(color, size=400) {
                 var matCanvas = document.createElement('canvas');
