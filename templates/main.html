@@ -213,7 +213,7 @@ swal.fire({
             <br>
         </div>
         <div id='rightdetails' class='rightdetails'>
-            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Radio Sky Above the {{ abbr_here }}">
+            <div id="currentlyshowing" style="display: inline"><input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Selected: None"></div>
             <br><br>
             <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="-Select Objects to Draw-"><br><br>
             <div style="text-align: left">
@@ -710,6 +710,7 @@ swal.fire({
 
             var atnf_thetas = {{ atnf_ra_dat_here }};
             var atnf_phis = {{ atnf_dec_dat_here }};
+            var atnf_names = {{ atnf_name_dat_here | safe}}
 
             var messier_thetas = {{ messier_ra_dat_here }};
             var messier_phis = {{ messier_dec_dat_here }};
@@ -782,6 +783,8 @@ swal.fire({
                         point.sat_tag = i;
                     }
 
+                    point.theta = theta
+                    point.phi = phi
                     point.visible = visible;
                     scene.add(point);
 
@@ -1240,7 +1243,7 @@ swal.fire({
                 mask_mat = new THREE.MeshBasicMaterial({color:0x000000});
                 mask = new THREE.Mesh(mask_geo, mask_mat);
                 camera.add(mask);
-                mask.position.set(view_center_x, view_center_y, 0);
+                mask.position.set(view_center_x, view_center_y, -1);
 
                 ra = calculateSiderealTime(false);
                 ra = ra.split(":");
@@ -1324,7 +1327,7 @@ swal.fire({
             setInterval(drawSun(), 43200000);
             drawMoon();
             addObjectLabels();
-            drawObjects(atnf_thetas, atnf_phis, 0xff0000, '', "ATNF Catalog");
+            drawObjects(atnf_thetas, atnf_phis, 0xff0000, atnf_names, "ATNF Catalog", true);
             //drawObjects(nvss_thetas, nvss_phis, 0xffff00, '', "NVSS Catalog")
 
             var zoomfactor = 1;
@@ -1366,20 +1369,46 @@ swal.fire({
 
             }*/
 
-            /*renderer.domElement.addEventListener("click", onclick, true);
+            renderer.domElement.addEventListener("click", onclick, true);
             var selectedObject;
             var raycaster = new THREE.Raycaster();
             function onclick(event) {
+                var display = false;
                 var mouse = new THREE.Vector2();
-                mouse.x = ( (event.clientX-window.innerWidth/4) / window.innerWidth ) * 2 - 1;
-                mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+                var rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ( (event.clientX - rect.left) / window.innerHeight ) * 2 - 1;
+                mouse.y = - ( (event.clientY - rect.top) / window.innerHeight ) * 2 + 1;
                 raycaster.setFromCamera(mouse, camera);
                 var intersects = raycaster.intersectObjects(scene.children, true); //array
+                selectedObject = intersects[0]
+                i = 0
+                toprightname = "undefined"
                 if (intersects.length > 0) {
-                    selectedObject = intersects[0];
-                    alert(selectedObject.group);
+                    display = true;
+                    while (selectedObject.object.group == "altaz" || selectedObject.object.group == "equatorial"){
+                        i += 1;
+                        if (i > intersects.length-1){
+                            display = false;
+                            break
+                        }
+                        selectedObject = intersects[i]
+                    }
+                    console.log(selectedObject)
+                    if (display != false && selectedObject.object.visible == true){
+                        toprightname = selectedObject.object.name;
+                    }
                 }
-            }*/
+                if (String(toprightname) != "undefined"){
+                    document.getElementById("currentlyshowing").innerHTML = "<input type='button' class='button' style='--bcolor: #123456; --fsize: 15px;' value='Selected: "+toprightname+"'>"
+                    /*for (var i = 0; i < camera.children.length; i++){
+                        if (camera.children[i].group == "topright"){
+                            camera.remove(camera.children[i])
+                        }
+                    }
+                    addText("Currently Selected:\n"+toprightname, [6, 9, -0.9], "topright", addtocamera=true, 0.3)*/
+
+                }
+            }
 
 
             document.getElementById("nonebutton").click();

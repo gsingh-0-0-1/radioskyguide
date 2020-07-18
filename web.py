@@ -64,11 +64,12 @@ data_to_plot = {}
 ra_dat = []
 dec_dat = []
 dm_dat = []
+name_dat = []
 
 for i in range(len(atnf_data)):
     item = atnf_data[i]
     item = item.split('\n')
-    data_to_plot[i] = ['', '', '']
+    data_to_plot[i] = ['', '', '', '']
     for j in range(len(item)):
         if item[j].startswith('RAJ'):
             ra = item[j].split(' ')
@@ -93,20 +94,31 @@ for i in range(len(atnf_data)):
 
             data_to_plot[i][2] = dm
 
+        if item[j].startswith('PSRJ'):
+            name = item[j].split(' ')
+            while '' in name:
+                name.pop(name.index(''))
+            name = name[1]
+
+            data_to_plot[i][3] = str(name)
+
+
     #print(data_to_plot[i])
             
-    if data_to_plot[i][0] == '' or data_to_plot[i][1] == '' or data_to_plot[i][2] == '':
+    if data_to_plot[i][0] == '' or data_to_plot[i][1] == '' or data_to_plot[i][2] == '' or data_to_plot[i][3] == '':
         del data_to_plot[i]
 
     try:
         ra_dat += [data_to_plot[i][0]]
         dec_dat += [data_to_plot[i][1]]
         dm_dat += [float(data_to_plot[i][2])]
+        name_dat += [name]
     except KeyError:
         pass
 
 atnf_ra_dat = process_ra(ra_dat)
 atnf_dec_dat = process_dec(dec_dat)
+atnf_name_dat = name_dat
 
 ##get data for the FRBCAT
 ##########
@@ -249,6 +261,7 @@ def gui():
 
     return render_template('main.html', atnf_ra_dat_here = atnf_ra_dat,
                                         atnf_dec_dat_here = atnf_dec_dat,
+                                        atnf_name_dat_here = atnf_name_dat,
                                         declination_here = str(declination),
                                         longitude_here = str(longitude),
                                         loc_here = str(loc),
