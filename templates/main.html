@@ -1344,7 +1344,7 @@ swal.fire({
             var raycaster = new THREE.Raycaster();
             var crosshair;
             function onclick(event) {
-                raycaster.params.Points.threshold = 0.1/camera.zoom
+                raycaster.params.Points.threshold = 0.2/camera.zoom
                 var display = false;
                 var mouse = new THREE.Vector2();
                 var rect = renderer.domElement.getBoundingClientRect();
