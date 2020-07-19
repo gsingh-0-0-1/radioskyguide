@@ -421,6 +421,7 @@ swal.fire({
                 }
                 else{
                     clearInterval(satelliterefreshID);
+                    satellite_list = []
                     for (let i = scene.children.length - 1; i >= 0; i--){
                         if (scene.children[i].name == "Satellite" || scene.children[i].group == "Satellite")
                             scene.remove(scene.children[i]);
@@ -786,9 +787,17 @@ swal.fire({
                             window[group+"_list"].push(point)
                     }
 
-                    if (satellitemode==true){
+                    if (satellitemode == true){
                         point.sat_tag = i;
-                        window[name] = point;
+                        
+                        if (listofnames==true){
+                            satellite_list.push(name[i]);
+                            window[name[i]] = point;
+                        }
+                        else{
+                            satellite_list.push(name);
+                            window[name] = point;
+                        }
                     }
 
                     point.theta = theta
@@ -1073,6 +1082,7 @@ swal.fire({
             }
 
             var data = '';
+            var satellite_list = [];
             function drawSatellites(){
                 data = new XMLHttpRequest();
                 data.open("GET", "/static/newtle.txt?time=" + new Date().getTime());
@@ -1087,11 +1097,11 @@ swal.fire({
             }
 
             function updateSatellites(){
-                for (var j = scene.children.length - 1; j >= 0; j--) {
+                /*for (var j = scene.children.length - 1; j >= 0; j--) {
                     if(scene.children[j].group == "Satellite"){
                         scene.remove(scene.children[j]);
                     }
-                }
+                }*/
  
                 for (var i = 0; i < data.length; i+=1){
                     sat = data[i].split("\n")
@@ -1129,11 +1139,21 @@ swal.fire({
                         satlatitude  = positionGd.latitude;
 
                     //if ( Math.abs(satlatitude - dec) < 0.1 && Math.abs(satlongitude - ra) < 0.1){
-                    drawObjects([satlongitude], [satlatitude], 0xffffff, [name], "Satellite", false, true);
+                    if (satellite_list.includes(name)){
+                        console.log("working")
+                        var pos = thetaPhiToXYZ(satlongitude, satlatitude)
+                        console.log(window[name])
+                        window[name].position.x = pos[0]
+                        window[name].position.y = pos[1]
+                        window[name].position.z = pos[2]
+                    }
+                    else{
+                        console.log(name, satellite_list[i])
+                        drawObjects([satlongitude], [satlatitude], 0xffffff, [name], "Satellite", true, true);
+                    }
                     //}
                     
                 }
-
             }
 
             function processRaDec(right_asc, decl){
@@ -1148,6 +1168,13 @@ swal.fire({
                 z = r * Math.sin(right_asc) * Math.cos(decl);
 
                 return [x, y, z, right_asc, decl];
+            }
+
+            function thetaPhiToXYZ(theta, phi){
+                x = r * Math.cos(theta) * Math.cos(phi)
+                y = r * Math.sin(phi)
+                z = r * Math.sin(theta) * Math.cos(phi)
+                return [x, y, z]
             }
 
             //add significant object labels
@@ -1377,23 +1404,61 @@ swal.fire({
                         //selectedObject.object.hid_override = true;
                         toprightname = selectedObject.object.name;
                         document.getElementById("currentobject").innerHTML = toprightname//"<input type='button' class='button' style='--bcolor: #123456; --fsize: 15px; display: center' value='Selected: "+toprightname+"'>"
-                            var material = new THREE.LineBasicMaterial({ color: 0xAAFFAA });
 
                         // crosshair size
 
                         scene.remove(crosshair)
-                        var geometry = new THREE.Geometry();
-                        x = 0.5/camera.zoom;
-                        y = 0.5/camera.zoom;
+                        x = 0.25/camera.zoom;
+                        y = 0.25/camera.zoom;
 
                         // crosshair
-                        geometry.vertices.push(new THREE.Vector3(0, y, 0));
+                        var material = new THREE.LineBasicMaterial({ color: 0xAAFFAA });
+
+                        upbar = new THREE.Geometry();
+                        upbar.vertices.push(new THREE.Vector3(0, y*1.2, 0));
+                        upbar.vertices.push(new THREE.Vector3(0, y/3, 0));
+                        upbar = new THREE.Line( upbar, material )
+
+                        downbar = new THREE.Geometry();
+                        downbar.vertices.push(new THREE.Vector3(0, -y/3, 0))
+                        downbar.vertices.push(new THREE.Vector3(0, -y*1.2, 0));
+                        downbar = new THREE.Line( downbar, material )
+
+                        leftbar = new THREE.Geometry();
+                        leftbar.vertices.push(new THREE.Vector3(x*1.2, 0, 0));
+                        leftbar.vertices.push(new THREE.Vector3(x/3, 0, 0));
+                        leftbar = new THREE.Line( leftbar, material )
+
+                        rightbar = new THREE.Geometry();
+                        rightbar.vertices.push(new THREE.Vector3(-x/3, 0, 0))
+                        rightbar.vertices.push(new THREE.Vector3(-x*1.2, 0, 0));
+                        rightbar = new THREE.Line( rightbar, material )
+                        
+
+                        var curve = new THREE.EllipseCurve(
+                            0,  0,            // ax, aY
+                            x, y,           // xRadius, yRadius
+                            0,  2 * Math.PI,  // aStartAngle, aEndAngle
+                            false,            // aClockwise
+                            0                 // aRotation
+                        );
+
+                        var points = curve.getPoints( 50 );
+                        var geometry = new THREE.BufferGeometry().setFromPoints( points );
+                        //var geometry = new THREE.Geometry();
+                        //crosshairgeometry.vertices.push(new THREE.Vector3(0, 0, 0))
+                        //crosshair = new THREE.Line( crosshairgeometry, material );
+                        /*geometry.vertices.push(new THREE.Vector3(0, y, 0));
                         geometry.vertices.push(new THREE.Vector3(0, -y, 0));
                         geometry.vertices.push(new THREE.Vector3(0, 0, 0));
                         geometry.vertices.push(new THREE.Vector3(x, 0, 0));    
-                        geometry.vertices.push(new THREE.Vector3(-x, 0, 0));
+                        geometry.vertices.push(new THREE.Vector3(-x, 0, 0));*/
 
                         crosshair = new THREE.Line( geometry, material );
+                        crosshair.add(upbar)
+                        crosshair.add(downbar)
+                        crosshair.add(leftbar)
+                        crosshair.add(rightbar)
 
                         clearInterval(crosshairinterval)
                         crosshair.position.copy(selectedObject.object.position)
