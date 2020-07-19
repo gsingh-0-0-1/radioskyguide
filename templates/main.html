@@ -1346,11 +1346,11 @@ swal.fire({
             var crosshair;
             var crosshairinterval;
             function onclick(event) {
-                raycaster.params.Points.threshold = 0.05/camera.zoom
+                console.log(camera.zoom)
+                raycaster.params.Points.threshold = 0.25/camera.zoom// * Math.pow(1.8, camera.zoom)
                 var display = false;
                 var mouse = new THREE.Vector2();
                 var rect = renderer.domElement.getBoundingClientRect();
-                console.log(rect.left, rect.top)
                 mouse.x = ( (event.clientX - rect.left) / window.innerHeight ) * (2) - (1);
                 mouse.y = - ( (event.clientY - rect.top) / window.innerHeight ) * (2) + (1);
 
@@ -1361,7 +1361,7 @@ swal.fire({
                 toprightname = "undefined"
                 if (intersects.length > 0) {
                     display = true;
-                    while (selectedObject.object.group == "altaz" || selectedObject.object.group == "equatorial" || selectedObject.object.name == "textlabel"){
+                    while (selectedObject.object.group == "altaz" || selectedObject.object.group == "equatorial" || selectedObject.object.name == "textlabel" || selectedObject.object.visible == false){
                         i += 1;
                         if (i > intersects.length-1){
                             display = false;
@@ -1369,7 +1369,9 @@ swal.fire({
                         }
                         selectedObject = intersects[i]
                     }
+
                     console.log(selectedObject)
+
                     if (display != false && selectedObject.object.visible == true){
                         //selectedObject.object.visible = false;
                         //selectedObject.object.hid_override = true;
@@ -1391,22 +1393,8 @@ swal.fire({
                         geometry.vertices.push(new THREE.Vector3(x, 0, 0));    
                         geometry.vertices.push(new THREE.Vector3(-x, 0, 0));
 
-                        camera.remove(crosshair)
-
                         crosshair = new THREE.Line( geometry, material );
 
-                        // place it in the center
-                        var crosshairPercentX = 50;
-                        var crosshairPercentY = 50;
-                        var crosshairPositionX = (crosshairPercentX / 100) * 2 - 1;
-                        var crosshairPositionY = (crosshairPercentY / 100) * 2 - 1;
-
-                        /*crosshair.position.x = 0+mouse.x//crosshairPositionX * camera.aspect;
-                        crosshair.position.y = 0+mouse.y//crosshairPositionY;
-
-                        crosshair.position.z = -1;*/
-                        //crosshair.position.copy(selectedObject.object.geometry.vertices[0])
-                        //if (selectedObject.object.geometry.vertices[0].x == 0 && selectedObject.object.geometry.vertices[0].y == 0 && selectedObject.object.geometry.vertices[0].z == 0)
                         clearInterval(crosshairinterval)
                         crosshair.position.copy(selectedObject.object.position)
                         if (selectedObject.object.group == "Satellite"){
