@@ -128,7 +128,7 @@ swal.fire({
         <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
         <script language="javascript" type="text/javascript" src="https://threejs.org/build/three.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
-        <script language="javascript" type="text/javascript" src="/static/examples/js/controls/OrbitControls.js"></script>
+        <script language="javascript" type="text/javascript" src="/static/examples/js/controls/TrackballControls.js"></script>
         <script src="/static/examples/js/controls/TrackballControls.js"></script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     </head>
@@ -1047,11 +1047,23 @@ swal.fire({
 
                 angles = [0, Math.PI/6, Math.PI/4, Math.PI/3, 5*Math.PI/12];
 
-                var helper = new THREE.PolarGridHelper( r, 16, 6, 64 );
+                var helper = new THREE.PolarGridHelper( r, 16, 1, 64 );
                 camera.add( helper );
                 helper.group = "altaz"
-                helper.position.set(0, 0, -5)
+                helper.position.set(0, 0, -20)
+                for (i = 1; i < angles.length; i++){ //skip 0
+                    var geometry  = new THREE.CircleGeometry( r*Math.cos(angles[i]), 36)
+                    var edges = new THREE.EdgesGeometry(geometry)
+                    var circle = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0x888888 } ))
+                    circle.position.set(0, 0, 0)
+                    circle.rotation.set(Math.PI/2, 0, 0)
+
+                    helper.add(circle)
+                }
                 helper.rotation.set(0, Math.PI/2, Math.PI/2)
+                /*var geometry = new THREE.CircleGeometry( ring_rad, 36 )
+                var edges = new THREE.EdgesGeometry( geometry );
+                var line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: color } ) );*/
 
                 //draw the degree labels
                 for (i = 0; i < angles.length; i++){
@@ -1335,7 +1347,7 @@ swal.fire({
             camera.position.set(0, 0, 0);
 
             if (GetURLParameter("controls") == "true"){
-                var controls = new THREE.OrbitControls(camera, renderer.domElement);
+                var controls = new THREE.TrackballControls(camera, renderer.domElement);
                 controls.enablePan = true;
                 controls.enableDamping = true;
                 controls.enableZoom = true;
@@ -1380,13 +1392,12 @@ swal.fire({
                 var rect = renderer.domElement.getBoundingClientRect();
                 mouse.x = ( (event.clientX - rect.left) / window.innerHeight ) * (2) - (1);
                 mouse.y = - ( (event.clientY - rect.top) / window.innerHeight ) * (2) + (1);
-
                 raycaster.setFromCamera(mouse, camera);
                 var intersects = raycaster.intersectObjects(scene.children, true); //array
-                selectedObject = intersects[0]
-                i = 0
-                toprightname = "undefined"
-                if (intersects.length > 0) {
+                if (intersects.length > 0 && intersects[0].object.group != "altaz" && intersects[0].object.group != "equatorial") {
+                    selectedObject = intersects[0]
+                    i = 0
+                    toprightname = "undefined"
                     display = true;
                     while (selectedObject.object.group == "altaz" || selectedObject.object.group == "equatorial" || selectedObject.object.name == "textlabel" || selectedObject.object.visible == false){
                         i += 1;
@@ -1396,8 +1407,6 @@ swal.fire({
                         }
                         selectedObject = intersects[i]
                     }
-
-                    console.log(selectedObject)
 
                     if (display != false && selectedObject.object.visible == true){
                         //selectedObject.object.visible = false;
