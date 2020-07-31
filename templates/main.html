@@ -1141,7 +1141,7 @@ swal.fire({
             var satellite_list = [];
             function drawSatellites(){
                 data = new XMLHttpRequest();
-                data.open("GET", "/static/newtle.txt?time=" + new Date().getTime());
+                data.open("GET", "/static/newtle.txt");
                 data.send();
                 data.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
