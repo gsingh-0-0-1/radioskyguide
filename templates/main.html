@@ -264,8 +264,8 @@ swal.fire({
                 <input type="checkbox" name="drawrrat" value="true" id="drawrrat" onclick="dealWithCheckboxes();">
                 <label for='drawrrat' style="color: #FFFF00; display:inline">RRATalog</label><br><br>
 
-                <input type="checkbox" name="drawnvss" value="true" id="drawnvss" onclick="dealWithCheckboxes();">
-                <label id='fornvss' for='drawnvss' style="color: #9400d3; display:inline">NVSS Catalog (>0.5 Jy)</label><br><br>
+                <input type="checkbox" name="drawnvss" value="true" id="drawnvss" onclick="nvssDialogue();">
+                <label id='fornvss' for='drawnvss' style="color: #9400d3; display:inline">NVSS Catalog (>0.2 Jy)</label><br><br>
 
                 <input type="range" min="0.2" max="5" value="0" class="slider" id="nvss_slider" step="0.01" onchange="dealWithNVSSSlider();"><br><br>
 
@@ -500,6 +500,15 @@ swal.fire({
                         }
                     }
                 }
+
+            }
+
+            function nvssDialogue(){
+              if (nvsscheckbox.checked){
+                document.getElementById("fornvss").innerHTML = 'Loading Objects...'
+              }
+              setTimeout(dealWithCheckboxes, 200)
+              setTimeout(function(){document.getElementById("fornvss").innerHTML = 'NVSS Catalog (>0.5 Jy)'}, 1000)
 
             }
 
@@ -1653,7 +1662,7 @@ swal.fire({
             antenna_fov_line.visible = false;
 
             drawObjects(atnf_thetas, atnf_phis, 0xff0000, atnf_names, "ATNF Catalog", true);
-            drawObjects(nvss_thetas, nvss_phis, 0x9400d3, nvss_names, "NVSS Catalog", true);
+            //drawObjects(nvss_thetas, nvss_phis, 0x9400d3, nvss_names, "NVSS Catalog", true);
             drawObjects(frb_thetas, frb_phis, 0x00ff00, frb_names, "FRB Catalog", true);
             drawObjects(messier_thetas, messier_phis, 0x00aaff, messier_names, "Messier Catalog", true);
             drawObjects(rrat_thetas, rrat_phis, 0xffff00, rrat_names, "RRAT Catalog", true);
