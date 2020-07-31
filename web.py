@@ -10,6 +10,7 @@ import ephem
 import datetime
 import pytz
 import pandas as pd
+import requests
 
 def get_phase_on_day(year,month,day):
   """Returns a floating-point number from 0-1. where 0=new, 0.5=full, 1=new"""
@@ -315,9 +316,22 @@ def displaymessierdata():
 def displayfrbdata():
     return str(frb_ra_dat)+"$"+str(frb_dec_dat)
 
-@app.route('/redo')
+@app.route('/antennadata/azel')
 def submain():
-    return render_template('redo.html')
+    try:
+        req = requests.get("http://restgw.hcro.org:12345/antennas/all/azel")
+        if r.status_code != 200:
+            req = "timeout"
+        else:
+            req = req.text
+
+        if "message" in req or "timeout" in req:
+            req = '''{"1a (simulated)": { "az" : 0 , "el" : 18 } }'''
+
+    except requests.exceptions.ConnectionError:
+        req = '''{"1a (simulated)": { "az" : 0 , "el" : 18 } }'''
+
+    return req
 
 try:
     app.run(host = sys.argv[1], debug = True, port = int(sys.argv[2])) 

@@ -117,6 +117,28 @@ input[type="checkbox"]:checked + label:before {
   cursor: pointer; /* Cursor on hover */
 }
 
+
+select {
+  width: 50%;
+  height: 40px;
+  font-size: 15px;
+  cursor: pointer;
+  border-radius: 0;
+  background-color: #5511a0;
+  border: none;
+  border-bottom: 2px solid #220088;
+  color: white;
+  padding: 10px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 10px;
+}
+
+select:focus{
+  outline: none;
+}
+
 swal.fire({
   icon: 'warning',
   title: 'Quick Note',
@@ -140,8 +162,12 @@ swal.fire({
             <br><br><br>
 
             <span id="antennae">
-            <input type="button" class="button" style="--bcolor: #3f1166; --fsize: 15px;" value="Available Antennae (Simulated)">
+            <input type="button" class="button" style="--bcolor: #3f1166; --fsize: 15px;" value="Available Antennae">
             <br>
+            <select id="antenna_select" onchange="javascript:changeAntenna();">
+              <option value="none">None</option>
+            </select>
+            <!--<br>
             <table>
             <tr>
             <td>
@@ -172,7 +198,7 @@ swal.fire({
             <input id="nonebutton" type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px; font-family: courier" value="NA" onclick="javascript:changeAntenna('none');">
             </td>
             </tr>
-            </table>
+            </table>-->
             </span>
 
             <br>
@@ -212,6 +238,14 @@ swal.fire({
             </div>
             <br>
         </div>
+
+        <div id="crosshairtext" style="position:absolute; display:inline-block; top:45%; left:52%; font-family:Verdana; z-index: 5; color: #FF0000">
+        </div>
+        <div id="crosshair_fov_text" style="position:absolute; display:inline-block; top:30%; left:43%; font-family:Verdana; z-index: 5; color: #FF0000">
+        </div>
+        <div id="crosshair_direction_text" style="position:absolute; display:inline-block; top:2%; left:50%; font-family:Verdana; z-index: 5; color: #FF0000">
+        </div>
+
         <div id='rightdetails' class='rightdetails'>
             <div id="currentlyshowing" style="display: inline; color: #56789a">Currently Selected<br><br>
                 <div id="currentobject">None</div>
@@ -231,9 +265,9 @@ swal.fire({
                 <label for='drawrrat' style="color: #FFFF00; display:inline">RRATalog</label><br><br>
 
                 <input type="checkbox" name="drawnvss" value="true" id="drawnvss" onclick="dealWithCheckboxes();">
-                <label id='fornvss' for='drawnvss' style="color: #9400d3; display:inline">NVSS Catalog (>0.5 Jy)</label><br><br>
+                <label id='fornvss' for='drawnvss' style="color: #9400d3; display:inline">NVSS Catalog (>0.2 Jy)</label><br><br>
 
-                <input type="range" min="0.5" max="5" value="0" class="slider" id="nvss_slider" step="0.01" onchange="dealWithNVSSSlider();"><br><br>
+                <input type="range" min="0.2" max="5" value="0" class="slider" id="nvss_slider" step="0.01" onchange="dealWithNVSSSlider();"><br><br>
 
                 <input type="checkbox" name="drawmessier" value="true" id="drawmessier" onclick="dealWithCheckboxes();">
                 <label for='drawmessier' style="color: #00AAFF; display:inline">Messier Catalog</label><br><br>
@@ -300,7 +334,7 @@ swal.fire({
                 c.value = "true"
             }
 
-            if (GetURLParameter("loc") != "Allen+Telescope+Array"){
+            if (GetURLParameter("loc") != "Allen+Telescope+Array" || GetURLParameter("controls") == "true"){
                 document.getElementById("antennae").innerHTML = ''
             }
 
@@ -997,17 +1031,18 @@ swal.fire({
                     pointing_alt = altaz[0]
                     pointing_az = altaz[1]
                     alt_box.value = pointing_alt;
-                    az_box.value = Math.round(pointing_az);
-                    fov_box.value = 30;
+                    az_box.value = pointing_az;
+                    fov_box.value = 90; //this is the FOV of ATA antennae
                 }
             }
             var current_antenna_interval = setInterval(function () {
                 updateAltAz(antenna);
                 //dealWithAltAzInput(e);
-            }, 1000);
+            }, 100);
 
-            function changeAntenna(new_antenna){
-                antenna = new_antenna;
+            function changeAntenna(new_antenna=''){
+                new_antenna = document.getElementById("antenna_select").value;
+                antenna = new_antenna
                 updateAltAz(new_antenna);
                 dealWithAltAzInput(e);
                 clearInterval(current_antenna_interval);
@@ -1152,15 +1187,12 @@ swal.fire({
 
                     //if ( Math.abs(satlatitude - dec) < 0.1 && Math.abs(satlongitude - ra) < 0.1){
                     if (satellite_list.includes(name)){
-                        console.log("working")
                         var pos = thetaPhiToXYZ(satlongitude, satlatitude)
-                        console.log(window[name])
                         window[name].position.x = pos[0]
                         window[name].position.y = pos[1]
                         window[name].position.z = pos[2]
                     }
                     else{
-                        console.log(name, satellite_list[i])
                         drawObjects([satlongitude], [satlatitude], 0xffffff, [name], "Satellite", true, true);
                     }
                     //}
@@ -1235,32 +1267,69 @@ swal.fire({
 
             }
 
+            var antenna_azel_data;
+            //get initial antenna data, populate dropdown menu
+            var req = new XMLHttpRequest();        
+            req.open("GET", "/antennadata/azel");
+            req.send();
+            var alt;
+            var az;
+            req.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    data = this.responseText;
+                    data = JSON.parse(data)
+                    antenna_azel_data = data;
+                    var keys = [];
+                    for (var k in data){
+                      document.getElementById("antenna_select").innerHTML += "<option value='"+k+"'>"+k+"</option>"
+                    }
+                }
+            };
+
+            //this is to actually get the antenna data for each option
             function getAntennaData(this_antenna){
-                if (this_antenna == "1a")
-                    alt = 90
-                if (this_antenna == "1f")
-                    alt = 75
-                if (this_antenna == "1c")
-                    alt = 60
-                if (this_antenna == "2a")
-                    alt = 45
-                if (this_antenna == "2b")
-                    alt = 30
-                if (this_antenna == "4g")
-                    alt = 15
-                if (this_antenna == "5c")
-                    alt = 0
-                az = new Date().getTime() / 1000
-                az = az % 200
-                az = az/200 * 360
-                return ([alt, az])
+              var req = new XMLHttpRequest();        
+              req.open("GET", "/antennadata/azel");
+              req.send();
+              var alt;
+              var az;
+              req.onreadystatechange = function() {
+                  if (this.readyState == 4 && this.status == 200) {
+                      data = this.responseText;
+                      data = JSON.parse(data)
+                      antenna_azel_data = data;
+                  }
+              };
+              return [antenna_azel_data[this_antenna]["el"], antenna_azel_data[this_antenna]["az"]]
+              /*if (this_antenna == "1a")
+                  alt = 90
+              if (this_antenna == "1f")
+                  alt = 75
+              if (this_antenna == "1c")
+                  alt = 60
+              if (this_antenna == "2a")
+                  alt = 45
+              if (this_antenna == "2b")
+                  alt = 30
+              if (this_antenna == "4g")
+                  alt = 15
+              if (this_antenna == "5c")
+                  alt = 0
+              var az = Math.round(new Date().getTime() / 1000) + 800
+              az = az % 1000
+              az = 360 * az/1000*/
+
+              //return ([data[this_antenna]["az"], data[this_antenna]["el"]])
             }
 
             var camx, camy, camz;
             var backmask = '';
+            var pointing_crosshair = '';
+            var antenna_fov_line = '';
             var viewrad = r;
             var view_center_x = 0;
             var view_center_y = 0;
+            var camyoffset = 0;
 
             //do the initial ra calculation so interactive mode will start correctly
             ra = calculateSiderealTime(false);
@@ -1274,71 +1343,132 @@ swal.fire({
             ra = final_ra;// - Math.PI/2;
             ra += raoffset;
 
+
             function animate() {
-                camera.remove(mask);
-
-                viewrad = r * Math.sin(fov * Math.PI / 180);
-                alt_rectangular = r * Math.cos(pointing_alt * Math.PI / 180);
-
-                view_center_x = alt_rectangular * Math.cos(pointing_az * Math.PI / 180);
-                view_center_y = alt_rectangular * Math.sin(pointing_az * Math.PI / 180);
-
-                camera.top = view_center_y + viewrad;
-                camera.bottom = view_center_y - viewrad;
-                camera.left = view_center_x - viewrad;
-                camera.right = view_center_x + viewrad;
-
-                camera.updateProjectionMatrix();
-
-                mask_geo = new THREE.TorusGeometry(viewrad+5, 5, 2, 100);
-                mask_mat = new THREE.MeshBasicMaterial({color:0x000000});
-                mask = new THREE.Mesh(mask_geo, mask_mat);
-                camera.add(mask);
-                mask.position.set(view_center_x, view_center_y, -1);
-
-                ra = calculateSiderealTime(false);
-                ra = ra.split(":");
-
-                final_ra = ra[0] * 1;
-                final_ra += ra[1] / 60;
-                final_ra += ra[2] / 3600;
-                final_ra = final_ra * 15;
-                final_ra = final_ra * Math.PI / 180;
-                ra = final_ra;// - Math.PI/2;
-                ra += raoffset;
-                //ra = 0;
-
-                camx = r * Math.cos(ra) * Math.cos(dec);
-                camy = r * Math.sin(dec);
-                camz = r * Math.sin(ra) * Math.cos(dec);
-                camera.lookAt(camx, camy, camz);
-                //redoAltAz(camx, camy, camz);
-                //camera.rotation.setFromVector3(new THREE.Vector3(camx, camy, camz));
-                requestAnimationFrame(animate);
-                if (GetURLParameter("controls") == "true"){
-                    controls.target = new THREE.Vector3(camx/100, camy/100, camz/100);
-                    controls.update();
-                    for (var i = 1; i < scene.children.length; i++){
-                        if (scene.children[i].group == "equatorial"){
-                            continue
-                        }
-                        x = scene.children[i].position.x
-                        y = scene.children[i].position.y
-                        z = scene.children[i].position.z
-                        d = Math.sqrt((camx-x)*(camx-x) + (camy-y)*(camy-y))
-                        d = Math.sqrt(d*d + (camz-z)*(camz-z))
-                        if (scene.children[i].hid_override != true || scene.children[i].hid_override == undefined){
-                            if (d > 10*Math.sqrt(2)){
-                                scene.children[i].visible = false;
-                            }
-                            else{
-                                scene.children[i].visible = true;
-                            }
-                        }
-
-                    }
+              
+              for (var i = 0; i < camera.children.length; i++){
+                if (camera.children[i].group == "altaz"){
+                  if (antenna != "none"){
+                    camera.children[i].visible = false
+                  }
+                  else{
+                    gridCheckboxes()
+                  }
                 }
-                renderer.render(scene, camera);
+              }
+
+              pointing_crosshair.visible = false;
+              antenna_fov_line.visible = false;
+              //camera.remove(antenna_crosshair_text);
+              document.getElementById("crosshairtext").innerHTML = ''
+              document.getElementById("crosshair_direction_text").innerHTML = ''
+              document.getElementById("crosshair_fov_text").innerHTML = ''
+
+              //get the "Actual" altitude for calculation purposes
+              act_alt = pointing_alt
+
+              if (antenna != "none"){
+                camera.zoom = 75
+                pointing_crosshair.visible = true;
+                antenna_fov_line.visible = true;
+                document.getElementById("crosshairtext").innerHTML = "Az "+String(Math.round(disp_az * 100) /100)+"&#176, El "+String(Math.round(act_alt * 100) / 100)+"&#176"
+                document.getElementById("crosshair_direction_text").innerHTML = 'N'
+                document.getElementById("crosshair_fov_text").innerHTML = String(Math.round(100 * 180/camera.zoom)/ 200)+"&#176" //divide by 200 here instead of 100 to get the radius rather than the diameter
+              }
+
+              //get the "actual" azimuth for calculation purposes
+              pointing_az = pointing_az % 360
+              disp_az = pointing_az - 90
+
+              if (antenna == "none" && GetURLParameter("controls") == "false"){
+                camera.zoom = 1
+              }
+
+              viewrad = r * Math.sin(fov * Math.PI / 180);
+
+              //alt_rectangular = r * Math.cos(pointing_alt * Math.PI / 180);
+
+              var antenna_dec = Math.asin( Math.sin(act_alt * Math.PI / 180) * Math.sin(dec) + 
+                Math.cos(act_alt * Math.PI / 180) * Math.cos(dec) * Math.cos(disp_az * Math.PI / 180))
+
+              var H = Math.asin( -Math.sin(disp_az * Math.PI / 180) * Math.cos(act_alt * Math.PI / 180) ) / Math.cos(antenna_dec)
+
+              view_center_x = 0//alt_rectangular * Math.cos(pointing_az * Math.PI / 180);
+              view_center_y = 0//alt_rectangular * Math.sin(pointing_az * Math.PI / 180);
+
+              /*camera.top = view_center_y + viewrad;
+              camera.bottom = view_center_y - viewrad;
+              camera.left = view_center_x - viewrad;
+              camera.right = view_center_x + viewrad;*/
+
+              camera.updateProjectionMatrix();
+
+              camera.remove(mask);
+              mask_geo = new THREE.TorusGeometry(viewrad+5, 5, 2, 100);
+              mask_mat = new THREE.MeshBasicMaterial({color:0x000000});
+              mask = new THREE.Mesh(mask_geo, mask_mat);
+              camera.add(mask);
+              mask.position.set(view_center_x, view_center_y, -1);
+
+              ra = calculateSiderealTime(false);
+              ra = ra.split(":");
+
+              final_ra = ra[0] * 1;
+              final_ra += ra[1] / 60;
+              final_ra += ra[2] / 3600;
+              final_ra = final_ra * 15;
+              final_ra = final_ra * Math.PI / 180;
+              ra = final_ra;// - Math.PI/2;
+              ra += raoffset;
+              //ra = 0;
+
+              antenna_ra = ra - H
+
+              if (pointing_alt < (dec * 180 / Math.PI)){
+                antenna_ra += Math.PI
+              }
+
+              camx = r * Math.cos(ra) * Math.cos(dec);
+              camy = r * Math.sin(dec);
+              camz = r * Math.sin(ra) * Math.cos(dec);
+
+               for (var i = 1; i < scene.children.length; i++){
+                  if (scene.children[i].group == "equatorial"){
+                      continue
+                  }
+                  x = scene.children[i].position.x
+                  y = scene.children[i].position.y
+                  z = scene.children[i].position.z
+                  d = Math.sqrt((camx-x)*(camx-x) + (camy-y)*(camy-y))
+                  d = Math.sqrt(d*d + (camz-z)*(camz-z))
+                  if (scene.children[i].hid_override != true || scene.children[i].hid_override == undefined){
+                      if (d > 10*Math.sqrt(2)){
+                          scene.children[i].visible = false;
+                      }
+                      else{
+                          scene.children[i].visible = true;
+                      }
+                  }
+
+              }             
+              requestAnimationFrame(animate);
+              if (GetURLParameter("controls") == "true"){
+                  controls.target = new THREE.Vector3(camx/100, camy/100, camz/100);
+                  controls.update();
+              }
+
+              if (GetURLParameter("controls") == "false"){
+                ra = antenna_ra
+
+                camx = r * Math.cos(ra) * Math.cos(antenna_dec);
+                camy = r * Math.sin(antenna_dec);
+                camz = r * Math.sin(ra) * Math.cos(antenna_dec);
+                //camyoffset += 0.01
+                //camy += camyoffset
+                camera.lookAt(camx, camy, camz);
+              }
+
+              renderer.render(scene, camera);
 
             };
 
@@ -1346,20 +1476,25 @@ swal.fire({
             drawAltAz(0, 0, 0);
             camera.position.set(0, 0, 0);
 
+            var controls = new THREE.TrackballControls(camera, renderer.domElement);
             if (GetURLParameter("controls") == "true"){
-                var controls = new THREE.TrackballControls(camera, renderer.domElement);
-                controls.enablePan = true;
-                controls.enableDamping = true;
-                controls.enableZoom = true;
-                controls.keyPanSpeed = 0.2/camera.zoom;
-                controls.rotateSpeed = -1/camera.zoom;
-                setInterval(function(){
-                    controls.keyPanSpeed = 0.2/camera.zoom;
-                    controls.rotateSpeed = -1/camera.zoom;
-                }, 100)
-                //controls.dampingFactor = 0.1;
-
+              controls.enablePan = true;
+              controls.enableDamping = true;
+              controls.enableZoom = true;
+              controls.keyPanSpeed = 0.2/camera.zoom;
+              controls.rotateSpeed = -1/camera.zoom;
+              setInterval(function(){
+                  controls.keyPanSpeed = 0.2/camera.zoom;
+                  controls.rotateSpeed = -1/camera.zoom;
+              }, 100)
+              controls.dampingFactor = 0.1;
             }
+            else{
+              controls.enablePan = false;
+              controls.enableDamping = false;
+              controls.enableZoom = false;              
+            }
+
 
             animate();
             //setInterval(animate, 1000);
@@ -1371,12 +1506,6 @@ swal.fire({
             setInterval(drawSun(), 43200000);
             drawMoon();
             addObjectLabels();
-            drawObjects(atnf_thetas, atnf_phis, 0xff0000, atnf_names, "ATNF Catalog", true);
-            drawObjects(nvss_thetas, nvss_phis, 0x9400d3, nvss_names, "NVSS Catalog", true);
-            drawObjects(frb_thetas, frb_phis, 0x00ff00, frb_names, "FRB Catalog", true);
-            drawObjects(messier_thetas, messier_phis, 0x00aaff, messier_names, "Messier Catalog", true);
-            drawObjects(rrat_thetas, rrat_phis, 0xffff00, rrat_names, "RRAT Catalog", true);
-            dealWithCheckboxes();
 
 
             renderer.domElement.addEventListener("click", onclick, true);
@@ -1384,9 +1513,14 @@ swal.fire({
             var raycaster = new THREE.Raycaster();
             var crosshair;
             var crosshairinterval;
+            raycaster.params.Line.threshold = 0;
+            raycaster.params.Sprite.threshold = 0;
             function onclick(event) {
-                console.log(camera.zoom)
                 raycaster.params.Points.threshold = 0.25/camera.zoom// * Math.pow(1.8, camera.zoom)
+                raycaster.params.Mesh.threshold = 0.25/camera.zoom
+                /*if (antenna != "none"){
+                  raycaster.params.Points.threshold = 0.1
+                }*/
                 var display = false;
                 var mouse = new THREE.Vector2();
                 var rect = renderer.domElement.getBoundingClientRect();
@@ -1419,6 +1553,10 @@ swal.fire({
                         scene.remove(crosshair)
                         x = 0.25/camera.zoom;
                         y = 0.25/camera.zoom;
+                        /*if (antenna != "none"){
+                          x = camera.top/40
+                          y = x
+                        }*/
 
                         // crosshair
                         var material = new THREE.LineBasicMaterial({ color: 0xAAFFAA });
@@ -1484,6 +1622,42 @@ swal.fire({
                 }
             }
 
+
+            mat = new THREE.LineBasicMaterial( {color: 0xff0000} )
+            geo = new THREE.Geometry();
+            size = 0.01
+            geo.vertices.push(new THREE.Vector3(size, 0, 0));
+            geo.vertices.push(new THREE.Vector3(-size, 0, 0));
+            geo.vertices.push(new THREE.Vector3(0, 0, 0));
+            geo.vertices.push(new THREE.Vector3(0, -size, 0));
+            geo.vertices.push(new THREE.Vector3(0, size, 0));
+            pointing_crosshair = new THREE.Line(geo, mat);
+            pointing_crosshair.position.set(0, 0, -1)
+            camera.add(pointing_crosshair)
+            pointing_crosshair.visible = false;
+
+            mat = new THREE.LineBasicMaterial( {color: 0xff0000} )
+            geo = new THREE.Geometry();
+            var outer_rad_antenna = r / 75;
+            min = 0.1 * outer_rad_antenna
+            max = 0.9 * outer_rad_antenna
+            var start = min * Math.cos(Math.PI / 4)
+            var end = max * Math.cos(Math.PI / 4)
+            geo.vertices.push(new THREE.Vector3(-start, start, 0))
+            geo.vertices.push(new THREE.Vector3(-end, end, 0))
+            geo.vertices.push(new THREE.Vector3(-end - 0.03 * outer_rad_antenna, end - 0.03*outer_rad_antenna, 0))
+            geo.vertices.push(new THREE.Vector3(-end + 0.03 * outer_rad_antenna, end + 0.03*outer_rad_antenna, 0))
+            antenna_fov_line = new THREE.Line(geo, mat)
+            antenna_fov_line.position.set(0, 0, -1)
+            camera.add(antenna_fov_line)
+            antenna_fov_line.visible = false;
+
+            drawObjects(atnf_thetas, atnf_phis, 0xff0000, atnf_names, "ATNF Catalog", true);
+            drawObjects(nvss_thetas, nvss_phis, 0x9400d3, nvss_names, "NVSS Catalog", true);
+            drawObjects(frb_thetas, frb_phis, 0x00ff00, frb_names, "FRB Catalog", true);
+            drawObjects(messier_thetas, messier_phis, 0x00aaff, messier_names, "Messier Catalog", true);
+            drawObjects(rrat_thetas, rrat_phis, 0xffff00, rrat_names, "RRAT Catalog", true);
+            dealWithCheckboxes();
 
             document.getElementById("nonebutton").click();
 
