@@ -179,7 +179,7 @@ rrat_decs = process_dec(open("rrat_decs.txt").read().split("\n"))
 rrat_names = open("rrat_names.txt").read().split("\n")
 
 nvss_ras = process_ra(open("nvss_ras.txt").read().split("\n"))
-nvss_decs = process_ra(open("nvss_decs.txt").read().split("\n"))
+nvss_decs = process_dec(open("nvss_decs.txt").read().split("\n"))
 nvss_lum = open("nvss_lum.txt").read().split("\n")
 for i in range(len(nvss_lum)):
     nvss_lum[i] = float(nvss_lum[i].replace(" ", ''))

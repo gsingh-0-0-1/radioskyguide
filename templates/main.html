@@ -1555,6 +1555,66 @@ swal.fire({
                         //selectedObject.object.visible = false;
                         //selectedObject.object.hid_override = true;
                         toprightname = selectedObject.object.name;
+                        if (selectedObject.object.group == "NVSS Catalog"){ //"calculate" the name for NVSS objects
+                          theta = selectedObject.object.theta
+                          phi = selectedObject.object.phi
+
+
+                          theta = theta * 24 / (2 * Math.PI) //get the hours
+                          theta_hour = Math.trunc(theta)
+                          if (String(theta_hour).length == 1){
+                            theta_hour = "0"+theta_hour
+                          }
+
+                          theta = theta - theta_hour //get the minutes
+                          theta = 60 * theta
+                          theta_minute = Math.trunc(theta)
+                          if (String(theta_minute).length == 1){
+                            theta_minute = "0"+theta_minute
+                          }
+
+                          theta = theta - theta_minute //get the seconds
+                          theta = 60 * theta
+                          theta = Math.trunc(theta)
+                          if (String(theta).length == 1){
+                            theta = "0"+theta
+                          }
+
+                          phi = phi * 180 / (Math.PI) //get the declination degrees
+                          phi = phi + 90 //make all phis positive, makes it easier to deal with minutes and seconds
+                          phi_degree = Math.trunc(phi)
+                          if (String(phi_degree).length == 1){
+                            phi_degree = "0"+phi_degree
+                          }
+
+                          phi = phi - phi_degree
+
+                          phi_degree = phi_degree - 90
+                          if (String(phi_degree).length == 1){
+                            phi_degree = "0"+phi_degree
+                          }
+                          if (String(Math.abs(phi_degree)).length == 1 && phi_degree < 0){ //deal with negative dec
+                            phi_degree = "-0"+Math.abs(phi_degree)
+                          }
+                          if (phi_degree > 0){
+                            phi_degree = "+" + phi_degree
+                          }
+
+                          phi = 60 * phi // get the declination minutes
+                          phi_minute = Math.trunc(phi)
+                          phi = phi - phi_minute
+                          if (String(phi_minute).length == 1){
+                            phi_minute = "0" + phi_minute
+                          }
+
+                          phi = phi * 60
+                          phi = Math.trunc(phi) //get the declination seconds
+                          if (String(phi).length == 1){
+                            phi = "0" + phi
+                          }
+
+                          toprightname = "NVSS J"+theta_hour+theta_minute+theta+phi_degree+phi_minute+phi
+                        }
                         document.getElementById("currentobject").innerHTML = toprightname//"<input type='button' class='button' style='--bcolor: #123456; --fsize: 15px; display: center' value='Selected: "+toprightname+"'>"
 
                         // crosshair size
