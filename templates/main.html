@@ -8,7 +8,7 @@
             gui {position: fixed; left:50%; top:0px; transform: translate(-50%, -0%);}
             .sidtime {position: fixed; left:5%; top:15%; font-family:Verdana; text-align: center;}
             .leftdetails {position: fixed; left:5%; top:5%; font-family:Verdana; text-align: center; transform: translate(-5%,0%); overflow-y: scroll; height: 95% }
-            .rightdetails {position: fixed; left:80%; top:5%; font-family:Verdana; text-align: center; transform: translate(-5%,0%); overflow-y: scroll; height: 95%; width: 18%;}
+            .rightdetails {position: fixed; left:80%; top:5%; font-family:Verdana; text-align: center; transform: translate(-5%,0%); overflow-y: scroll; height: 95%; width: 20%;}
             .button {
               background-color: var(--bcolor);
               border: none;
@@ -267,7 +267,7 @@ swal.fire({
                 <input type="checkbox" name="drawnvss" value="true" id="drawnvss" onclick="nvssDialogue();">
                 <label id='fornvss' for='drawnvss' style="color: #9400d3; display:inline">NVSS Catalog (>0.2 Jy)</label><br><br>
 
-                <input type="range" min="0.2" max="5" value="0" class="slider" id="nvss_slider" step="0.01" onchange="dealWithNVSSSlider();"><br><br>
+                <input type="range" min="0.2" max="5" value="0" class="slider" id="nvss_slider" step="0.0001" onchange="dealWithNVSSSlider();"><br><br>
 
                 <input type="checkbox" name="drawmessier" value="true" id="drawmessier" onclick="dealWithCheckboxes();">
                 <label for='drawmessier' style="color: #00AAFF; display:inline">Messier Catalog</label><br><br>
@@ -435,7 +435,12 @@ swal.fire({
                             }
                         }
                         else{
+                          if (catnames[iter] == "NVSS Catalog"){
+                            drawObjects(window[catshorthands[iter]+"_thetas"], window[catshorthands[iter]+"_phis"], catcolors[iter], '', group=catnames[iter], false, false, 7, true, true);
+                          }
+                          else{
                             drawObjects(window[catshorthands[iter]+"_thetas"], window[catshorthands[iter]+"_phis"], catcolors[iter], '', group=catnames[iter]);
+                          }
                         }
                     }
                     else{
@@ -793,7 +798,7 @@ swal.fire({
                 return texture;
             }
 
-            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=7, visible=true) {
+            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=7, visible=true, nvss=false) {
                 color = "#" + color.toString(16).padStart(6, '0');
                 if (name != "Satellite" && group != "Satellite")
                     thistexture = createCircleTexture(color, 400, group);
@@ -822,6 +827,10 @@ swal.fire({
                     }
                     else{
                         point.name = name;
+                    }
+
+                    if (nvss){
+                      point.lum = nvss_lum[i]
                     }
 
                     if (group != ''){
@@ -1030,7 +1039,7 @@ swal.fire({
 
             function updateAltAz(this_antenna){
                 if (this_antenna == "none"){
-                    //console.log(this_antenna)
+                    
                 }
                 else{
                     var alt_box = document.getElementById("alt_box");
@@ -1614,6 +1623,9 @@ swal.fire({
                           }
 
                           toprightname = "NVSS J"+theta_hour+theta_minute+theta+phi_degree+phi_minute+phi
+                          toprightname = toprightname + "<br>"
+                          toprightname = toprightname + "Flux Density: " + selectedObject.object.lum + " mJy"
+
                         }
                         document.getElementById("currentobject").innerHTML = toprightname//"<input type='button' class='button' style='--bcolor: #123456; --fsize: 15px; display: center' value='Selected: "+toprightname+"'>"
 
