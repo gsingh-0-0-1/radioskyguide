@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import render_template
 from flask import request
+from flask import send_from_directory
 import sys
 import time
 import os
@@ -332,6 +333,11 @@ def submain():
         req = '''{"1a (simulated)": { "az" : 0 , "el" : 18 } }'''
 
     return req
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 try:
     app.run(host = sys.argv[1], debug = True, port = int(sys.argv[2])) 
