@@ -1122,10 +1122,10 @@ swal.fire({
             var data = '';
             var satellite_list = [];
             function drawSatellites(){
-                data = new XMLHttpRequest();
-                data.open("GET", "/static/newtle.txt?time="+new Date().getTime());
-                data.send();
-                data.onreadystatechange = function() {
+                xdata = new XMLHttpRequest();
+                xdata.open("GET", "/static/newtle.txt?time="+new Date().getTime());
+                xdata.send();
+                xdata.onreadystatechange = function() {
                     if (this.readyState == 4 && this.status == 200) {
                         data = this.responseText;
                         data = data.split("\n0");
@@ -1135,13 +1135,10 @@ swal.fire({
             }
 
             function updateSatellites(){
-                /*for (var j = scene.children.length - 1; j >= 0; j--) {
-                    if(scene.children[j].group == "Satellite"){
-                        scene.remove(scene.children[j]);
-                    }
-                }*/
+              console.log("im here", data.length);
  
                 for (var i = 0; i < data.length; i+=1){
+                  console.log(i);
                     var sat = data[i].split("\n")
                     name = sat[0];
 
@@ -1164,11 +1161,13 @@ swal.fire({
                     var positionEci = positionAndVelocity.position,
                         velocityEci = positionAndVelocity.velocity;
 
+                    console.log(name, satrec, positionEci)
+
                     if (positionEci == undefined){
                       continue;
                     }
 
-                    console.log(name, satrec, positionEci)
+                  
 
                     var observerGd = {
                         longitude: satellite.degreesToRadians(longitude),
