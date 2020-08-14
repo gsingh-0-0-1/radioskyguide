@@ -1273,11 +1273,11 @@ swal.fire({
             var az;
             req.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    data = this.responseText;
-                    data = JSON.parse(data)
-                    antenna_azel_data = data;
+                    adata = this.responseText;
+                    adata = JSON.parse(data)
+                    antenna_azel_data = adata;
                     var keys = [];
-                    for (var k in data){
+                    for (var k in adata){
                       document.getElementById("antenna_select").innerHTML += "<option value='"+k+"'>"+k+"</option>"
                     }
                 }
@@ -1292,8 +1292,8 @@ swal.fire({
               var az;
               req.onreadystatechange = function() {
                   if (this.readyState == 4 && this.status == 200) {
-                      data = this.responseText;
-                      data = JSON.parse(data)
+                      adata = this.responseText;
+                      adata = JSON.parse(data)
                       antenna_azel_data = data;
                   }
               };
