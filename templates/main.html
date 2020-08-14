@@ -168,38 +168,6 @@ swal.fire({
             <select id="antenna_select" onchange="javascript:changeAntenna();">
               <option value="none">None</option>
             </select>
-            <!--<br>
-            <table>
-            <tr>
-            <td>
-            <input type="button" class="button" style="--bcolor: #3f1111; --fsize: 15px; padding: 10px 20px; font-family: courier" value="1a" onclick="javascript:changeAntenna('1a');">
-            </td>
-            <td>
-            <input type="button" class="button" style="--bcolor: #3f115a; --fsize: 15px; padding: 10px 20px; font-family: courier" value="1f" onclick="javascript:changeAntenna('1f');">
-            </td>
-            <td>
-            <input type="button" class="button" style="--bcolor: #3f1199; --fsize: 15px; padding: 10px 20px; font-family: courier" value="1c" onclick="javascript:changeAntenna('1c');">
-            </td>
-            <td>
-            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px; font-family: courier" value="2a" onclick="javascript:changeAntenna('2a');">
-            </td>
-            </tr>
-
-            <tr>
-            <td>
-            <input type="button" class="button" style="--bcolor: #3f1111; --fsize: 15px; padding: 10px 20px; font-family: courier" value="2b" onclick="javascript:changeAntenna('2b');">
-            </td>
-            <td>
-            <input type="button" class="button" style="--bcolor: #3f1177; --fsize: 15px; padding: 10px 20px; font-family: courier" value="4g" onclick="javascript:changeAntenna('4g');">
-            </td>
-            <td>
-            <input type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px; font-family: courier" value="5c" onclick="javascript:changeAntenna('5c');">
-            </td>
-            <td>
-            <input id="nonebutton" type="button" class="button" style="--bcolor: #3f11bb; --fsize: 15px; padding: 10px 20px; font-family: courier" value="NA" onclick="javascript:changeAntenna('none');">
-            </td>
-            </tr>
-            </table>-->
             </span>
 
             <br>
@@ -1144,6 +1112,10 @@ swal.fire({
                 }*/
                 for (var i = 0; i < scenetextobjects.length; i++){
                     scenetextobjects[i].quaternion.copy(camera.quaternion);
+                    if (scenetextobjects[i].spec == "crosshair"){
+                      continue;
+                    }
+                    scenetextobjects[i].scale.set(1 / camera.zoom, 1 / camera.zoom, 1 / camera.zoom);
                 }
             }
 
@@ -1253,7 +1225,7 @@ swal.fire({
                 right_asc = l[3];
                 decl = l[4];
 
-                addText("Crab Pulsar", [x, y + 0.1, z], "Important Objects", false, 0.2);
+                addText("Crab Pulsar", [x, y + 0.001, z], "Important Objects", false, 0.2);
                 drawObjects([right_asc], [decl], 0x00fff8, 'Crab Pulsar', group="Important Objects")
 
                 //J0332+5434
@@ -1267,7 +1239,7 @@ swal.fire({
                 right_asc = l[3];
                 decl = l[4];
 
-                addText("J0332+5434", [x, y + 0.1, z], "Important Objects", false, 0.2);
+                addText("J0332+5434", [x, y + 0.001, z], "Important Objects", false, 0.2);
                 drawObjects([right_asc], [decl], 0x00fff8, 'J0332+5434', group="Important Objects")
 
                 //SGR 1935+2154
@@ -1281,7 +1253,7 @@ swal.fire({
                 right_asc = l[3];
                 decl = l[4];
 
-                addText("SGR 1935+2154", [x, y + 0.1, z], "Important Objects", false, 0.2);
+                addText("SGR 1935+2154", [x, y + 0.001, z], "Important Objects", false, 0.2);
                 drawObjects([right_asc], [decl], 0x00fff8, 'SGR 1935+2154', group="Important Objects")
 
             }
@@ -1494,6 +1466,7 @@ swal.fire({
             startScene();
             drawAltAz(0, 0, 0);
             camera.position.set(0, 0, 0);
+            camera.zoom = 1;
 
             var controls = new THREE.TrackballControls(camera, renderer.domElement);
             if (GetURLParameter("controls") == "true"){
@@ -1517,7 +1490,6 @@ swal.fire({
 
             animate();
             //setInterval(animate, 1000);
-            setInterval(redoLabels, 10);
 
             var satelliterefreshID;
             drawSatellites();
@@ -1530,7 +1502,7 @@ swal.fire({
             renderer.domElement.addEventListener("click", onclick, true);
             var selectedObject;
             var raycaster = new THREE.Raycaster();
-            var crosshair;
+            var crosshair = new Object();
             var crosshairinterval;
             raycaster.params.Line.threshold = 0;
             raycaster.params.Sprite.threshold = 0;
@@ -1628,7 +1600,7 @@ swal.fire({
                           toprightname = toprightname + "Flux Density: " + selectedObject.object.lum + " mJy"
 
                         }
-                        document.getElementById("currentobject").innerHTML = toprightname//"<input type='button' class='button' style='--bcolor: #123456; --fsize: 15px; display: center' value='Selected: "+toprightname+"'>"
+                        document.getElementById("currentobject").innerHTML = toprightname
 
                         // crosshair size
 
@@ -1674,14 +1646,6 @@ swal.fire({
 
                         var points = curve.getPoints( 50 );
                         var geometry = new THREE.BufferGeometry().setFromPoints( points );
-                        //var geometry = new THREE.Geometry();
-                        //crosshairgeometry.vertices.push(new THREE.Vector3(0, 0, 0))
-                        //crosshair = new THREE.Line( crosshairgeometry, material );
-                        /*geometry.vertices.push(new THREE.Vector3(0, y, 0));
-                        geometry.vertices.push(new THREE.Vector3(0, -y, 0));
-                        geometry.vertices.push(new THREE.Vector3(0, 0, 0));
-                        geometry.vertices.push(new THREE.Vector3(x, 0, 0));    
-                        geometry.vertices.push(new THREE.Vector3(-x, 0, 0));*/
 
                         crosshair = new THREE.Line( geometry, material );
                         crosshair.add(upbar)
@@ -1698,6 +1662,7 @@ swal.fire({
                         //crosshair.quaternion.copy(camera.quaternion)
                         //keep crosshair pointing to camera
                         crosshair.name = "textlabel"
+                        crosshair.spec = "crosshair"
                         scenetextobjects.push(crosshair);
                         scene.add(crosshair)
                     }
@@ -1740,6 +1705,14 @@ swal.fire({
             drawObjects(messier_thetas, messier_phis, 0x00aaff, messier_names, "Messier Catalog", true);
             drawObjects(rrat_thetas, rrat_phis, 0xffff00, rrat_names, "RRAT Catalog", true);
             dealWithCheckboxes();
+
+            tempevent = new Object();
+            tempevent.clientX = window.innerWidth / 2
+            tempevent.clientY = window.innerHeight / 2
+            onclick(tempevent);
+            crosshair.hid_override = true;
+
+            setInterval(redoLabels, 10);
 
             document.getElementById("nonebutton").click();
 

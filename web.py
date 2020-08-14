@@ -320,7 +320,7 @@ def displayfrbdata():
 @app.route('/antennadata/azel')
 def submain():
     try:
-        req = requests.get("http://restgw.hcro.org:12345/antennas/all/azel")
+        req = requests.get("http://restgw.hcro.org:12345/antennas/all/azel", timeout=2)
         if r.status_code != 200:
             req = "timeout"
         else:
