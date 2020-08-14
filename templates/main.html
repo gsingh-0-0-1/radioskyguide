@@ -1142,8 +1142,9 @@ swal.fire({
                 }*/
  
                 for (var i = 0; i < data.length; i+=1){
-                    sat = data[i].split("\n")
+                    var sat = data[i].split("\n")
                     name = sat[0];
+
                     line1 = sat[1];
                     line2 = sat[2];
 
@@ -1162,6 +1163,12 @@ swal.fire({
 
                     var positionEci = positionAndVelocity.position,
                         velocityEci = positionAndVelocity.velocity;
+
+                    if (positionEci == undefined){
+                      continue;
+                    }
+
+                    console.log(name, satrec, positionEci)
 
                     var observerGd = {
                         longitude: satellite.degreesToRadians(longitude),
