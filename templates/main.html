@@ -170,6 +170,15 @@ swal.fire({
             </select>
             </span>
 
+            <br><br>
+
+
+            <input id="objectsearchbar" type="text" class="button" style="padding: 10px 0px;border-color: black; font-size: 17px; outline: none; background-color: #bbb; text-align: left; padding-left: 5%; color: #000" placeholder="&#x1F50E;Object Search" onkeypress="javascript:dealWithSearchBar(event)">
+
+            <div id="objectsearch" style="color: #67F; text-align: left !important">
+
+            </div>
+
             <br>
             <div>
 
@@ -503,7 +512,6 @@ swal.fire({
                         writeRALabels();
                         addDecLines();
                         writeDecLabels();
-                        //equatorialGrid();
                     }
                 }
                 else{
@@ -591,15 +599,6 @@ swal.fire({
                 setTimeout(fullReload, 500);
             }
 
-            //var drawingSurface = document.getElementByID('gui');
-
-            var r = 10;
-            var scene;
-            var camera;
-            var renderer;
-            pixelratio = 1.5;
-            var rmod = 0;
-
             function startScene(){
                 var width = window.innerWidth;
                 var height = window.innerHeight;
@@ -671,26 +670,6 @@ swal.fire({
                     }
                     scene.add(line);
                 }
-            }
-
-            function equatorialGrid(){
-                var radius = r;
-                var latSegments = 18;
-                var longSegments = 16;
-
-                var geometry = new THREE.SphereBufferGeometry( radius, longSegments, latSegments);
-                var edges = new THREE.EdgesGeometry( geometry );
-                var sphere = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
-
-                sphere.group = "equatorial"
-                scene.add( sphere );
-
-                var geometry = new THREE.CircleGeometry( 10, 36 );
-                var edges = new THREE.EdgesGeometry( geometry );
-                var equator = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffa500 } ) );
-                equator.lookAt(0, 10, 0);
-                equator.group = "equatorial";
-                scene.add(equator)
             }
 
             var scenetextobjects = [];
@@ -798,7 +777,62 @@ swal.fire({
                         point.name = name;
                     }
 
-                    if (nvss){
+                    if (nvss || group == "NVSS Catalog"){
+
+                      theta = theta * 24 / (2 * Math.PI) //get the hours
+                      theta_hour = Math.trunc(theta)
+                      if (String(theta_hour).length == 1){
+                        theta_hour = "0"+theta_hour
+                      }
+
+                      theta = theta - theta_hour //get the minutes
+                      theta = 60 * theta
+                      theta_minute = Math.trunc(theta)
+                      if (String(theta_minute).length == 1){
+                        theta_minute = "0"+theta_minute
+                      }
+
+                      theta = theta - theta_minute //get the seconds
+                      theta = 60 * theta
+                      theta = Math.trunc(theta)
+                      if (String(theta).length == 1){
+                        theta = "0"+theta
+                      }
+
+                      phi = phi * 180 / (Math.PI) //get the declination degrees
+                      phi = phi + 90 //make all phis positive, makes it easier to deal with minutes and seconds
+                      phi_degree = Math.trunc(phi)
+                      if (String(phi_degree).length == 1){
+                        phi_degree = "0"+phi_degree
+                      }
+
+                      phi = phi - phi_degree
+
+                      phi_degree = phi_degree - 90
+                      if (String(phi_degree).length == 1){
+                        phi_degree = "0"+phi_degree
+                      }
+                      if (String(Math.abs(phi_degree)).length == 1 && phi_degree < 0){ //deal with negative dec
+                        phi_degree = "-0"+Math.abs(phi_degree)
+                      }
+                      if (phi_degree > 0){
+                        phi_degree = "+" + phi_degree
+                      }
+
+                      phi = 60 * phi // get the declination minutes
+                      phi_minute = Math.trunc(phi)
+                      phi = phi - phi_minute
+                      if (String(phi_minute).length == 1){
+                        phi_minute = "0" + phi_minute
+                      }
+
+                      phi = phi * 60
+                      phi = Math.trunc(phi) //get the declination seconds
+                      if (String(phi).length == 1){
+                        phi = "0" + phi
+                      }
+
+                      point.name = "NVSS J"+theta_hour+theta_minute+theta+phi_degree+phi_minute+phi
                       point.lum = nvss_lum[i]
                     }
 
@@ -827,6 +861,9 @@ swal.fire({
                     scene.add(point);
 
                     point.position.set(x,y,z);
+
+                    namedObjectList.push(point.name)
+                    window[point.name] = point;
                 }
             }
 
@@ -908,6 +945,9 @@ swal.fire({
                 sun.name = "Sun"
                 sun_halo.name = "Sun"
 
+                window["Sun"] = sun
+                namedObjectList.push("Sun")
+
             }
 
             var moon;
@@ -951,6 +991,9 @@ swal.fire({
                 scene.add(moon_halo);
                 moon.name = "Moon"
                 moon_halo.name = "Moon"
+
+                window["Moon"] = moon
+                namedObjectList.push("Moon")
             }
 
             var ra = 0;
@@ -1008,7 +1051,7 @@ swal.fire({
 
             function updateAltAz(this_antenna){
                 if (this_antenna == "none"){
-                    
+                   
                 }
                 else{
                     var alt_box = document.getElementById("alt_box");
@@ -1272,7 +1315,7 @@ swal.fire({
             req.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     adata = this.responseText;
-                    adata = JSON.parse(data)
+                    adata = JSON.parse(adata)
                     antenna_azel_data = adata;
                     var keys = [];
                     for (var k in adata){
@@ -1296,25 +1339,6 @@ swal.fire({
                   }
               };
               return [antenna_azel_data[this_antenna]["el"], antenna_azel_data[this_antenna]["az"]]
-              /*if (this_antenna == "1a")
-                  alt = 90
-              if (this_antenna == "1f")
-                  alt = 75
-              if (this_antenna == "1c")
-                  alt = 60
-              if (this_antenna == "2a")
-                  alt = 45
-              if (this_antenna == "2b")
-                  alt = 30
-              if (this_antenna == "4g")
-                  alt = 15
-              if (this_antenna == "5c")
-                  alt = 0
-              var az = Math.round(new Date().getTime() / 1000) + 800
-              az = az % 1000
-              az = 360 * az/1000*/
-
-              //return ([data[this_antenna]["az"], data[this_antenna]["el"]])
             }
 
             var camx, camy, camz;
@@ -1325,6 +1349,7 @@ swal.fire({
             var view_center_x = 0;
             var view_center_y = 0;
             var camyoffset = 0;
+            namedObjectList = [];
 
             //do the initial ra calculation so interactive mode will start correctly
             ra = calculateSiderealTime(false);
@@ -1390,11 +1415,6 @@ swal.fire({
 
               view_center_x = 0//alt_rectangular * Math.cos(pointing_az * Math.PI / 180);
               view_center_y = 0//alt_rectangular * Math.sin(pointing_az * Math.PI / 180);
-
-              /*camera.top = view_center_y + viewrad;
-              camera.bottom = view_center_y - viewrad;
-              camera.left = view_center_x - viewrad;
-              camera.right = view_center_x + viewrad;*/
 
               camera.updateProjectionMatrix();
 
@@ -1467,6 +1487,13 @@ swal.fire({
 
             };
 
+            var r = 10;
+            var scene;
+            var camera;
+            var renderer;
+            pixelratio = 1.5;
+            var rmod = 0;
+
             startScene();
             drawAltAz(0, 0, 0);
             camera.position.set(0, 0, 0);
@@ -1493,7 +1520,6 @@ swal.fire({
 
 
             animate();
-            //setInterval(animate, 1000);
 
             var satelliterefreshID;
             drawSatellites();
@@ -1511,11 +1537,8 @@ swal.fire({
             raycaster.params.Line.threshold = 0;
             raycaster.params.Sprite.threshold = 0;
             function onclick(event) {
-                raycaster.params.Points.threshold = 0.25/camera.zoom// * Math.pow(1.8, camera.zoom)
+                raycaster.params.Points.threshold = 0.25/camera.zoom
                 raycaster.params.Mesh.threshold = 0.25/camera.zoom
-                /*if (antenna != "none"){
-                  raycaster.params.Points.threshold = 0.1
-                }*/
                 var display = false;
                 var mouse = new THREE.Vector2();
                 var rect = renderer.domElement.getBoundingClientRect();
@@ -1538,68 +1561,8 @@ swal.fire({
                     }
 
                     if (display != false && selectedObject.object.visible == true){
-                        //selectedObject.object.visible = false;
-                        //selectedObject.object.hid_override = true;
                         toprightname = selectedObject.object.name;
                         if (selectedObject.object.group == "NVSS Catalog"){ //"calculate" the name for NVSS objects
-                          theta = selectedObject.object.theta
-                          phi = selectedObject.object.phi
-
-
-                          theta = theta * 24 / (2 * Math.PI) //get the hours
-                          theta_hour = Math.trunc(theta)
-                          if (String(theta_hour).length == 1){
-                            theta_hour = "0"+theta_hour
-                          }
-
-                          theta = theta - theta_hour //get the minutes
-                          theta = 60 * theta
-                          theta_minute = Math.trunc(theta)
-                          if (String(theta_minute).length == 1){
-                            theta_minute = "0"+theta_minute
-                          }
-
-                          theta = theta - theta_minute //get the seconds
-                          theta = 60 * theta
-                          theta = Math.trunc(theta)
-                          if (String(theta).length == 1){
-                            theta = "0"+theta
-                          }
-
-                          phi = phi * 180 / (Math.PI) //get the declination degrees
-                          phi = phi + 90 //make all phis positive, makes it easier to deal with minutes and seconds
-                          phi_degree = Math.trunc(phi)
-                          if (String(phi_degree).length == 1){
-                            phi_degree = "0"+phi_degree
-                          }
-
-                          phi = phi - phi_degree
-
-                          phi_degree = phi_degree - 90
-                          if (String(phi_degree).length == 1){
-                            phi_degree = "0"+phi_degree
-                          }
-                          if (String(Math.abs(phi_degree)).length == 1 && phi_degree < 0){ //deal with negative dec
-                            phi_degree = "-0"+Math.abs(phi_degree)
-                          }
-                          if (phi_degree > 0){
-                            phi_degree = "+" + phi_degree
-                          }
-
-                          phi = 60 * phi // get the declination minutes
-                          phi_minute = Math.trunc(phi)
-                          phi = phi - phi_minute
-                          if (String(phi_minute).length == 1){
-                            phi_minute = "0" + phi_minute
-                          }
-
-                          phi = phi * 60
-                          phi = Math.trunc(phi) //get the declination seconds
-                          if (String(phi).length == 1){
-                            phi = "0" + phi
-                          }
-
-                          toprightname = "NVSS J"+theta_hour+theta_minute+theta+phi_degree+phi_minute+phi
                           toprightname = toprightname + "<br>"
                           toprightname = toprightname + "Flux Density: " + selectedObject.object.lum + " mJy"
 
@@ -1611,10 +1574,6 @@ swal.fire({
                         scene.remove(crosshair)
                         x = 0.25/camera.zoom;
                         y = 0.25/camera.zoom;
-                        /*if (antenna != "none"){
-                          x = camera.top/40
-                          y = x
-                        }*/
 
                         // crosshair
                         var material = new THREE.LineBasicMaterial({ color: 0xAAFFAA });
@@ -1674,6 +1633,43 @@ swal.fire({
             }
 
 
+            //here is the function for dealing with object searching
+            function dealWithSearchBar(event){
+              if (event.keyCode == 13 || event.which == 13){
+                searchbar = document.getElementById("objectsearchbar")
+                object_list_div = document.getElementById("objectsearch");
+                object_matches = namedObjectList.filter(element => element.includes(searchbar.value));
+                if (searchbar.value == ''){
+                  object_list_div.innerHTML = ''
+                  return
+                }
+
+                object_list_div.innerHTML = '<br>Matches:'
+                for (i = 0; i < object_matches.length; i++){
+                  object_list_div.innerHTML += "<br>" + "<a href=\"javascript:searchBarCrosshairMod('" + object_matches[i] + "');\" style='color: #67F'>" + object_matches[i] + "</a>"
+                  if (i > 2){
+                    break
+                  }
+                }
+              }
+            }
+
+            //function to select object based on crosshair
+            function searchBarCrosshairMod(obj){
+              console.log(obj)
+              clearInterval(crosshairinterval)
+              crosshair.position.copy(window[obj].position)
+              if (selectedObject.object.group == "Satellite"){
+                crosshairinterval = setInterval(function(){
+                  crosshair.position.copy(window[obj].position)
+                }, 100)
+              }
+              document.getElementById("currentobject").innerHTML = obj
+            }
+
+
+
+            //intialize the antenna view crosshair
             mat = new THREE.LineBasicMaterial( {color: 0xff0000} )
             geo = new THREE.Geometry();
             size = 0.01
@@ -1687,6 +1683,7 @@ swal.fire({
             camera.add(pointing_crosshair)
             pointing_crosshair.visible = false;
 
+            //initialize the fov line for the antenna view
             mat = new THREE.LineBasicMaterial( {color: 0xff0000} )
             geo = new THREE.Geometry();
             var outer_rad_antenna = r / 75;
@@ -1704,7 +1701,7 @@ swal.fire({
             antenna_fov_line.visible = false;
 
             drawObjects(atnf_thetas, atnf_phis, 0xff0000, atnf_names, "ATNF Catalog", true);
-            //drawObjects(nvss_thetas, nvss_phis, 0x9400d3, nvss_names, "NVSS Catalog", true);
+            drawObjects(nvss_thetas, nvss_phis, 0x9400d3, '', "NVSS Catalog", false);
             drawObjects(frb_thetas, frb_phis, 0x00ff00, frb_names, "FRB Catalog", true);
             drawObjects(messier_thetas, messier_phis, 0x00aaff, messier_names, "Messier Catalog", true);
             drawObjects(rrat_thetas, rrat_phis, 0xffff00, rrat_names, "RRAT Catalog", true);
@@ -1718,7 +1715,6 @@ swal.fire({
 
             setInterval(redoLabels, 10);
 
-            document.getElementById("nonebutton").click();
 
         </script>
         </gui>
