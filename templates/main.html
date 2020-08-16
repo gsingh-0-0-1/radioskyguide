@@ -754,6 +754,8 @@ swal.fire({
                 if (name != "Satellite" && group != "Satellite")
                     thistexture = createCircleTexture(color, 400, group);
                 for (var i = 0; i < thetas.length; i++){
+                    origtheta = thetas[i];
+                    origphi = phis[i];
                     theta = thetas[i];
                     phi = phis[i];
 
@@ -858,8 +860,8 @@ swal.fire({
                         }
                     }
 
-                    point.theta = theta
-                    point.phi = phi
+                    point.theta = origtheta
+                    point.phi = origphi
                     point.visible = visible;
                     scene.add(point);
 
