@@ -699,8 +699,10 @@ swal.fire({
                     mesh.position.set(pos[0], pos[1], pos[2]);
                     mesh.name = "textlabel";
                     mesh.group = group;
-                    if (addtocamera==false)
-                        scenetextobjects.push(mesh);
+                    if (addtocamera==false){
+                      scenetextobjects.push(mesh);
+                    }
+                    window[text+"_text"] = mesh
                 } );
             }
 
@@ -747,7 +749,7 @@ swal.fire({
                 return texture;
             }
 
-            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=7, visible=true, nvss=false) {
+            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=7, visible=true, nvss=false, do_not_push=false) {
                 color = "#" + color.toString(16).padStart(6, '0');
                 if (name != "Satellite" && group != "Satellite")
                     thistexture = createCircleTexture(color, 400, group);
@@ -863,7 +865,9 @@ swal.fire({
 
                     point.position.set(x,y,z);
 
-                    namedObjectList.push(point.name)
+                    if (!do_not_push){
+                      namedObjectList.push(point.name)
+                    }
                     window[point.name] = point;
                 }
             }
@@ -946,6 +950,9 @@ swal.fire({
                 sun.name = "Sun"
                 sun_halo.name = "Sun"
 
+                sun.theta = ra_sun
+                sun.phi = dec_sun
+
                 window["Sun"] = sun
                 namedObjectList.push("Sun")
 
@@ -992,6 +999,9 @@ swal.fire({
                 scene.add(moon_halo);
                 moon.name = "Moon"
                 moon_halo.name = "Moon"
+
+                moon.theta = moon_ra
+                moon.phi = moon_dec
 
                 window["Moon"] = moon
                 namedObjectList.push("Moon")
@@ -1261,8 +1271,10 @@ swal.fire({
             }
 
             //add significant object labels
+            importantObjectList = [];
             function addObjectLabels(){
                 //Crab Pulsar
+                importantObjectList.push("Crab Pulsar")
                 right_asc = [5, 34, 31.973];
                 decl = [22, 0, 52.06];
 
@@ -1277,6 +1289,7 @@ swal.fire({
                 drawObjects([right_asc], [decl], 0x00fff8, 'Crab Pulsar', group="Important Objects")
 
                 //J0332+5434
+                importantObjectList.push("J0332+5434")
                 right_asc = [3, 32, 59.4096];
                 decl = [54, 34, 43.329];
 
@@ -1291,6 +1304,7 @@ swal.fire({
                 drawObjects([right_asc], [decl], 0x00fff8, 'J0332+5434', group="Important Objects")
 
                 //SGR 1935+2154
+                importantObjectList.push("SGR 1935+2154")
                 right_asc = [19, 35, 0];
                 decl = [21, 54, 0];
 
@@ -1646,11 +1660,19 @@ swal.fire({
                   return
                 }
 
-                object_list_div.style.background = '#444'
+                object_list_div.style.background = '#222'
 
                 object_list_div.innerHTML = 'Matches:'
                 for (i = 0; i < object_matches.length; i++){
-                  object_list_div.innerHTML += "<br>" + "<a href=\"javascript:searchBarCrosshairMod('" + object_matches[i] + "');\" style='color: #67F'>" + object_matches[i] + "</a>"
+                  console.log(object_matches[i])
+                  if (importantObjectList.includes(object_matches[i])){
+                    var star = "&#9733"
+                  }
+                  else{
+                    var star = "&#9734"
+                  }
+                  object_list_div.innerHTML += "<br>" + "<a id='" + object_matches[i] + "_star' href=\"javascript:importantObjectMod('" + object_matches[i] + "')\" style='color: #67F'>" + star + " </a>"
+                  object_list_div.innerHTML += "<a href=\"javascript:searchBarCrosshairMod('" + object_matches[i] + "');\" style='color: #67F'>" + object_matches[i] + "</a>"
                   if (i > 2){
                     break
                   }
@@ -1669,6 +1691,23 @@ swal.fire({
                 }, 100)
               }
               document.getElementById("currentobject").innerHTML = obj
+            }
+
+            //function to add to Important Objects
+            function importantObjectMod(obj){
+              if (importantObjectList.includes(obj)){
+                scene.remove(window[obj+"_text"])
+                scene.remove(window[obj])
+                importantObjectList = importantObjectList.filter(item => item !== obj)
+                document.getElementById(obj+"_star").innerHTML = "&#9734 "
+              }
+              else{
+                drawObjects([window[obj].theta], [window[obj].phi], 0x00fff8, obj, group="Important Objects", false, false, 7, true, false, true)
+                rect = thetaPhiToXYZ(window[obj].theta, window[obj].phi)
+                addText(obj, [rect[0], rect[1] + 0.001, rect[2]], "Important Objects", false, 0.2);
+                importantObjectList.push(obj)
+                document.getElementById(obj+"_star").innerHTML = "&#9733 "
+              }
             }
 
 
@@ -1718,6 +1757,8 @@ swal.fire({
             crosshair.hid_override = true;
 
             setInterval(redoLabels, 10);
+
+            console.log(importantObjectList)
 
 
         </script>
