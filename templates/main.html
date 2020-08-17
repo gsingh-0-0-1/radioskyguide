@@ -1710,6 +1710,9 @@ swal.fire({
                 document.getElementById(obj+"_star").innerHTML = star_not_added_code + " "
               }
               else{
+              	if (window[obj].group == "Satellite" || window[obj].group == "Satellites"){
+              		return
+              	}
                 drawObjects([window[obj].theta], [window[obj].phi], 0x00fff8, obj, group="Important Objects", false, false, 7, true, false, true)
                 rect = thetaPhiToXYZ(window[obj].theta, window[obj].phi)
                 addText(obj, [rect[0], rect[1] + 0.001, rect[2]], "Important Objects", false, 0.2);
