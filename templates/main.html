@@ -1338,6 +1338,19 @@ swal.fire({
                 addText("Jupiter", [x, y + 0.001, z], "Important Objects", false, 0.2)
                 drawObjects([jup_ra], [jup_dec], 0x00fff8, 'Jupiter', group="Important Objects")
 
+                //Jupiter
+                importantObjectList.push("Saturn")
+                sat_ra = {{ sat_ra }}
+                sat_dec = {{ sat_dec }}
+
+                l = thetaPhiToXYZ(sat_ra, sat_dec);
+                x = l[0];
+                y = l[1];
+                z = l[2];
+
+                addText("Saturn", [x, y + 0.001, z], "Important Objects", false, 0.2)
+                drawObjects([sat_ra], [sat_dec], 0x00fff8, 'Saturn', group="Important Objects")
+
             }
 
             var antenna_azel_data;

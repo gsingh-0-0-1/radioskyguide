@@ -273,6 +273,12 @@ def gui():
     jup_ra = process_ra([jup_ra])
     jup_dec = process_dec([jup_dec])
 
+    sat = ephem.Saturn(datetime.datetime.utcnow())
+    sat_ra = str(sat.ra)
+    sat_dec = str(sat.dec)
+    sat_ra = process_ra([sat_ra])
+    sat_dec = process_dec([sat_dec])
+
     utcdate = datetime.datetime.utcnow()
 
     return render_template('main.html', atnf_ra_dat_here = atnf_ra_dat,
@@ -301,7 +307,9 @@ def gui():
                                         moon_ra_here = moon_ra,
                                         lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day ),
                                         jup_ra = jup_ra,
-                                        jup_dec = jup_dec
+                                        jup_dec = jup_dec,
+                                        sat_ra = sat_ra,
+                                        sat_dec = sat_dec
                                         )
 
     # f = codecs.open("main.html", 'r')
