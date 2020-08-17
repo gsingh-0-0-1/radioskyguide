@@ -1655,6 +1655,8 @@ swal.fire({
 
 
             //here is the function for dealing with object searching
+            var star_added_code = "&#9745;"
+            var star_not_added_code = "&#9744;"
             function dealWithSearchBar(event){
               if (event.keyCode == 13 || event.which == 13){
                 searchbar = document.getElementById("objectsearchbar")
@@ -1672,12 +1674,12 @@ swal.fire({
                 for (i = 0; i < object_matches.length; i++){
                   console.log(object_matches[i])
                   if (importantObjectList.includes(object_matches[i])){
-                    var star = "&#9733"
+                    var star = star_added_code + " "
                   }
                   else{
-                    var star = "&#9734"
+                    var star = star_not_added_code + " "
                   }
-                  object_list_div.innerHTML += "<br>" + "<a id='" + object_matches[i] + "_star' href=\"javascript:importantObjectMod('" + object_matches[i] + "')\" style='color: #67F'>" + star + " </a>"
+                  object_list_div.innerHTML += "<br>" + "<a id='" + object_matches[i] + "_star' href=\"javascript:importantObjectMod('" + object_matches[i] + "')\" style='text-decoration: none; font-size: 20px; color: #67F'>" + star + " </a>"
                   object_list_div.innerHTML += "<a href=\"javascript:searchBarCrosshairMod('" + object_matches[i] + "');\" style='color: #67F'>" + object_matches[i] + "</a>"
                   if (i > 2){
                     break
@@ -1705,14 +1707,14 @@ swal.fire({
                 scene.remove(window[obj+"_text"])
                 scene.remove(window[obj])
                 importantObjectList = importantObjectList.filter(item => item !== obj)
-                document.getElementById(obj+"_star").innerHTML = "&#9734 "
+                document.getElementById(obj+"_star").innerHTML = star_not_added_code + " "
               }
               else{
                 drawObjects([window[obj].theta], [window[obj].phi], 0x00fff8, obj, group="Important Objects", false, false, 7, true, false, true)
                 rect = thetaPhiToXYZ(window[obj].theta, window[obj].phi)
                 addText(obj, [rect[0], rect[1] + 0.001, rect[2]], "Important Objects", false, 0.2);
                 importantObjectList.push(obj)
-                document.getElementById(obj+"_star").innerHTML = "&#9733 "
+                document.getElementById(obj+"_star").innerHTML = star_added_code + " "
               }
             }
 
