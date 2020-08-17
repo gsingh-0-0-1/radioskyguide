@@ -175,8 +175,11 @@ swal.fire({
 
             <input id="objectsearchbar" type="text" class="button" style="padding: 10px 0px;border-color: black; font-size: 17px; outline: none; background-color: #bbb; align-self: left !important; text-align: left; padding-left: 5%; padding-right: 5%; color: #000" placeholder="&#x1F50E;Object Search" onkeypress="javascript:dealWithSearchBar(event)">
 
-            <br><br>
-            <div id="objectsearch" style="color: #67F; text-align: left !important; padding-left: 5%; padding-right: 5%; padding-top: 5%; padding-bottom: 5%; transform: translate(0%, 0)">
+            <br>
+            <div id="objectmatchestitle" style='color: #67F; text-align: left !important; padding-left: 5%; padding-right: 5%; padding-top: 5%; padding-bottom: 5%;'>
+
+            </div>
+            <div id="objectsearch" style="color: #67F; text-align: left !important; padding-left: 5%; padding-right: 5%; padding-top: 2%; padding-bottom: 5%; height: 10%; overflow-y: scroll">
 
             </div>
 
@@ -1322,6 +1325,19 @@ swal.fire({
                 addText("SGR 1935+2154", [x, y + 0.001, z], "Important Objects", false, 0.2);
                 drawObjects([right_asc], [decl], 0x00fff8, 'SGR 1935+2154', group="Important Objects")
 
+                //Jupiter
+                importantObjectList.push("Jupiter")
+                jup_ra = {{ jup_ra }}
+                jup_dec = {{ jup_dec }}
+
+                l = thetaPhiToXYZ(jup_ra, jup_dec);
+                x = l[0];
+                y = l[1];
+                z = l[2];
+
+                addText("Jupiter", [x, y + 0.001, z], "Important Objects", false, 0.2)
+                drawObjects([jup_ra], [jup_dec], 0x00fff8, 'Jupiter', group="Important Objects")
+
             }
 
             var antenna_azel_data;
@@ -1665,12 +1681,16 @@ swal.fire({
                 if (searchbar.value == ''){
                   object_list_div.innerHTML = ''
                   object_list_div.style.background = 'none'
+                  document.getElementById("objectmatchestitle").innerHTML = ''
                   return
                 }
 
                 object_list_div.style.background = '#222'
 
-                object_list_div.innerHTML = 'Matches:'
+                document.getElementById("objectmatchestitle").innerHTML = 'Matches:'
+                object_list_div.innerHTML = ''
+                //object_list_div.innerHTML += "<div style='position: sticky; width: 100%; height: 25%; top: 0; padding-left: 0 !important; padding-right: 0 !important; padding-top: -20% !important; padding-bottom: 0 !important; background-color: #000; z-index: 10; margin-left: -5%;'>Matches:</div>"
+                
                 for (i = 0; i < object_matches.length; i++){
                   console.log(object_matches[i])
                   if (importantObjectList.includes(object_matches[i])){
@@ -1679,9 +1699,9 @@ swal.fire({
                   else{
                     var star = star_not_added_code + " "
                   }
-                  object_list_div.innerHTML += "<br>" + "<a id='" + object_matches[i] + "_star' href=\"javascript:importantObjectMod('" + object_matches[i] + "')\" style='text-decoration: none; font-size: 20px; color: #67F'>" + star + " </a>"
-                  object_list_div.innerHTML += "<a href=\"javascript:searchBarCrosshairMod('" + object_matches[i] + "');\" style='color: #67F'>" + object_matches[i] + "</a>"
-                  if (i > 2){
+                  object_list_div.innerHTML += "<a id='" + object_matches[i] + "_star' href=\"javascript:importantObjectMod('" + object_matches[i] + "')\" style='text-decoration: none; font-size: 20px; color: #67F'>" + star + " </a>"
+                  object_list_div.innerHTML += "<a href=\"javascript:searchBarCrosshairMod('" + object_matches[i] + "');\" style='color: #67F'>" + object_matches[i] + "</a>" + "<br>"
+                  if (i >= 14){
                     break
                   }
                 }
