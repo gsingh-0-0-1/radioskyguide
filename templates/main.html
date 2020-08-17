@@ -1543,7 +1543,6 @@ swal.fire({
             //redraw sun every half day... hopefully you'll refresh by then...
             setInterval(drawSun(), 43200000);
             drawMoon();
-            addObjectLabels();
 
             document.getElementById("equatorialcheckbox").click()
             document.getElementById("equatorialcheckbox").click()
@@ -1753,6 +1752,7 @@ swal.fire({
             drawObjects(frb_thetas, frb_phis, 0x00ff00, frb_names, "FRB Catalog", true);
             drawObjects(messier_thetas, messier_phis, 0x00aaff, messier_names, "Messier Catalog", true);
             drawObjects(rrat_thetas, rrat_phis, 0xffff00, rrat_names, "RRAT Catalog", true);
+            addObjectLabels();
             dealWithCheckboxes();
 
             tempevent = new Object();
