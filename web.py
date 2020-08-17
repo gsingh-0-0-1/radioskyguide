@@ -267,6 +267,12 @@ def gui():
     moon_ra = process_ra([moon_ra])
     moon_dec = process_dec([moon_dec])
 
+    jup = ephem.Jupiter(datetime.datetime.utcnow())
+    jup_ra = str(jup.ra)
+    jup_dec = str(jup.dec)
+    jup_ra = process_ra([jup_ra])
+    jup_dec = process_dec([jup_dec])
+
     utcdate = datetime.datetime.utcnow()
 
     return render_template('main.html', atnf_ra_dat_here = atnf_ra_dat,
@@ -293,7 +299,10 @@ def gui():
                                         nvss_name_dat_here = nvss_names,
                                         moon_dec_here = moon_dec,
                                         moon_ra_here = moon_ra,
-                                        lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day ))
+                                        lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day ),
+                                        jup_ra = jup_ra,
+                                        jup_dec = jup_dec
+                                        )
 
     # f = codecs.open("main.html", 'r')
     # mainhtml = f.read()
