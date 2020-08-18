@@ -1441,10 +1441,14 @@
 
 				var vector = new THREE.Vector3();
 				var projector = new THREE.Projector();
-				projector.projectVector( vector.setFromMatrixPosition( selectedObject.object.matrixWorld ), camera );
+				projector.projectVector( vector.setFromMatrixPosition( obj.matrixWorld ), camera );
 
 				object_el = Math.asin(Math.sqrt(vector.x * vector.x + vector.y * vector.y))
 				object_el = 90 - (object_el * 180 / Math.PI)
+
+				if (obj.visible != true){
+					object_el *= -1;
+				}
 
 				//object_az = Math.PI/2 - Math.acos(vector.x / Math.sqrt(vector.x * vector.x + vector.y * vector.y))
 				object_az = Math.PI/2 - Math.atan2(vector.y, vector.x)
@@ -1698,7 +1702,7 @@
 	                	display = true
 	                }
 
-                    if (display != false && selectedObject.object.visible == true){
+                    if (display != false && (selectedObject.object.visible == true || obj != "none")){
                         toprightname = selectedObject.object.name;
                         if (selectedObject.object.group == "NVSS Catalog"){ //"calculate" the name for NVSS objects
                           toprightname = toprightname + "<br>"
