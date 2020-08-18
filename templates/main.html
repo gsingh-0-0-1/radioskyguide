@@ -22,198 +22,223 @@
               margin: 4px 2px;
               cursor: pointer;
             }
-/*Checkboxes styles*/
-input[type="checkbox"] { display: none; }
+			/*Checkboxes styles*/
+			input[type="checkbox"] { display: none; }
 
-input[type="checkbox"] + label {
-  display: block;
-  position: relative;
-  padding-left: 35px;
-  margin-bottom: 20px;
-  color: #ddd;
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
+			input[type="checkbox"] + label {
+				display: block;
+				position: relative;
+				padding-left: 35px;
+				margin-bottom: 20px;
+				color: #ddd;
+				cursor: pointer;
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+			}
 
-input[type="checkbox"] + label:last-child { margin-bottom: 0; }
+			input[type="checkbox"] + label:last-child { margin-bottom: 0; }
 
-input[type="checkbox"] + label:before {
-  content: '';
-  display: block;
-  width: 20px;
-  height: 20px;
-  border: 1px solid #6cc0e5;
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: .6;
-  -webkit-transition: all .12s, border-color .08s;
-  transition: all .12s, border-color .08s;
-}
+			input[type="checkbox"] + label:before {
+				content: '';
+				display: block;
+				width: 20px;
+				height: 20px;
+				border: 1px solid #6cc0e5;
+				position: absolute;
+				left: 0;
+				top: 0;
+				opacity: .6;
+				-webkit-transition: all .12s, border-color .08s;
+				transition: all .12s, border-color .08s;
+			}
 
-input[type="checkbox"]:checked + label:before {
-  width: 10px;
-  top: -5px;
-  left: 5px;
-  border-radius: 0;
-  opacity: 1;
-  border-top-color: transparent;
-  border-left-color: transparent;
-  -webkit-transform: rotate(45deg);
-  transform: rotate(45deg);
-}
-/* width */
-::-webkit-scrollbar {
-  width: 10px;
-}
+			input[type="checkbox"]:checked + label:before {
+				width: 10px;
+				top: -5px;
+				left: 5px;
+				border-radius: 0;
+				opacity: 1;
+				border-top-color: transparent;
+				border-left-color: transparent;
+				-webkit-transform: rotate(45deg);
+				transform: rotate(45deg);
+			}
+			/* width */
+			::-webkit-scrollbar {
+				width: 10px;
+			}
 
-/* Track */
-::-webkit-scrollbar-track {
-  background: #222;
-}
+			/* Track */
+			::-webkit-scrollbar-track {
+				background: #222;
+			}
 
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #456789;
-}
+			/* Handle */
+			::-webkit-scrollbar-thumb {
+				background: #456789;
+			}
 
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #345678;
-}
-
-
-
-.slidecontainer {
-  width: 100%; /* Width of the outside container */
-}
-
-/* The slider itself */
-.slider {
-  -webkit-appearance: none;  /* Override default CSS styles */
-  appearance: none;
-  width: 80%; /* Full-width */
-  height: 25px; /* Specified height */
-  background: #123456; /* Grey background */
-  outline: none; /* Remove outline */
-  opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
-  transition: opacity .2s;
-}
-
-/* Mouse-over effects */
-.slider:hover {
-  opacity: 1; /* Fully shown on mouse-over */
-}
-
-/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none; /* Override default look */
-  appearance: none;
-  width: 25px; /* Set a specific slider handle width */
-  height: 25px; /* Slider handle height */
-  background: #9400d3; /* Green background */
-  cursor: pointer; /* Cursor on hover */
-}
+			/* Handle on hover */
+			::-webkit-scrollbar-thumb:hover {
+				background: #345678;
+			}
 
 
-select {
-  width: 50%;
-  height: 40px;
-  font-size: 15px;
-  cursor: pointer;
-  border-radius: 0;
-  background-color: #5511a0;
-  border: none;
-  border-bottom: 2px solid #220088;
-  color: white;
-  padding: 10px;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  padding: 10px;
-}
 
-select:focus{
-  outline: none;
-}
+			.slidecontainer {
+				width: 100%; /* Width of the outside container */
+			}
 
-swal.fire({
-  icon: 'warning',
-  title: 'Quick Note',
-  text: 'Interactive mode is in development, and might be a little buggy. It is also not compatible with the antennae view - please switch back to non-interactive to use those. Rendering satellites with interactive mode might also be a little laggy.',
-  footer: 'Radio SkyGUIde'
-})
+			/* The slider itself */
+			.slider {
+				-webkit-appearance: none;  /* Override default CSS styles */
+				appearance: none;
+				width: 80%; /* Full-width */
+				height: 25px; /* Specified height */
+				background: #123456; /* Grey background */
+				outline: none; /* Remove outline */
+				opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+				-webkit-transition: .2s; /* 0.2 seconds transition on hover */
+				transition: opacity .2s;
+			}
+
+			/* Mouse-over effects */
+			.slider:hover {
+				opacity: 1; /* Fully shown on mouse-over */
+			}
+
+			/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+			.slider::-webkit-slider-thumb {
+				-webkit-appearance: none; /* Override default look */
+				appearance: none;
+				width: 25px; /* Set a specific slider handle width */
+				height: 25px; /* Slider handle height */
+				background: #9400d3; /* Green background */
+				cursor: pointer; /* Cursor on hover */
+			}
+
+
+			select {
+				width: 50%;
+				height: 40px;
+				font-size: 15px;
+				cursor: pointer;
+				border-radius: 0;
+				background-color: #5511a0;
+				border: none;
+				border-bottom: 2px solid #220088;
+				color: white;
+				padding: 10px;
+				appearance: none;
+				-webkit-appearance: none;
+				-moz-appearance: none;
+				padding: 10px;
+			}
+
+			select:focus{
+				outline: none;
+			}
+
+			swal.fire({
+				icon: 'warning',
+				title: 'Quick Note',
+				text: 'Interactive mode is in development, and might be a little buggy. It is also not compatible with the antennae view - please switch back to non-interactive to use those. Rendering satellites with interactive mode might also be a little laggy.',
+				footer: 'Radio SkyGUIde'
+			})
         </style>
         <script language="javascript" type="text/javascript" src="/static/astro.js"></script>
         <script language="javascript" type="text/javascript" src="/static/astro.ephem.js"></script>
         <script language="javascript" type="text/javascript" src="https://threejs.org/build/three.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
         <script language="javascript" type="text/javascript" src="/static/examples/js/controls/TrackballControls.js"></script>
+        <script language="javascript" type="text/javascript" src="/static/examples/js/renderers/Projector.js"></script>
         <script src="/static/examples/js/controls/TrackballControls.js"></script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     </head>
-    <body onload="fullReload();">
+    <body>
+    	<div id="testdiv" style="color: #FFF; z-index: 5; position: absolute;">
+    	</div>
+
         <div id="leftdetails" class="leftdetails">
-            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}"><br>
-            <span id="sidtime">
-            </span>
+            <input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Approximate LST at the {{ abbr_here }}">
+
+            <br>
+
+            <span id="sidtime"></span>
+
             <br><br><br>
 
             <span id="antennae">
+
             <input type="button" class="button" style="--bcolor: #3f1166; --fsize: 15px;" value="Available Antennae">
+
             <br>
+
             <select id="antenna_select" onchange="javascript:changeAntenna();">
               <option value="none">None</option>
             </select>
+
             </span>
 
             <br><br>
 
-
             <input id="objectsearchbar" type="text" class="button" style="padding: 10px 0px;border-color: black; font-size: 17px; outline: none; background-color: #bbb; align-self: left !important; text-align: left; padding-left: 5%; padding-right: 5%; color: #000" placeholder="&#x1F50E;Object Search" onkeypress="javascript:dealWithSearchBar(event)">
 
             <br>
+
             <div id="objectmatchestitle" style='color: #67F; text-align: left !important; padding-left: 5%; padding-right: 5%; padding-top: 5%; padding-bottom: 5%;'>
-
             </div>
-            <div id="objectsearch" style="color: #67F; text-align: left !important; padding-left: 5%; padding-right: 5%; padding-top: 2%; padding-bottom: 5%; height: 10%; overflow-y: scroll">
 
+            <div id="objectsearch" style="color: #67F; text-align: left !important; padding-left: 5%; padding-right: 5%; padding-top: 2%; padding-bottom: 5%; height: 10%; overflow-y: scroll">
             </div>
 
             <br>
-            <div>
 
+            <div>
                 <br>
+
                 <table style="text-align: center; display:inline;">
+
                 <tr>
+
                 <td>
                 <input type="button" class="button" style="--bcolor: #749fd8; --fsize: 15px; font-family: courier" value="+5m" onclick="offsetRA(1.25);">
                 </td>
+
                 <td>
                 <input type="button" class="button" style="--bcolor: #cb8080; --fsize: 15px; font-family: courier" value="-5m" onclick="offsetRA(-1.25);">
                 </td>
+
                 </tr>
                 
                 <tr>
+
                 <td>
                 <input type="button" class="button" style="--bcolor: #356fbb; --fsize: 15px; font-family: courier" value="+1h" onclick="offsetRA(15);">
                 </td>
+
                 <td>
                 <input type="button" class="button" style="--bcolor: #b54a4a; --fsize: 15px; font-family: courier" value="-1h" onclick="offsetRA(-15);">
                 </td>
+
+            	</tr>
+
                 </table>
 
                 <br>
                 <input type="text" class="button" id="delaybox" style="--bcolor: #553555; --fsize: 15px;" placeholder="Custom Time Offset" onkeypress="javascript:customRaOffset(event);">
+
                 <br>
+
                 <input type="text" class="button" id="cont_del_box" style="--bcolor: #553555; --fsize: 15px;" placeholder="Animate (Min/Sec)" onkeypress="javascript:delayAnimate(event)">
 
                 <br>
+
                 <input type="button" class="button" style="--bcolor: #553555; --fsize: 15px;" value="Reset and Re-center" onclick="offsetRA(0, true); controls.reset()">
+
                 <br>
+
                 <div id="totaloffset">
                     <input type="button" class="button" style="--bcolor: #444444; --fsize: 15px;" value="Total Time Offset (min): 0">
                 </div>
@@ -223,17 +248,22 @@ swal.fire({
 
         <div id="crosshairtext" style="position:absolute; display:inline-block; top:45%; left:52%; font-family:Verdana; z-index: 5; color: #FF0000">
         </div>
+
         <div id="crosshair_fov_text" style="position:absolute; display:inline-block; top:30%; left:43%; font-family:Verdana; z-index: 5; color: #FF0000">
         </div>
+
         <div id="crosshair_direction_text" style="position:absolute; display:inline-block; top:2%; left:50%; font-family:Verdana; z-index: 5; color: #FF0000">
         </div>
 
         <div id='rightdetails' class='rightdetails'>
+        	<!-- Currently Selected Object -->
             <div id="currentlyshowing" style="display: inline; color: #56789a">Currently Selected<br><br>
                 <div id="currentobject">None</div>
             </div>
+
             <br><br>
-            <!--<input type="button" class="button" style="--bcolor: #123456; --fsize: 15px;" value="-Select Objects to Draw-"><br><br>-->
+
+            <!-- Catalog names and checkboxes -->
             <div style="text-align: left">
             <form>
 
@@ -261,6 +291,8 @@ swal.fire({
                 <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
             </form>
             
+            <!-- Checkboxes for grid types -->
+
             <form>
                 <input type="checkbox" name="equatorialcheckbox" value="true" id="equatorialcheckbox" onclick="gridCheckboxes();">
                 <label for="equatorialcheckbox" style="color: #999999; display:inline">Equatorial Grid</label>
@@ -268,8 +300,12 @@ swal.fire({
                 <input type="checkbox" name="altazcheckbox" value="true" id="altazcheckbox" onclick="gridCheckboxes();" checked>
                 <label for="altazcheckbox" style="color: #999999; display:inline">Alt-Az Grid</label>
             </form>
+
             </div>
+
             <br><br>
+
+            <!-- Some hidden values that will get passed when going into interactive mode -->
             <form action='/main'>
                 <input type="hidden" name="alt" value="90">
                 <input type="hidden" name="az" value="0">
@@ -281,10 +317,14 @@ swal.fire({
                 <input type="hidden" name="controls" id="controls" value="tobefilled">
                 <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Toggle Interactive Mode">
             </form>
+
             <br>
+
             <form action='/'>
                 <input type="Submit" class="button" style="--bcolor: #123456; --fsize: 15px;" value="Restart">
             </form>
+
+            <!-- this is left-over from an older interface where alt, az, and fov were input textboxes. I left them here, and now they are used as "variables". It's a tad convoluted, but restructuring this isn't a top priority at the moment. -->
             <div id="modifyaltaz">
                 <!--<input id="alt_box" class="button" style="--bcolor: #123456; --fsize: 15px;" placeholder="Altitude (&#176)" onkeypress="javascript:dealWithAltAzInput(event);">-->
                 <input id="alt_box" type="hidden">
@@ -301,6 +341,9 @@ swal.fire({
             <br>
 
         </div>
+
+        <!-- the main script begins here -->
+
         <gui id='gui'>
         <script>
             astrojs.ready(function(e){
@@ -316,16 +359,20 @@ swal.fire({
                 c.value = "true"
             }
 
+            //remove the antenna interface if the location is not the ATA
             if (GetURLParameter("loc") != "Allen+Telescope+Array" || GetURLParameter("controls") == "true"){
                 document.getElementById("antennae").innerHTML = ''
             }
 
+            //flash a warning message if interactive mode is on
             if (GetURLParameter("controls") == "true"){
                 swal("Interactive Mode Note", "Interactive mode is still being worked on, and might be a little buggy. It's also not easily compatible with the antenna view - please revert back to non-interactive before using the antennae buttons.", "warning")
             }
 
+            //this variable is used to animate - i.e., 10 minutes per second...
             var continuousDelayAnimateInterval;
 
+            //and this function makes use of the previous variable
             function delayAnimate(event){
                 if (event.keyCode == 13 || event.which == 13){
                     clearInterval(continuousDelayAnimateInterval);
@@ -338,6 +385,7 @@ swal.fire({
                 }
             }
 
+            //this function is used to get parameters from the page URL
             function GetURLParameter(sParam){
 
                 var sPageURL = window.location.search.substring(1);
@@ -352,6 +400,7 @@ swal.fire({
                 }
             }
 
+            //this function takes the values of the alt, az, and fov box, and parses them for use
             function dealWithAltAzInput(event){
                 if (event.keyCode == 13 || event.which == 13){
                     alt_box = document.getElementById("alt_box");
@@ -374,7 +423,7 @@ swal.fire({
                 }
             }
 
-
+            //this function takes the input in the offset box and applies it
             function customRaOffset(event){
                 if (event.keyCode == 13 || event.which == 13){
                     delaybox = document.getElementById("delaybox");
@@ -602,6 +651,7 @@ swal.fire({
                 sid.innerHTML = "<input type='button' class='button' style='--bcolor: #123456; --fsize: 15px;' value=" +calculateSiderealTime(false) + ">";
                 setTimeout(fullReload, 500);
             }
+            fullReload()
 
             function startScene(){
                 var width = window.innerWidth;
@@ -1194,7 +1244,6 @@ swal.fire({
             }
 
             function updateSatellites(){
-              console.log("im here", data.length);
  
                 for (var i = 0; i < data.length; i+=1){
                     var sat = data[i].split("\n")
@@ -1210,8 +1259,6 @@ swal.fire({
                     newDateObj.setTime(oldDateObj.getTime() + (timeoffset * 60 * 1000));
 
                     //var timeSinceTleEpochMinutes = Math.floor(new Date().getTime() / 60000);
-
-                    //console.log(timeSinceTleEpochMinutes);
 
                     //var positionAndVelocity = satellite.sgp4(satrec, timeSinceTleEpochMinutes);
                     var positionAndVelocity = satellite.propagate(satrec, newDateObj);
@@ -1387,6 +1434,39 @@ swal.fire({
               return [antenna_azel_data[this_antenna]["el"], antenna_azel_data[this_antenna]["az"]]
             }
 
+            //this function helps with updating the alt-az in the currently selected menu
+			function updatetopright(obj){
+				var width = window.innerWidth, height = window.innerHeight;
+				var widthHalf = width / 2, heightHalf = height / 2;
+
+				var vector = new THREE.Vector3();
+				var projector = new THREE.Projector();
+				projector.projectVector( vector.setFromMatrixPosition( selectedObject.object.matrixWorld ), camera );
+
+				object_el = Math.asin(Math.sqrt(vector.x * vector.x + vector.y * vector.y))
+				object_el = 90 - (object_el * 180 / Math.PI)
+
+				//object_az = Math.PI/2 - Math.acos(vector.x / Math.sqrt(vector.x * vector.x + vector.y * vector.y))
+				object_az = Math.PI/2 - Math.atan2(vector.y, vector.x)
+				object_az = object_az * 180 / Math.PI
+				if (object_az < 0){
+					object_az = object_az + 360
+				}
+				//toprightname += "<br>X " + vector.x + " Y: " + vector.y
+				toprightname = document.getElementById("currentobject").innerHTML
+				//remove the last 
+				/*if(toprightname.lastIndexOf("<br>") > 1) {
+				    toprightname = toprightname.substring(0, toprightname.lastIndexOf("<br>"));
+				}
+				else {
+				}*/
+				toprightname = toprightname.split("<br>Alt")[0]
+
+				toprightname += "<br>Alt " + object_el.toFixed(4) + ", Az: " + object_az.toFixed(4)
+
+			    document.getElementById("currentobject").innerHTML = toprightname
+			}
+
             var camx, camy, camz;
             var backmask = '';
             var pointing_crosshair = '';
@@ -1494,7 +1574,7 @@ swal.fire({
               camz = r * Math.sin(ra) * Math.cos(dec);
 
                for (var i = 1; i < scene.children.length; i++){
-                  if (scene.children[i].group == "equatorial"){
+                  if (scene.children[i].group == "equatorial" || scene.children[i].spec == "crosshair"){
                       continue
                   }
                   x = scene.children[i].position.x
@@ -1584,7 +1664,9 @@ swal.fire({
             var crosshairinterval;
             raycaster.params.Line.threshold = 0;
             raycaster.params.Sprite.threshold = 0;
-            function onclick(event) {
+            var toprightnameUpdateInterval = ''
+
+            function onclick(event, obj='none') {
                 raycaster.params.Points.threshold = 0.25/camera.zoom
                 raycaster.params.Mesh.threshold = 0.25/camera.zoom
                 var display = false;
@@ -1594,19 +1676,27 @@ swal.fire({
                 mouse.y = - ( (event.clientY - rect.top) / window.innerHeight ) * (2) + (1);
                 raycaster.setFromCamera(mouse, camera);
                 var intersects = raycaster.intersectObjects(scene.children, true); //array
-                if (intersects.length > 0 && intersects[0].object.group != "altaz" && intersects[0].object.group != "equatorial") {
-                    selectedObject = intersects[0]
-                    i = 0
-                    toprightname = "undefined"
-                    display = true;
-                    while (selectedObject.object.group == "altaz" || selectedObject.object.group == "equatorial" || selectedObject.object.name == "textlabel" || selectedObject.object.visible == false){
-                        i += 1;
-                        if (i > intersects.length-1){
-                            display = false;
-                            break
-                        }
-                        selectedObject = intersects[i]
-                    }
+                console.log(event.clientX, event.clientY)
+                if ((intersects.length > 0 && intersects[0].object.group != "altaz" && intersects[0].object.group != "equatorial") || obj != 'none'){
+                	if (obj == 'none'){
+	                    selectedObject = intersects[0]
+	                    i = 0
+	                    toprightname = "undefined"
+	                    display = true;
+	                    while (selectedObject.object.group == "altaz" || selectedObject.object.group == "equatorial" || selectedObject.object.name == "textlabel" || selectedObject.object.visible == false){
+	                        i += 1;
+	                        if (i > intersects.length-1){
+	                            display = false;
+	                            break
+	                        }
+	                        selectedObject = intersects[i]
+	                    }
+	                }
+	                else{
+	                	selectedObject = new Object()
+	                	selectedObject.object = window[obj]
+	                	display = true
+	                }
 
                     if (display != false && selectedObject.object.visible == true){
                         toprightname = selectedObject.object.name;
@@ -1615,8 +1705,25 @@ swal.fire({
                           toprightname = toprightname + "Flux Density: " + selectedObject.object.lum + " mJy"
 
                         }
+
                         document.getElementById("currentobject").innerHTML = toprightname
 
+                        //get alt and az coordinates of the object
+                        //width and height are both "height" since the drawing space is a square
+                        //with side length window.innerHeight
+						var width = window.innerWidth, height = window.innerHeight;
+						var widthHalf = width / 2, heightHalf = height / 2;
+
+						var vector = new THREE.Vector3();
+						var projector = new THREE.Projector();
+						projector.projectVector( vector.setFromMatrixPosition( selectedObject.object.matrixWorld ), camera );
+
+						//vector.x = ( vector.x * widthHalf ) + widthHalf;
+						//vector.y = - ( vector.y * heightHalf ) + heightHalf;
+
+						clearInterval(toprightnameUpdateInterval)
+						updatetopright(selectedObject.object)
+						toprightnameUpdateInterval = setInterval(function(){updatetopright(selectedObject.object)}, 100)
                         // crosshair size
 
                         scene.remove(crosshair)
@@ -1721,15 +1828,39 @@ swal.fire({
 
             //function to select object based on crosshair
             function searchBarCrosshairMod(obj){
-              console.log(obj)
-              clearInterval(crosshairinterval)
-              crosshair.position.copy(window[obj].position)
-              if (selectedObject.object.group == "Satellite"){
-                crosshairinterval = setInterval(function(){
-                  crosshair.position.copy(window[obj].position)
-                }, 100)
-              }
-              document.getElementById("currentobject").innerHTML = obj
+            	/*//first, clear the previous crosshair interval
+				clearInterval(crosshairinterval)
+				//set the crosshair to copy the object's position
+				crosshair.position.copy(window[obj].position)
+				crosshair.visible = true;
+				if (obj.group == "Satellite"){
+					crosshairinterval = setInterval(function(){
+						crosshair.position.copy(window[obj].position)
+					}, 100)
+				}*/
+				var width = window.innerWidth, height = window.innerHeight;
+				var widthHalf = width / 2, heightHalf = height / 2;
+
+				var vector = new THREE.Vector3();
+				var projector = new THREE.Projector();
+				projector.projectVector( vector.setFromMatrixPosition( window[obj].matrixWorld ), camera );
+				vector.x = ( vector.x * widthHalf / 2) + widthHalf - 4;
+				vector.y = - ( vector.y * heightHalf ) + heightHalf - 4;
+
+				console.log(vector.x, vector.y)
+
+				//document.getElementById("testdiv").style.left = vector.x
+				//document.getElementById("testdiv").style.top = vector.y
+				//document.getElementById("testdiv").innerHTML = "hello there"
+
+				var ev = new Object();
+
+				ev.clientX = vector.x 
+				ev.clientY = vector.y
+
+				onclick(ev, obj);
+
+				//document.getElementById("currentobject").innerHTML = obj
             }
 
             //function to add to Important Objects
@@ -1796,12 +1927,60 @@ swal.fire({
             tempevent = new Object();
             tempevent.clientX = window.innerWidth / 2
             tempevent.clientY = window.innerHeight / 2
-            onclick(tempevent);
             crosshair.hid_override = true;
 
             setInterval(redoLabels, 10);
 
             console.log(importantObjectList)
+
+            //initialize crosshair object
+			x = 0.25/camera.zoom;
+			y = 0.25/camera.zoom;
+			var material = new THREE.LineBasicMaterial({ color: 0xAAFFAA });
+
+	        upbar = new THREE.Geometry();
+	        upbar.vertices.push(new THREE.Vector3(0, y*1.2, 0));
+	        upbar.vertices.push(new THREE.Vector3(0, y/3, 0));
+	        upbar = new THREE.Line( upbar, material )
+
+	        downbar = new THREE.Geometry();
+	        downbar.vertices.push(new THREE.Vector3(0, -y/3, 0))
+	        downbar.vertices.push(new THREE.Vector3(0, -y*1.2, 0));
+	        downbar = new THREE.Line( downbar, material )
+
+	        leftbar = new THREE.Geometry();
+	        leftbar.vertices.push(new THREE.Vector3(x*1.2, 0, 0));
+	        leftbar.vertices.push(new THREE.Vector3(x/3, 0, 0));
+	        leftbar = new THREE.Line( leftbar, material )
+
+	        rightbar = new THREE.Geometry();
+	        rightbar.vertices.push(new THREE.Vector3(-x/3, 0, 0))
+	        rightbar.vertices.push(new THREE.Vector3(-x*1.2, 0, 0));
+	        rightbar = new THREE.Line( rightbar, material )
+	        
+
+	        var curve = new THREE.EllipseCurve(
+	            0,  0,            // ax, aY
+	            x, y,           // xRadius, yRadius
+	            0,  2 * Math.PI,  // aStartAngle, aEndAngle
+	            false,            // aClockwise
+	            0                 // aRotation
+	        );
+
+	        var points = curve.getPoints( 50 );
+	        var geometry = new THREE.BufferGeometry().setFromPoints( points );
+
+	        crosshair = new THREE.Line( geometry, material );
+	        crosshair.add(upbar)
+	        crosshair.add(downbar)
+	        crosshair.add(leftbar)
+	        crosshair.add(rightbar)
+
+            crosshair.name = "textlabel"
+            crosshair.spec = "crosshair"
+            scenetextobjects.push(crosshair);
+	        crosshair.visible = false;
+	        scene.add(crosshair)
 
 
         </script>
