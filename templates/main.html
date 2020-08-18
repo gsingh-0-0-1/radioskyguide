@@ -1778,7 +1778,7 @@
                         clearInterval(crosshairinterval)
                         crosshair.position.copy(selectedObject.object.position)
                         if (selectedObject.object.group == "Satellite"){
-                            crosshairinterval = setInterval(function(){crosshair.position.copy(window[toprightname].position)}, 100)
+                            crosshairinterval = setInterval(function(){crosshair.position.copy(selectedObject.object.position)}, 100)
                         }
                         crosshair.hid_override = false;
                         //crosshair.quaternion.copy(camera.quaternion)

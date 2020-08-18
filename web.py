@@ -57,7 +57,7 @@ def process_dec(dec_dat):
         dec_dat[i] = num * np.pi / 180
     return dec_dat
 
-atnf_data = open("psrcat.db")
+atnf_data = open("catalogfiles/psrcat.db")
 atnf_data = atnf_data.read()
 atnf_data = atnf_data.split('@-----------------------------------------------------------------')
 
@@ -125,7 +125,7 @@ atnf_name_dat = name_dat
 ##get data for the FRBCAT
 ##########
 
-frb_data = open("frbcat.csv")
+frb_data = open("catalogfiles/frbcat.csv")
 frb_data = frb_data.read()
 frb_data = frb_data.replace('''"''', '')
 frb_data = frb_data.split("\n")
@@ -145,7 +145,7 @@ for i in range(len(frb_data)-1):
 frb_ra_dat = process_ra(frb_ra_dat)
 frb_dec_dat = process_dec(frb_dec_dat)
 
-messier_data = open("messiercatalog.txt")
+messier_data = open("catalogfiles/messiercatalog.txt")
 messier_data = messier_data.read()
 messier_data = messier_data.split("\n")
 #messier_data.remove('')
@@ -175,16 +175,16 @@ messier_decs = process_dec(messier_decs)
 
 
 
-rrat_ras = process_ra(open("rrat_ras.txt").read().split("\n"))
-rrat_decs = process_dec(open("rrat_decs.txt").read().split("\n"))
-rrat_names = open("rrat_names.txt").read().split("\n")
+rrat_ras = process_ra(open("catalogfiles/rrat_ras.txt").read().split("\n"))
+rrat_decs = process_dec(open("catalogfiles/rrat_decs.txt").read().split("\n"))
+rrat_names = open("catalogfiles/rrat_names.txt").read().split("\n")
 
-nvss_ras = process_ra(open("nvss_ras.txt").read().split("\n"))
-nvss_decs = process_dec(open("nvss_decs.txt").read().split("\n"))
-nvss_lum = open("nvss_lum.txt").read().split("\n")
+nvss_ras = process_ra(open("catalogfiles/nvss_ras.txt").read().split("\n"))
+nvss_decs = process_dec(open("catalogfiles/nvss_decs.txt").read().split("\n"))
+nvss_lum = open("catalogfiles/nvss_lum.txt").read().split("\n")
 for i in range(len(nvss_lum)):
     nvss_lum[i] = float(nvss_lum[i].replace(" ", ''))
-nvss_names = open("nvss_names.txt").read().split("\n")
+nvss_names = open("catalogfiles/nvss_names.txt").read().split("\n")
 for i in range(len(nvss_names)):
     nvss_names[i] = "NVSS J"+nvss_names[i]
 
