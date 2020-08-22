@@ -16,7 +16,6 @@
               color: white;
               padding: 15px 24px;
               text-align: center;
-              text-decoration: none;
               display: inline-block;
               font-size: var(--fsize);
               margin: 4px 2px;
@@ -153,7 +152,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.0.0/satellite.min.js"></script>
         <script language="javascript" type="text/javascript" src="/static/examples/js/controls/TrackballControls.js"></script>
         <script language="javascript" type="text/javascript" src="/static/examples/js/renderers/Projector.js"></script>
-        <script src="/static/examples/js/controls/TrackballControls.js"></script>
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     </head>
     <body>
@@ -289,8 +287,14 @@
 
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
                 <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
+
+                <a href="javascript:triggerLogInPanel()" style="color: #aaa; display: none">
+                    User-Defined Objects...
+                </a>
             </form>
             
+            <br>
+
             <!-- Checkboxes for grid types -->
 
             <form>
@@ -339,6 +343,68 @@
                 <br>
             </div>
             <br>
+
+        </div>
+
+        <!-- Login panel html - the display property will be toggled on to trigger the panel  -->
+
+        <div id="loginpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: #112; width: 30%; height: 45%; border: 0px solid #6666de; display: none; z-index: 1">
+            <input type="button" class="button" value="X" style="--bcolor: #aa2222; --fsize: 7px; padding: 0 0; margin: 0 0; position: fixed; left: 0%; top: 0%; display: inline; width: 7%; height: 4%; outline: none; border: 1px solid black" onclick="javascript:hideLoginPanel();">
+            <div style="color: #229; font-family: Helvetica; font-size: 20px; text-align: left; margin-left: 5%; margin-top: 2%">
+                <br>
+                Log In
+                <br>
+                <div>
+                    <input onkeypress="javascript:sendLoginRequest(event)" id="login_user" type="text" class="button" style="--bcolor: #123456; --fsize: 15px; padding: 10px 5px; border-radius: 7px" placeholder="Username">
+                    <br>
+                    <input onkeypress="javascript:sendLoginRequest(event)" id="login_pass" type="password" class="button" style="--bcolor: #765432; --fsize: 15px; padding: 10px 5px; border-radius: 7px" placeholder="Password">
+                    <br>
+                    <div id="loginResult" style="font-size: 10px; color: #222222">
+                        <br>
+                    </div>
+                </div>
+
+                <br>
+                Create New Account
+                <br>
+                <div>
+                    <input onkeypress="javascript:sendLoginRequest(event, true)" id="create_user" type="text" class="button" style="--bcolor: #6a3535; --fsize: 15px; padding: 10px 5px; border-radius: 7px" placeholder="Username">
+                    <br>
+                    <input onkeypress="javascript:sendLoginRequest(event, true)" id="create_pass" type="password" class="button" style="--bcolor: #6a3535; --fsize: 15px; padding: 10px 5px; border-radius: 7px" placeholder="Password">
+                    <br>
+                    <div id="createResult" style="font-size: 10px; color: #aa2222">
+                        <br>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User-specific objects and such over here -->
+        <div id="userpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: #25256a; width: 30%; height: 45%; border: 3px solid #6666de; display: none; z-index: 1">
+            <input type="button" class="button" value="X" style="--bcolor: #aa2222; --fsize: 7px; padding: 0 0; margin: 0 0; position: fixed; left: 0%; top: 0%; display: inline; width: 7%; height: 4%; outline: none" onclick="javascript:hideUserPanel()">
+
+            <span style="position: fixed; left: 5%; top: 15%; font-size: 35px; font-family: Helvetica; color: #6666e7">
+                Your Objects
+            </span>
+
+            <input id="userid_button" type="button" style="--bcolor: #282; --fsize: 12px; position:fixed; left: 100%; top: 0%; transform: translate(-100%, 0%); outline: none" value="">
+
+            <div id="userObjectsDiv" style="position: fixed; top: 35%; width: 90%; height:55%; background-color: #121256; transform: translate(5%, 0); overflow-y: scroll">
+                <iframe id="hidden-iframe" name="hidden-iframe" style="display: none"></iframe>
+                <form target="hidden-iframe" enctype="multipart/form-data" id="submitCatalogFile" action='/uploadfile' style="position: fixed; left: 0%; top: 80%; height: 20%; width: 100%; background-color: #000" method="POST">
+
+                    <input accept=".csv" name="catalogFileUpload" id="catalogFileUpload" type="file" style="left: 0; top: 86%; position: fixed; color: #fff">
+
+                    <input type="hidden" name="uploadFileUser" id="uploadFileUser" value=''>
+                    <input type="hidden" name="uploadFilePass" id="uploadFilePass" value=''>
+
+                    <input onclick="javascript:resetFileUpload(this.form)" type="button" class="button" style="--bcolor: #666; --fsize: 10px; position: fixed; left: 70%; top: 83%; padding: 5 5" value="Upload">
+                </form>
+            </div>
+
+            <span style="position: fixed; left: 5%; top: 90%; color: #ccc; font-family: Helvetica; font-size: 11px">
+                All files should be .csv, with format "name,hh:mm:ss.ss,dd:mm:ss.ss"
+            </span>
 
         </div>
 
@@ -417,8 +483,7 @@
                     }
                     pointing_alt = alt_box.value;
                     temp_az = parseFloat(az_box.value) * 1;
-                    temp_az = 360 - temp_az;
-                    pointing_az = temp_az + 90;
+                    pointing_az = temp_az
                     fov = fov_box.value;
                 }
             }
@@ -595,6 +660,31 @@
             }
 
             function calculateSiderealTime(raw){
+            	y = 2020
+            	m = 8
+            	day = 19
+
+            	dwhole = (367 * y) - Math.floor(7 * (y + Math.floor((m + 9) / 12)) / 4) + Math.floor(275 * m / 9) + day - 730531.5
+
+            	dfrac_o = Math.floor(new Date().getTime()/1000) % 86400
+
+            	hours = Math.floor(dfrac_o / 3600)
+
+            	mins = Math.floor(dfrac_o / 60) % 60
+
+            	seconds = dfrac_o - (hours * 3600) - (mins * 60)
+
+            	dfrac = (hours + mins/60 + seconds/3600)/24
+
+            	d = dwhole + dfrac
+
+            	lmst = 280.46061837 + (360.98564736629 * d) + longitude
+
+            	lmst = lmst * Math.PI / 180
+
+            	if (raw){
+            		return lmst
+            	}
 
                 //get the time in UTC
                 seconds_since_j2000 = Math.floor(Date.now()/1000) - 946684800;
@@ -973,9 +1063,11 @@
                 //other calculations 
                 L = 280.460 + (0.9856474 * days_since_j2000)
                 g = 357.528 + (0.9856003 * days_since_j2000)
+                L = L % 360
+                g = g % 360
                 lambda = L + (1.915 * Math.sin(g * Math.PI/180)) + (0.02 * Math.sin(2 * g * Math.PI/180));
 
-                obl_earth = 23.43663;
+                obl_earth = 23.43661;
 
                 ra_sun = Math.atan2(Math.cos(obl_earth*Math.PI/180) * Math.sin(lambda*Math.PI/180), Math.cos(lambda*Math.PI/180));
                 dec_sun = Math.asin(Math.sin(obl_earth*Math.PI/180) * Math.sin(lambda*Math.PI/180));
@@ -1007,6 +1099,8 @@
 
                 sun.theta = ra_sun
                 sun.phi = dec_sun
+
+                console.log(ra_sun, dec_sun)
 
                 window["Sun"] = sun
                 namedObjectList.push("Sun")
@@ -1128,7 +1222,7 @@
                     pointing_az = altaz[1]
                     alt_box.value = pointing_alt;
                     az_box.value = pointing_az;
-                    fov_box.value = 90; //this is the FOV of ATA antennae
+                    fov_box.value = 90; 
                 }
             }
             var current_antenna_interval = setInterval(function () {
@@ -1400,12 +1494,12 @@
 
             var antenna_azel_data;
             //get initial antenna data, populate dropdown menu
-            var req = new XMLHttpRequest();        
-            req.open("GET", "/antennadata/azel");
-            req.send();
+            var antenna_req = new XMLHttpRequest();        
+            antenna_req.open("GET", "/antennadata/azel");
+            antenna_req.send();
             var alt;
             var az;
-            req.onreadystatechange = function() {
+            antenna_req.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     adata = this.responseText;
                     adata = JSON.parse(adata)
@@ -1419,18 +1513,19 @@
 
             //this is to actually get the antenna data for each option
             function getAntennaData(this_antenna){
-              var req = new XMLHttpRequest();        
-              req.open("GET", "/antennadata/azel");
-              req.send();
+              var antenna_req = new XMLHttpRequest();        
+              antenna_req.open("GET", "/antennadata/azel");
+              antenna_req.send();
               var alt;
               var az;
-              req.onreadystatechange = function() {
+              antenna_req.onreadystatechange = function() {
                   if (this.readyState == 4 && this.status == 200) {
                       adata = this.responseText;
-                      adata = JSON.parse(data)
-                      antenna_azel_data = data;
+                      adata = JSON.parse(adata)
+                      antenna_azel_data = adata;
                   }
               };
+              console.log(antenna_azel_data)
               return [antenna_azel_data[this_antenna]["el"], antenna_azel_data[this_antenna]["az"]]
             }
 
@@ -1456,19 +1551,18 @@
 				if (object_az < 0){
 					object_az = object_az + 360
 				}
-				//toprightname += "<br>X " + vector.x + " Y: " + vector.y
+				
 				toprightname = document.getElementById("currentobject").innerHTML
-				//remove the last 
-				/*if(toprightname.lastIndexOf("<br>") > 1) {
-				    toprightname = toprightname.substring(0, toprightname.lastIndexOf("<br>"));
-				}
-				else {
-				}*/
 				toprightname = toprightname.split("<br>Alt")[0]
 
 				toprightname += "<br>Alt " + object_el.toFixed(4) + ", Az: " + object_az.toFixed(4)
+				/*centerobj.matrixWorldInverse.getInverse( centerobj.matrixWorld );
+				vec = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z)
+				vec.applyMatrix4( centerobj.matrixWorldInverse );
+				toprightname += "<br>X " + vec.x + " Y: " + vec.y*/
 
 			    document.getElementById("currentobject").innerHTML = toprightname
+
 			}
 
             var camx, camy, camz;
@@ -1482,21 +1576,21 @@
             namedObjectList = [];
 
             //do the initial ra calculation so interactive mode will start correctly
-            ra = calculateSiderealTime(false);
-            ra = ra.split(":");
+            ra = calculateSiderealTime(true);
+            /*ra = ra.split(":");
 
             final_ra = ra[0] * 1;
             final_ra += ra[1] / 60;
             final_ra += ra[2] / 3600;
             final_ra = final_ra * 15;
             final_ra = final_ra * Math.PI / 180;
-            ra = final_ra;// - Math.PI/2;
+            ra = final_ra;// - Math.PI/2;*/
             ra += raoffset;
 
 
             function animate() {
               
-              for (var i = 0; i < camera.children.length; i++){
+                for (var i = 0; i < camera.children.length; i++){
                 if (camera.children[i].group == "altaz"){
                   if (antenna != "none"){
                     camera.children[i].visible = false
@@ -1505,77 +1599,66 @@
                     gridCheckboxes()
                   }
                 }
-              }
+                }
 
-              pointing_crosshair.visible = false;
-              antenna_fov_line.visible = false;
-              //camera.remove(antenna_crosshair_text);
-              document.getElementById("crosshairtext").innerHTML = ''
-              document.getElementById("crosshair_direction_text").innerHTML = ''
-              document.getElementById("crosshair_fov_text").innerHTML = ''
+                pointing_crosshair.visible = false;
+                antenna_fov_line.visible = false;
+                //camera.remove(antenna_crosshair_text);
+                document.getElementById("crosshairtext").innerHTML = ''
+                document.getElementById("crosshair_direction_text").innerHTML = ''
+                document.getElementById("crosshair_fov_text").innerHTML = ''
 
-              //get the "Actual" altitude for calculation purposes
-              act_alt = pointing_alt
+                if (antenna != "none"){
+                    camera.zoom = 75
+                    pointing_crosshair.visible = true;
+                    antenna_fov_line.visible = true;
+                    document.getElementById("crosshairtext").innerHTML = "Az "+String(Math.round(pointing_az * 100) /100)+"&#176, El "+String(Math.round(act_alt * 100) / 100)+"&#176"
+                    document.getElementById("crosshair_direction_text").innerHTML = 'N'
+                    document.getElementById("crosshair_fov_text").innerHTML = String(Math.round(100 * 180/camera.zoom)/ 200)+"&#176" //divide by 200 here instead of 100 to get the radius rather than the diameter
+                }
 
-              if (antenna != "none"){
-                camera.zoom = 75
-                pointing_crosshair.visible = true;
-                antenna_fov_line.visible = true;
-                document.getElementById("crosshairtext").innerHTML = "Az "+String(Math.round(disp_az * 100) /100)+"&#176, El "+String(Math.round(act_alt * 100) / 100)+"&#176"
-                document.getElementById("crosshair_direction_text").innerHTML = 'N'
-                document.getElementById("crosshair_fov_text").innerHTML = String(Math.round(100 * 180/camera.zoom)/ 200)+"&#176" //divide by 200 here instead of 100 to get the radius rather than the diameter
-              }
+                //get the "Actual" altitude for calculation purposes
+                act_alt = pointing_alt
 
-              //get the "actual" azimuth for calculation purposes
-              pointing_az = pointing_az % 360
-              disp_az = pointing_az - 90
+                //get the "actual" azimuth for calculation purposes
+                disp_az = pointing_az//(360 - pointing_az) + 90
 
-              if (antenna == "none" && GetURLParameter("controls") == "false"){
-                camera.zoom = 1
-              }
+                if (antenna == "none" && GetURLParameter("controls") == "false"){
+                    camera.zoom = 1
+                }
 
-              viewrad = r * Math.sin(fov * Math.PI / 180);
+                viewrad = r * Math.sin(fov * Math.PI / 180);
 
-              //alt_rectangular = r * Math.cos(pointing_alt * Math.PI / 180);
+                //alt_rectangular = r * Math.cos(pointing_alt * Math.PI / 180);
 
-              var antenna_dec = Math.asin( Math.sin(act_alt * Math.PI / 180) * Math.sin(dec) + 
-                Math.cos(act_alt * Math.PI / 180) * Math.cos(dec) * Math.cos(disp_az * Math.PI / 180))
+                antenna_dec = Math.asin( Math.sin(act_alt * Math.PI / 180) * Math.sin(dec) + Math.cos(act_alt * Math.PI / 180) * Math.cos(dec) * Math.cos(disp_az * Math.PI / 180))
 
-              var H = Math.asin( -Math.sin(disp_az * Math.PI / 180) * Math.cos(act_alt * Math.PI / 180) ) / Math.cos(antenna_dec)
+                var H = Math.asin( -Math.sin(disp_az * Math.PI / 180) * Math.cos(act_alt * Math.PI / 180) / Math.cos(antenna_dec) )
 
-              view_center_x = 0//alt_rectangular * Math.cos(pointing_az * Math.PI / 180);
-              view_center_y = 0//alt_rectangular * Math.sin(pointing_az * Math.PI / 180);
+                if ((disp_az > 270 || disp_az < 90) && antenna != "none"){
+                    H = H + (Math.PI/2 - H)*2
+                }
 
-              camera.updateProjectionMatrix();
+                view_center_x = 0//alt_rectangular * Math.cos(pointing_az * Math.PI / 180);
+                view_center_y = 0//alt_rectangular * Math.sin(pointing_az * Math.PI / 180);
 
-              camera.remove(mask);
-              mask_geo = new THREE.TorusGeometry(viewrad+5, 5, 2, 100);
-              mask_mat = new THREE.MeshBasicMaterial({color:0x000000});
-              mask = new THREE.Mesh(mask_geo, mask_mat);
-              camera.add(mask);
-              mask.position.set(view_center_x, view_center_y, -1);
+                camera.updateProjectionMatrix();
 
-              ra = calculateSiderealTime(false);
-              ra = ra.split(":");
+                camera.remove(mask);
+                mask_geo = new THREE.TorusGeometry(viewrad+5, 5, 2, 100);
+                mask_mat = new THREE.MeshBasicMaterial({color:0x000000});
+                mask = new THREE.Mesh(mask_geo, mask_mat);
+                camera.add(mask);
+                mask.position.set(view_center_x, view_center_y, -1);
 
-              final_ra = ra[0] * 1;
-              final_ra += ra[1] / 60;
-              final_ra += ra[2] / 3600;
-              final_ra = final_ra * 15;
-              final_ra = final_ra * Math.PI / 180;
-              ra = final_ra;// - Math.PI/2;
-              ra += raoffset;
-              //ra = 0;
+                ra = calculateSiderealTime(true);
+                ra += raoffset;
 
-              antenna_ra = ra - H
+                antenna_ra = ra - H
 
-              if (pointing_alt < (dec * 180 / Math.PI)){
-                antenna_ra += Math.PI
-              }
-
-              camx = r * Math.cos(ra) * Math.cos(dec);
-              camy = r * Math.sin(dec);
-              camz = r * Math.sin(ra) * Math.cos(dec);
+                camx = r * Math.cos(ra) * Math.cos(dec);
+                camy = r * Math.sin(dec);
+                camz = r * Math.sin(ra) * Math.cos(dec);
 
                for (var i = 1; i < scene.children.length; i++){
                   if (scene.children[i].group == "equatorial" || scene.children[i].spec == "crosshair"){
@@ -1610,6 +1693,7 @@
                 camz = r * Math.sin(ra) * Math.cos(antenna_dec);
                 //camyoffset += 0.01
                 //camy += camyoffset
+
                 camera.lookAt(camx, camy, camz);
               }
 
@@ -1618,6 +1702,7 @@
             };
 
             var r = 10;
+            var inc = 0
             var scene;
             var camera;
             var renderer;
@@ -1680,7 +1765,6 @@
                 mouse.y = - ( (event.clientY - rect.top) / window.innerHeight ) * (2) + (1);
                 raycaster.setFromCamera(mouse, camera);
                 var intersects = raycaster.intersectObjects(scene.children, true); //array
-                console.log(event.clientX, event.clientY)
                 if ((intersects.length > 0 && intersects[0].object.group != "altaz" && intersects[0].object.group != "equatorial") || obj != 'none'){
                 	if (obj == 'none'){
 	                    selectedObject = intersects[0]
@@ -1791,6 +1875,8 @@
                 }
             }
 
+            //**********************************************************************************//
+            //THESE FUNCTIONS DEAL WITH USER CLICKS AND OBJECT-SPECIFIC DETAILS
 
             //here is the function for dealing with object searching
             var star_added_code = "&#9745;"
@@ -1814,7 +1900,6 @@
                 //object_list_div.innerHTML += "<div style='position: sticky; width: 100%; height: 25%; top: 0; padding-left: 0 !important; padding-right: 0 !important; padding-top: -20% !important; padding-bottom: 0 !important; background-color: #000; z-index: 10; margin-left: -5%;'>Matches:</div>"
                 
                 for (i = 0; i < object_matches.length; i++){
-                  console.log(object_matches[i])
                   if (importantObjectList.includes(object_matches[i])){
                     var star = star_added_code + " "
                   }
@@ -1832,26 +1917,15 @@
 
             //function to select object based on crosshair
             function searchBarCrosshairMod(obj){
-            	/*//first, clear the previous crosshair interval
-				clearInterval(crosshairinterval)
-				//set the crosshair to copy the object's position
-				crosshair.position.copy(window[obj].position)
-				crosshair.visible = true;
-				if (obj.group == "Satellite"){
-					crosshairinterval = setInterval(function(){
-						crosshair.position.copy(window[obj].position)
-					}, 100)
-				}*/
 				var width = window.innerWidth, height = window.innerHeight;
 				var widthHalf = width / 2, heightHalf = height / 2;
 
 				var vector = new THREE.Vector3();
 				var projector = new THREE.Projector();
+
 				projector.projectVector( vector.setFromMatrixPosition( window[obj].matrixWorld ), camera );
 				vector.x = ( vector.x * widthHalf / 2) + widthHalf - 4;
 				vector.y = - ( vector.y * heightHalf ) + heightHalf - 4;
-
-				console.log(vector.x, vector.y)
 
 				//document.getElementById("testdiv").style.left = vector.x
 				//document.getElementById("testdiv").style.top = vector.y
@@ -1885,6 +1959,74 @@
                 importantObjectList.push(obj)
                 document.getElementById(obj+"_star").innerHTML = star_added_code + " "
               }
+            }
+
+            //**********************************************************************************//
+            logged_in = false;
+
+            //function to trigger login panel
+            function triggerLogInPanel(){
+                if (logged_in){
+                    document.getElementById("userpanel").style.display = "block"
+                }
+                else{
+                    document.getElementById("loginpanel").style.display = "block"
+                }
+            }
+
+            function hideLoginPanel(){
+                document.getElementById("loginpanel").style.display = "none"
+            }
+
+            function hideUserPanel(){
+                document.getElementById("userpanel").style.display = "none"
+            }
+
+            function resetFileUpload(form){
+                form.submit()
+                document.getElementById("catalogFileUpload").value = ""
+            }
+
+            function populateUserObjects(user, pass){
+                var objects_req = new XMLHttpRequest("GET", "/getuserfiles?userid=")
+            }
+
+            //function to send login request to server
+            function sendLoginRequest(event, create=false){
+                if (event.keyCode == 13 || event.which == 13){
+                    if (create){
+                        mode = "create"
+                    }
+                    else{
+                        mode = "login"
+                    }
+                    var userid = document.getElementById(mode+"_user").value
+                    var pass = document.getElementById(mode+"_pass").value
+                    var create_req = new XMLHttpRequest();
+                    if (create){
+                        create_req.open("GET", "/createuser?userid=" + userid + "&password=" + pass);
+                    }
+                    else{
+                        create_req.open("GET", "/login?userid=" + userid + "&password=" + pass);
+                    }
+                    create_req.send()
+                    create_req.onreadystatechange = function() {
+                        if (this.readyState == 4 && this.status == 200) {
+                            result = this.responseText;
+                            if (result == "Success"){
+                                logged_in = true;
+                                document.getElementById("userid_button").value = userid
+                                document.getElementById("loginpanel").style.display = "none"
+                                document.getElementById("userpanel").style.display = "block"
+                                document.getElementById("uploadFileUser").value = userid
+                                document.getElementById("uploadFilePass").value = pass
+                            }
+                            else{
+                                document.getElementById(mode+"Result").innerHTML = result;
+                            }
+                        }
+                    };
+                }                
             }
 
 
@@ -1935,8 +2077,6 @@
 
             setInterval(redoLabels, 10);
 
-            console.log(importantObjectList)
-
             //initialize crosshair object
 			x = 0.25/camera.zoom;
 			y = 0.25/camera.zoom;
@@ -1985,6 +2125,11 @@
             scenetextobjects.push(crosshair);
 	        crosshair.visible = false;
 	        scene.add(crosshair)
+
+	        centerobj_geo = new THREE.Geometry()
+            centerobj_mat = new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, color: 0x000000 })
+            centerobj = new THREE.Points(centerobj_geo, centerobj_mat)
+            scene.add(centerobj)
 
 
         </script>
