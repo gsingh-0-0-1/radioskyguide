@@ -12,6 +12,33 @@ import datetime
 import pytz
 import pandas as pd
 import requests
+import csv
+from flask import Response
+import werkzeug
+from flask import Flask, flash, request, redirect, url_for
+from werkzeug.utils import secure_filename
+
+
+def serversidelogin(user, pswd):
+    reader = csv.reader(open('userdata/hashes.csv'))
+
+    userdata = {}
+    for row in reader:
+        key = row[0]
+        if key in userdata:
+            # implement your duplicate row handling here
+            pass
+        userdata[key] = row[1:]   
+
+    if user not in userdata.keys():
+        return "User does not exist."
+
+    else:
+        success = werkzeug.check_password_hash(userdata[user][0], pswd)
+        if success == True:
+            return "Success"
+        else:
+            return "Incorrect password"
 
 def get_phase_on_day(year,month,day):
   """Returns a floating-point number from 0-1. where 0=new, 0.5=full, 1=new"""
@@ -37,12 +64,15 @@ def process_ra(ra_dat):
         temp = ra_dat[i].split(":")
         num = 0
         for j in range(len(temp)):
-            if j == 0:
-                num = num + ( float(temp[j]) * 15)
-            if j == 1:
-                num = num + ( float(temp[j]) * 0.25)
-            if j == 2:
-                num = num + ( float(temp[j]) * (1/240))
+            num = num + (float(temp[j]) / (60**j))
+
+        num = num * 15
+        '''if j == 0:
+            num = num + ( float(temp[j]) * 15)
+        if j == 1:
+            num = num + ( float(temp[j]) * 0.25)
+        if j == 2:
+            num = num + ( float(temp[j]) * (1/240))'''
 
         ra_dat[i] = num * np.pi / 180
     return ra_dat
@@ -337,8 +367,8 @@ def displayfrbdata():
 @app.route('/antennadata/azel')
 def submain():
     try:
-        req = requests.get("http://restgw.hcro.org:12345/antennas/all/azel", timeout=2)
-        if r.status_code != 200:
+        req = requests.get("http://10.3.0.90:12345/antennas/all/azel", timeout=2)
+        if req.status_code != 200:
             req = "timeout"
         else:
             req = req.text
@@ -347,9 +377,71 @@ def submain():
             req = '''{"1a (simulated)": { "az" : 0 , "el" : 18 } }'''
 
     except requests.exceptions.ConnectionError:
+        t = time.time()
+        t = 360 * (t % 300) / 300
         req = '''{"1a (simulated)": { "az" : 0 , "el" : 18 } }'''
 
     return req
+
+@app.route('/createuser')
+def createuser():
+    user = request.args.get("userid").replace(" ", '')
+    pswd = request.args.get("password")
+    ##get username and password data
+    reader = csv.reader(open('userdata/hashes.csv'))
+
+    userdata = {}
+    for row in reader:
+        key = row[0]
+        if key in userdata:
+            # implement your duplicate row handling here
+            pass
+        userdata[key] = row[1:]
+
+    if user in userdata.keys():
+        return "This username is taken."
+
+    else:
+        ps_hash = werkzeug.generate_password_hash(pswd)
+        with open("userdata/hashes.csv", "a") as f:
+            f.write(user + "," + ps_hash + "\n")
+        os.mkdir("userdata/"+user)
+        return "Success"
+
+@app.route('/login')
+def login():
+    user = request.args.get("userid").replace(" ", '')
+    pswd = request.args.get("password")
+    ##get username and password data
+    return serversidelogin(user, pswd)
+
+
+@app.route('/uploadfile', methods=['POST'])
+def uploadfile():
+    if request.method == "POST":
+        if "catalogFileUpload" not in request.files:
+            return 
+        file = request.files['catalogFileUpload']
+        if file.filename == '':
+            return
+        filename = secure_filename(file.filename)
+        user = request.form["uploadFileUser"].replace(" ", '')
+        password = request.form["uploadFilePass"]
+        req = serversidelogin(user, password)
+        if req == "Success":
+            file.save(os.path.join("userdata/gurmehar/", filename))
+            #return redirect(url_for('uploaded_file', filename=filename))      
+    return "Success"  
+
+
+@app.route('/getuserfiles')
+def getuserfiles():
+    user = request.args.get("userid").replace(" ", '')
+    pswd = request.args.get("password")
+    ##get username and password data
+    if serversidelogin(user, pswd) == "Success":
+        return os.listdir("userdata/"+user+"/")
+
 
 @app.route('/favicon.ico')
 def favicon():
