@@ -285,6 +285,9 @@
                 <input type="checkbox" name="drawsatellites" value="true" id="drawsatellites" onclick="dealWithCheckboxes();">
                 <label for='drawsatellites' style="color: #FFFFFF; display:inline">Starlink Satellites</label><br><br>
 
+                <input type="checkbox" name="drawflights" value="true" id="drawflights" onclick="dealWithFlightCheckbox();">
+                <label for='drawflights' style="color: #AAA; display:inline">Commercial Flights</label><br><br>
+
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
                 <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
 
@@ -505,6 +508,7 @@
             var satellitecheckbox = document.getElementById("drawsatellites");
             var rratcheckbox = document.getElementById("drawrrat");
             var nvsscheckbox = document.getElementById("drawnvss");
+            var flightcheckbox = document.getElementById("drawflights");
             var importantcheckbox = document.getElementById("drawimportant");
             var catboxlist = [atnfcheckbox, frbcheckbox, messiercheckbox, rratcheckbox, nvsscheckbox];
             var catnames = ["ATNF Catalog", "FRB Catalog", "Messier Catalog", "RRAT Catalog", "NVSS Catalog"];
@@ -583,6 +587,23 @@
                             scene.children[i].hid_override = true;
                         }
                     }             
+                }
+            }
+
+
+            flightUpdateInterval = ''
+            function dealWithFlightCheckbox(){
+                if (flightcheckbox.checked){
+                    updateFlights()
+                    flightUpdateInterval = setInterval(updateFlights, 30000);
+                }
+                else{
+                    for (let i = scene.children.length - 1; i >= 0; i--){
+                        if (scene.children[i].group == "Flights"){
+                            scene.remove(scene.children[i])
+                        }
+                    }
+                    clearInterval(flightUpdateInterval)
                 }
             }
 
@@ -892,9 +913,9 @@
                 return texture;
             }
 
-            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=7, visible=true, nvss=false, do_not_push=false) {
+            function drawObjects(thetas, phis, color, name, group='', listofnames=false, satellitemode=false, size=7, visible=true, nvss=false, do_not_push=false, flight=false, alts='') {
                 color = "#" + color.toString(16).padStart(6, '0');
-                if (name != "Satellite" && group != "Satellite")
+                if (name != "Satellite" && group != "Satellite" && group != "Flights")
                     thistexture = createCircleTexture(color, 400, group);
                 for (var i = 0; i < thetas.length; i++){
                     origtheta = thetas[i];
@@ -905,6 +926,12 @@
                     x = r * Math.cos(theta) * Math.cos(phi);
                     y = r * Math.sin(phi);
                     z = r * Math.sin(theta) * Math.cos(phi);
+
+                    if (flight){
+                        x *= alts[i] / 10000
+                        y *= alts[i] / 10000
+                        z *= alts[i] / 10000
+                    }
 
                     var geometry = new THREE.Geometry();
                     geometry.vertices.push(new THREE.Vector3(0, 0, 0))
@@ -1099,8 +1126,6 @@
 
                 sun.theta = ra_sun
                 sun.phi = dec_sun
-
-                console.log(ra_sun, dec_sun)
 
                 window["Sun"] = sun
                 namedObjectList.push("Sun")
@@ -1395,6 +1420,27 @@
                 }
             }
 
+            function updateFlights(){
+                flight_data_req = new XMLHttpRequest;
+                flight_data_req.open("GET", "/static/flightdata.txt?time="+new Date().getTime())
+                flight_data_req.send();
+                flight_data_req.onreadystatechange = function(){
+                    flight_data = this.responseText;
+                    flight_lats = flight_data.split("$")[0].split(",")
+                    flight_long = flight_data.split("$")[1].split(",")
+                    flight_alts = flight_data.split("$")[2].split(",")
+                    flight_call = flight_data.split("$")[3].split(",")
+
+                    for (let i = scene.children.length - 1; i >= 0; i--){
+                        if (scene.children[i].group == "Flights"){
+                            scene.remove(scene.children[i])
+                        }
+                    }
+
+                    drawObjects(flight_long, flight_lats, 0xaaaaaa, flight_call, "Flights", true, false, 7, true, false, false, true, flight_alts);
+                }
+            }
+
             function processRaDec(right_asc, decl){
                 right_asc = (right_asc[0] * 15) + (right_asc[1] / 4) + (right_asc[2] / 240);
                 decl = (decl[0]) + (decl[1] / 60) + (decl[2] / 3600);
@@ -1525,7 +1571,6 @@
                       antenna_azel_data = adata;
                   }
               };
-              console.log(antenna_azel_data)
               return [antenna_azel_data[this_antenna]["el"], antenna_azel_data[this_antenna]["az"]]
             }
 
