@@ -17,6 +17,7 @@ from flask import Response
 import werkzeug
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
+from opensky_api import OpenSkyApi
 
 
 def serversidelogin(user, pswd):
@@ -447,6 +448,8 @@ def getuserfiles():
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+api = OpenSkyApi()
 
 try:
     app.run(host = sys.argv[1], debug = True, port = int(sys.argv[2])) 
