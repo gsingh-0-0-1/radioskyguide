@@ -935,7 +935,7 @@
 
                     var geometry = new THREE.Geometry();
                     geometry.vertices.push(new THREE.Vector3(0, 0, 0))
-                    if (name == "Satellite" || group == "Satellite")
+                    if (name == "Satellite" || group == "Satellite" || group == "Flights")
                         var material = new THREE.PointsMaterial( { size: 2, sizeAttenuation: false, color: color } );
                     else
                         var material = new THREE.PointsMaterial({
