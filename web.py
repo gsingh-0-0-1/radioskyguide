@@ -430,7 +430,7 @@ def uploadfile():
         password = request.form["uploadFilePass"]
         req = serversidelogin(user, password)
         if req == "Success":
-            file.save(os.path.join("userdata/gurmehar/", filename))
+            file.save(os.path.join("userdata/"+user+"/", filename))
             #return redirect(url_for('uploaded_file', filename=filename))      
     return "Success"  
 
@@ -441,7 +441,28 @@ def getuserfiles():
     pswd = request.args.get("password")
     ##get username and password data
     if serversidelogin(user, pswd) == "Success":
-        return os.listdir("userdata/"+user+"/")
+        l = os.listdir("userdata/"+user+"/")
+        for item in l:
+            if '.csv' not in item:
+                l.remove(item)
+        return ','.join(l)
+
+@app.route('/getfiledata')
+def getfiledata():
+    user = request.args.get("userid").replace(" ", '')
+    pswd = request.args.get("password")
+    file = request.args.get("file") + ".csv"
+    ##get username and password data
+    if serversidelogin(user, pswd) == "Success":
+        f = open("userdata/"+user+"/"+file, "r")
+        data = f.read().split("\n")
+        if data[-1] == "": data.pop(-1)
+        data = [i.split(",") for i in data]
+        data = np.array(data)
+        names = data[:, 0]
+        ras = process_ra(data[:, 1])
+        decs = process_dec(data[:, 2])
+        return ','.join(list(names)) + "$" + ','.join(list(ras)) + "$" + ','.join(list(decs))
 
 
 @app.route('/favicon.ico')

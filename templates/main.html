@@ -291,7 +291,7 @@
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
                 <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
 
-                <a href="javascript:triggerLogInPanel()" style="color: #aaa; display: none">
+                <a href="javascript:triggerLogInPanel()" style="color: #aaa;">
                     User-Defined Objects...
                 </a>
             </form>
@@ -351,18 +351,18 @@
 
         <!-- Login panel html - the display property will be toggled on to trigger the panel  -->
 
-        <div id="loginpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: #112; width: 30%; height: 45%; border: 0px solid #6666de; display: none; z-index: 1">
-            <input type="button" class="button" value="X" style="--bcolor: #aa2222; --fsize: 7px; padding: 0 0; margin: 0 0; position: fixed; left: 0%; top: 0%; display: inline; width: 7%; height: 4%; outline: none; border: 1px solid black" onclick="javascript:hideLoginPanel();">
-            <div style="color: #229; font-family: Helvetica; font-size: 20px; text-align: left; margin-left: 5%; margin-top: 2%">
+        <div id="loginpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-image: url('static/sagstarcloud_.JPG'); background-size: 100%; width: 30%; height: 45%; border: 0px solid #6666de; display: none; z-index: 1">
+            <input type="button" class="button" value="X" style="--bcolor: #aa2222; --fsize: 7px; padding: 0 0; margin: 0 0; position: fixed; left: 0%; top: 0%; display: inline; width: 3%; height: 4%; outline: none; border: 1px solid black; border-radius: 100%" onclick="javascript:hideLoginPanel();">
+            <div style="color: #559; font-family: Helvetica; font-size: 20px; text-align: left; margin-left: 5%; margin-top: 0%">
                 <br>
                 Log In
                 <br>
                 <div>
-                    <input onkeypress="javascript:sendLoginRequest(event)" id="login_user" type="text" class="button" style="--bcolor: #123456; --fsize: 15px; padding: 10px 5px; border-radius: 7px" placeholder="Username">
+                    <input onkeypress="javascript:sendLoginRequest(event)" name="username" id="login_user" type="text" class="button" style="--bcolor: rgba(0, 0, 0, 0); --fsize: 15px; padding: 10px 5px; border-top: none; border-right: none; border-left: none; border-bottom: solid #7878ab 2px; outline: none" placeholder="Username">
                     <br>
-                    <input onkeypress="javascript:sendLoginRequest(event)" id="login_pass" type="password" class="button" style="--bcolor: #765432; --fsize: 15px; padding: 10px 5px; border-radius: 7px" placeholder="Password">
+                    <input onkeypress="javascript:sendLoginRequest(event)" name="password" id="login_pass" type="password" class="button"style="--bcolor: rgba(0, 0, 0, 0); --fsize: 15px; padding: 10px 5px; border-top: none; border-right: none; border-left: none; border-bottom: solid #7878ab 2px; outline: none" placeholder="Password">
                     <br>
-                    <div id="loginResult" style="font-size: 10px; color: #222222">
+                    <div id="loginResult" style="font-size: 10px; color: #aa2222; z-index: 6">
                         <br>
                     </div>
                 </div>
@@ -371,11 +371,11 @@
                 Create New Account
                 <br>
                 <div>
-                    <input onkeypress="javascript:sendLoginRequest(event, true)" id="create_user" type="text" class="button" style="--bcolor: #6a3535; --fsize: 15px; padding: 10px 5px; border-radius: 7px" placeholder="Username">
+                    <input onkeypress="javascript:sendLoginRequest(event, true)" name="username" id="create_user" type="text" class="button" style="--bcolor: rgba(0, 0, 0, 0); --fsize: 15px; padding: 10px 5px; border-top: none; border-right: none; border-left: none; border-bottom: solid #7878ab 2px; outline: none" placeholder="Username">
                     <br>
-                    <input onkeypress="javascript:sendLoginRequest(event, true)" id="create_pass" type="password" class="button" style="--bcolor: #6a3535; --fsize: 15px; padding: 10px 5px; border-radius: 7px" placeholder="Password">
+                    <input onkeypress="javascript:sendLoginRequest(event, true)" name="password" id="create_pass" type="password" class="button" style="--bcolor: rgba(0, 0, 0, 0); --fsize: 15px; padding: 10px 5px; border-top: none; border-right: none; border-left: none; border-bottom: solid #7878ab 2px; outline: none" placeholder="Password">
                     <br>
-                    <div id="createResult" style="font-size: 10px; color: #aa2222">
+                    <div id="createResult" style="font-size: 10px; color: #aa2222; z-index: 6">
                         <br>
                     </div>
                 </div>
@@ -383,27 +383,28 @@
         </div>
 
         <!-- User-specific objects and such over here -->
-        <div id="userpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-color: #25256a; width: 30%; height: 45%; border: 3px solid #6666de; display: none; z-index: 1">
-            <input type="button" class="button" value="X" style="--bcolor: #aa2222; --fsize: 7px; padding: 0 0; margin: 0 0; position: fixed; left: 0%; top: 0%; display: inline; width: 7%; height: 4%; outline: none" onclick="javascript:hideUserPanel()">
+        <div id="userpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-image: url('static/sagstarcloud_.JPG'); background-size: 100%; width: 30%; height: 45%; border: 0px solid #6666de; display: none; z-index: 1">
+            <input type="button" class="button" value="X" style="--bcolor: #aa2222; --fsize: 7px; padding: 0 0; margin: 0 0; position: fixed; left: 0%; top: 0%; display: inline; width: 3%; height: 4%; outline: none; border: 1px solid black; border-radius: 100%" onclick="javascript:hideUserPanel();">
 
-            <span style="position: fixed; left: 5%; top: 15%; font-size: 35px; font-family: Helvetica; color: #6666e7">
+            <span style="position: fixed; left: 5%; top: 10%; font-size: 35px; font-family: Helvetica; color: #559">
                 Your Objects
             </span>
 
-            <input id="userid_button" type="button" style="--bcolor: #282; --fsize: 12px; position:fixed; left: 100%; top: 0%; transform: translate(-100%, 0%); outline: none" value="">
+            <input id="userid_button" type="button" style="--bcolor: #888; --fsize: 12px; position:fixed; left: 100%; top: 0%; transform: translate(-100%, 0%); outline: none" value="">
 
-            <div id="userObjectsDiv" style="position: fixed; top: 35%; width: 90%; height:55%; background-color: #121256; transform: translate(5%, 0); overflow-y: scroll">
-                <iframe id="hidden-iframe" name="hidden-iframe" style="display: none"></iframe>
-                <form target="hidden-iframe" enctype="multipart/form-data" id="submitCatalogFile" action='/uploadfile' style="position: fixed; left: 0%; top: 80%; height: 20%; width: 100%; background-color: #000" method="POST">
-
-                    <input accept=".csv" name="catalogFileUpload" id="catalogFileUpload" type="file" style="left: 0; top: 86%; position: fixed; color: #fff">
-
-                    <input type="hidden" name="uploadFileUser" id="uploadFileUser" value=''>
-                    <input type="hidden" name="uploadFilePass" id="uploadFilePass" value=''>
-
-                    <input onclick="javascript:resetFileUpload(this.form)" type="button" class="button" style="--bcolor: #666; --fsize: 10px; position: fixed; left: 70%; top: 83%; padding: 5 5" value="Upload">
-                </form>
+            <div id="userObjectsDiv" style="position: fixed; left: 5%; top: 25%; width: 85%; height:50%; background-color: rgba(50, 20, 20, 0.5); overflow-y: scroll; color: #889; font-size: 16px; text-align: left; font-family: Verdana; padding-left: 3%; padding-top: 3%">
             </div>
+
+            <iframe id="hidden-iframe" name="hidden-iframe" style="display: none"></iframe>
+            <form target="hidden-iframe" enctype="multipart/form-data" id="submitCatalogFile" action='/uploadfile' style="position: fixed; left: 5%; top: 75%; height: 20%; width: 90%; background-color: #000" method="POST">
+
+                <input accept=".csv" name="catalogFileUpload" id="catalogFileUpload" type="file" style="left: 5%; top: 80%; position: fixed; color: #fff">
+
+                <input type="hidden" name="uploadFileUser" id="uploadFileUser" value=''>
+                <input type="hidden" name="uploadFilePass" id="uploadFilePass" value=''>
+
+                <input onclick="javascript:resetFileUpload(this.form); setTimeout(populateUserObjects, 750)" type="button" class="button" style="--bcolor: #666; --fsize: 10px; position: fixed; left: 70%; top: 78%; padding: 5 5" value="Upload">
+            </form>
 
             <span style="position: fixed; left: 5%; top: 90%; color: #ccc; font-family: Helvetica; font-size: 11px">
                 All files should be .csv, with format "name,hh:mm:ss.ss,dd:mm:ss.ss"
@@ -1013,7 +1014,7 @@
 
                     if (group != ''){
                         point.group = group;
-                        if (group.includes("Catalog"))
+                        if (group.includes("Catalog") || group.includes("udef_"))
                             window[group+"_list"].push(point)
                     }
 
@@ -2032,8 +2033,63 @@
                 document.getElementById("catalogFileUpload").value = ""
             }
 
-            function populateUserObjects(user, pass){
-                var objects_req = new XMLHttpRequest("GET", "/getuserfiles?userid=")
+            function populateUserObjects(user="undef", pass="undef"){
+                if (user == "undef" || pass == "undef"){
+                    user = document.getElementById("uploadFileUser").value
+                    pass = document.getElementById("uploadFilePass").value
+                }
+                var objects_req = new XMLHttpRequest
+                objects_req.open("GET", "/getuserfiles?userid="+user+"&password="+pass)
+                objects_req.send()
+                objects_req.onreadystatechange = function(){
+                    if (this.readyState == 4 && this.status == 200){
+                        var user_objects = this.responseText
+                        user_objects = user_objects.split(",")
+                        document.getElementById("userObjectsDiv").innerHTML = ''
+                        if (user_objects[0] == ''){
+                            return
+                        }
+                        for (var i = 0; i < user_objects.length; i++){
+                            var name = user_objects[i].split(".csv")[0]
+                            document.getElementById("userObjectsDiv").innerHTML += "<input type='checkbox' name='udef_" + name + "' value='true' id='udef_" + name + "' onclick=\"javascript:handleUserCatalog('" + name + "')\" checked><label for='udef_" + name + "' style='color: #EEE; display:inline'> " + name + " </label><br><br>"
+                            fetchFileData(user, pass, name)
+                        }
+                    }
+                }
+            }
+
+            function fetchFileData(user, pass, file){
+                var file_req = new XMLHttpRequest;
+                file_req.open("GET", "/getfiledata?userid=" + user + "&password=" + pass + "&file=" + file)
+                file_req.send();
+                file_req.onreadystatechange = function(){
+                    if (this.readyState == 4 && this.status == 200){
+                        var file_data = this.responseText
+                        var file_ras = file_data.split("$")[1].split(",")
+                        var file_decs = file_data.split("$")[2].split(",")
+                        var file_names = file_data.split("$")[0].split(",")
+                        console.log(file)
+                        console.log(file_ras)
+                        window["udef_"+file+"_list"] = []
+                        drawObjects(file_ras, file_decs, 0xeeeeee, file_names, "udef_"+file, true);
+                    }
+                }
+            }
+
+            function handleUserCatalog(file){
+                var box = document.getElementById("udef_"+file)
+                if (box.checked){
+                    for (var i = 0; i < window["udef_"+file+"_list"].length; i++){
+                        window["udef_"+file+"_list"][i].visible = true
+                        window["udef_"+file+"_list"][i].hid_override = false
+                    }
+                }
+                else{
+                    for (var i = 0; i < window["udef_"+file+"_list"].length; i++){
+                        window["udef_"+file+"_list"][i].visible = false
+                        window["udef_"+file+"_list"][i].hid_override = true
+                    }
+                }
             }
 
             //function to send login request to server
@@ -2060,17 +2116,20 @@
                             result = this.responseText;
                             if (result == "Success"){
                                 logged_in = true;
+                                //update the user panel with information and such
                                 document.getElementById("userid_button").value = userid
                                 document.getElementById("loginpanel").style.display = "none"
                                 document.getElementById("userpanel").style.display = "block"
                                 document.getElementById("uploadFileUser").value = userid
                                 document.getElementById("uploadFilePass").value = pass
+                                populateUserObjects(userid, pass)
                             }
                             else{
                                 document.getElementById(mode+"Result").innerHTML = result;
                             }
                         }
                     };
+                    
                 }                
             }
 
