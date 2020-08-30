@@ -351,9 +351,31 @@
 
         <!-- Login panel html - the display property will be toggled on to trigger the panel  -->
 
-        <div id="loginpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-image: url('static/sagstarcloud.JPG'); background-size: 100%; width: 30%; height: 45%; border: 0px solid #6666de; display: none; z-index: 1">
-            <input type="button" class="button" value="X" style="--bcolor: #aa2222; --fsize: 7px; padding: 0 0; margin: 0 0; position: fixed; left: 0%; top: 0%; display: inline; width: 3%; height: 4%; outline: none; border: 1px solid black; border-radius: 100%" onclick="javascript:hideLoginPanel();">
-            <div style="color: #559; font-family: Helvetica; font-size: 20px; text-align: left; margin-left: 5%; margin-top: 0%">
+        <div id="bgblur" style="position:absolute; left:0 top: 0; width: 100%; height: 100%; background-color: rgba(10, 10, 10, 0.6); z-index: 4; display: none">
+        </div>
+
+        <div id="loginpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-image: url('static/sagstarcloud.JPG'); background-size: 200%; width: 30%; height: 62%; border: 0px solid #ddd; display: none; z-index: 5; border-radius: 100%">
+
+            <!-- close window button -->
+            <input type="button" class="button" value="X" style="--bcolor: rgba(0, 0, 0, 0); background-image: url('static/redgiant.png'); background-position: 50% 50%; --fsize: 18px; padding: 0 0; margin: 0 0; position: fixed; background-size: 100%; background-repeat: no-repeat; left: 50%; top: -20%; display: inline; width: 12%; height: 12%; outline: none; border-radius: 0%; transform: translate(-50%, 0); color: #000; text-align: center" onclick="javascript:hideLoginPanel();">
+
+            <!-- galaxy -->
+            <div style="position: fixed; left: 100%; top: 17%; background-image: url('static/galaxy.png'); width: 25%; height: 25%; background-size: 100%; transform: translate(0, -50%); background-position: 50% 50%; background-repeat: no-repeat;">
+            </div>
+
+            <!-- jupiter -->
+            <div style="position: fixed; left: 18%; top: 96%; background-image: url('static/jupiter.png'); width: 25%; height: 25%; background-size: 100%; transform: translate(-50%, 0%); background-position: 50% 50%; background-repeat: no-repeat;">
+            </div>            
+
+            <!-- saturn -->
+            <div style="position: fixed; left: -25%; top: 18%; background-image: url('static/saturn.png'); width: 30%; height: 30%; background-size: 100%; transform: translate(0, -50%); background-position: 50% 50%; background-repeat: no-repeat;">
+            </div>
+
+            <!-- moon -->
+            <div style="position: fixed; left: 90%; top: 97%; background-image: url('static/moonimg.png'); width: 15%; height: 15%; background-size: 100%; transform: translate(0, -50%); background-position: 50% 50%; background-repeat: no-repeat;">
+            </div>
+
+            <div style="color: #88b; font-family: Helvetica; font-size: 20px; text-align: center; margin-left: 0%; margin-top: 11%">
                 <br>
                 Log In
                 <br>
@@ -383,7 +405,7 @@
         </div>
 
         <!-- User-specific objects and such over here -->
-        <div id="userpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-image: url('static/sagstarcloud.JPG'); background-size: 100%; width: 30%; height: 45%; border: 0px solid #6666de; display: none; z-index: 1">
+        <div id="userpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-image: url('static/sagstarcloud.JPG'); background-size: 100%; width: 30%; height: 45%; border: 0px solid #ddd; display: none; z-index: 5">
             <input type="button" class="button" value="X" style="--bcolor: #aa2222; --fsize: 7px; padding: 0 0; margin: 0 0; position: fixed; left: 0%; top: 0%; display: inline; width: 3%; height: 4%; outline: none; border: 1px solid black; border-radius: 100%" onclick="javascript:hideUserPanel();">
 
             <span style="position: fixed; left: 5%; top: 8%; font-size: 35px; font-family: Verdana; color: #77b">
@@ -2017,14 +2039,17 @@
                 else{
                     document.getElementById("loginpanel").style.display = "block"
                 }
+                document.getElementById("bgblur").style.display = "block"
             }
 
             function hideLoginPanel(){
                 document.getElementById("loginpanel").style.display = "none"
+                document.getElementById("bgblur").style.display = "none"
             }
 
             function hideUserPanel(){
                 document.getElementById("userpanel").style.display = "none"
+                document.getElementById("bgblur").style.display = "none"
             }
 
             function resetFileUpload(form){
