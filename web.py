@@ -35,7 +35,7 @@ def serversidelogin(user, pswd):
         return "User does not exist."
 
     else:
-        success = werkzeug.check_password_hash(userdata[user][0], pswd)
+        success = werkzeug.security.check_password_hash(userdata[user][0], pswd)
         if success == True:
             return "Success"
         else:
@@ -403,7 +403,7 @@ def createuser():
         return "This username is taken."
 
     else:
-        ps_hash = werkzeug.generate_password_hash(pswd)
+        ps_hash = werkzeug.security.generate_password_hash(pswd)
         with open("userdata/hashes.csv", "a") as f:
             f.write(user + "," + ps_hash + "\n")
         os.mkdir("userdata/"+user)
