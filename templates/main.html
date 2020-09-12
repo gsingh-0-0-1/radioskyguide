@@ -285,8 +285,8 @@
                 <input type="checkbox" name="drawsatellites" value="true" id="drawsatellites" onclick="dealWithCheckboxes();">
                 <label for='drawsatellites' style="color: #FFFFFF; display:inline">Starlink Satellites</label><br><br>
 
-                <input type="checkbox" name="drawflights" value="true" id="drawflights" onclick="dealWithFlightCheckbox();">
-                <label for='drawflights' style="color: #AAA; display:inline">Commercial Flights</label><br><br>
+                <!--<input type="checkbox" name="drawflights" value="true" id="drawflights" onclick="dealWithFlightCheckbox();">
+                <label for='drawflights' style="color: #AAA; display:inline">Commercial Flights</label><br><br>-->
 
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
                 <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
@@ -618,11 +618,12 @@
             function dealWithFlightCheckbox(){
                 if (flightcheckbox.checked){
                     updateFlights()
-                    flightUpdateInterval = setInterval(updateFlights, 30000);
+                    flightUpdateInterval = setInterval(updateFlights, 15000);
                 }
                 else{
                     for (let i = scene.children.length - 1; i >= 0; i--){
                         if (scene.children[i].group == "Flights"){
+                            namedObjectList = namedObjectList.filter(element => !element.includes(scene.children[i].name))
                             scene.remove(scene.children[i])
                         }
                     }
@@ -704,7 +705,7 @@
             }
 
             function calculateSiderealTime(raw){
-            	y = 2020
+            	/*y = 2020
             	m = 8
             	day = 19
 
@@ -728,7 +729,7 @@
 
             	if (raw){
             		return lmst
-            	}
+            	}*/
 
                 //get the time in UTC
                 seconds_since_j2000 = Math.floor(Date.now()/1000) - 946684800;
@@ -753,9 +754,8 @@
                 siderealtime = siderealtime % 360;
                 siderealtime = siderealtime / 15;
 
-                if (raw==true){
-                
-                    return siderealtime;
+                if (raw){
+                    return (siderealtime * 15) * Math.PI / 180
                 }
 
                 else{
@@ -951,9 +951,12 @@
                     z = r * Math.sin(theta) * Math.cos(phi);
 
                     if (flight){
+                        /*x = x
+                        y = y
+                        z = z
                         x *= alts[i] / 10000
                         y *= alts[i] / 10000
-                        z *= alts[i] / 10000
+                        z *= alts[i] / 10000*/
                     }
 
                     var geometry = new THREE.Geometry();
@@ -1443,16 +1446,76 @@
                 }
             }
 
+            var e_c_eq = 40075.017
+            var e_c_pol = 39940.653
+            var e_c_av = (e_c_pol + e_c_eq) / 2
+
             function updateFlights(){
-                flight_data_req = new XMLHttpRequest;
-                flight_data_req.open("GET", "/static/flightdata.txt?time="+new Date().getTime())
+                var flight_data_req = new XMLHttpRequest;
+                flight_data_req.open("GET", "/static/flightdata.txt?time=" + new Date().getTime())
                 flight_data_req.send();
                 flight_data_req.onreadystatechange = function(){
-                    flight_data = this.responseText;
-                    flight_lats = flight_data.split("$")[0].split(",")
-                    flight_long = flight_data.split("$")[1].split(",")
-                    flight_alts = flight_data.split("$")[2].split(",")
-                    flight_call = flight_data.split("$")[3].split(",")
+                    var flight_data = this.responseText;
+                    var spl = flight_data.split("$")
+                    let flight_lats = spl[0].split(",")
+                    let flight_long = spl[1].split(",")
+                    let flight_alts = spl[2].split(",")
+                    let flight_call = spl[3].split(",")
+
+                    var final_lats = [];
+                    var final_long = [];
+                    var final_call = [];
+
+                    //calculate the offset for RA vs longitude
+
+                    console.log("here")
+
+                    for (var i = 0; i < flight_lats.length; i++){
+                        d_long = Math.abs(longitude - (flight_long[i]*Math.PI/180) )
+
+                        if (d_long > 180){
+                            d_long = 360 - d_long
+                        }
+
+                        d_long = d_long * Math.PI / 180
+                        d_lat = Math.abs((dec * 180 / Math.PI) - flight_lats[i]) * Math.PI / 180
+
+                        d_fin = Math.acos( Math.cos(d_long/(2*Math.PI)) * Math.cos(d_lat/(2*Math.PI)) )
+                        d_fin = e_c_av * d_fin / Math.PI
+
+                        d_air = Math.sqrt(d_fin*d_fin + 1*flight_alts[i]*flight_alts[i])
+
+                        console.log(d_fin, d_air)
+
+                        if (d_air < 15000){
+                            var mod = (calculateSiderealTime(true) % (2 * Math.PI)) - (longitude * Math.PI / 180)
+                            var corrected_flight_ra = (flight_long[i] * 1) + mod
+                            //now we convert from ra/dec to alt/az
+
+                            var H = (calculateSiderealTime(true) % (2 * Math.PI)) - corrected_flight_ra
+
+                            var flight_altitude = Math.sin(flight_lats[i]*1) * Math.sin(dec)
+                            flight_altitude = flight_altitude + (Math.cos(flight_lats[i]*1) * Math.cos(dec) * Math.cos(H))
+
+                            var flight_az = - Math.sin(H) * Math.cos(flight_lats[i]*1) / Math.cos(flight_altitude)
+
+                            //convert from alt/az back to ra/dec
+                            var flight_final_dec = Math.asin( Math.sin(flight_altitude) * Math.sin(dec) + Math.cos(flight_altitude) * Math.cos(dec) * Math.cos(flight_az))
+
+                            var final_H = Math.asin( -Math.sin(flight_az) * Math.cos(flight_altitude) / Math.cos(flight_final_dec) )
+
+                            if ((flight_az*180/Math.PI > 270 || flight_az*180/Math.PI < 90)){
+                                final_H = final_H + (Math.PI/2 - final_H)*2
+                            }
+
+                            var flight_final_ra = (calculateSiderealTime(true) % (2 * Math.PI)) - final_H
+
+                            final_long.push(corrected_flight_ra*1)
+                            final_lats.push(flight_lats[i]*1)
+                            /*final_long.push(flight_final_ra)
+                            final_lats.push(flight_final_dec)*/
+                        }
+                    }
 
                     for (let i = scene.children.length - 1; i >= 0; i--){
                         if (scene.children[i].group == "Flights"){
@@ -1460,7 +1523,7 @@
                         }
                     }
 
-                    drawObjects(flight_long, flight_lats, 0xaaaaaa, flight_call, "Flights", true, false, 7, true, false, false, true, flight_alts);
+                    drawObjects(final_long, final_lats, 0xaaaaaa, flight_call, "Flights", true, false, 7, true, false, false, true, flight_alts);
                 }
             }
 
