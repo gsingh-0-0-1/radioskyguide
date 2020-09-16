@@ -9,10 +9,16 @@ longs = []
 alts = []
 callsigns = []
 for s in states.states:
-    lats += [str(s.latitude * np.pi / 180)]
-    longs += [str((s.longitude + 180) * np.pi / 180)]
-    alts += [str(s.baro_altitude)]
-    callsigns += [str(s.callsign)]
+	try:
+		if s.geo_altitude > 15000:
+			continue
+	except TypeError: #check for NoneType in geo and baro altitude
+		continue
+
+	lats += [str(s.latitude)]
+	longs += [str(s.longitude)]
+	alts += [str(s.geo_altitude)]
+	callsigns += [str(s.callsign)]
 
 lats = ",".join(lats)
 longs = ",".join(longs)

@@ -285,8 +285,8 @@
                 <input type="checkbox" name="drawsatellites" value="true" id="drawsatellites" onclick="dealWithCheckboxes();">
                 <label for='drawsatellites' style="color: #FFFFFF; display:inline">Starlink Satellites</label><br><br>
 
-                <!--<input type="checkbox" name="drawflights" value="true" id="drawflights" onclick="dealWithFlightCheckbox();">
-                <label for='drawflights' style="color: #AAA; display:inline">Commercial Flights</label><br><br>-->
+                <input type="checkbox" name="drawflights" value="true" id="drawflights" onclick="dealWithFlightCheckbox();">
+                <label for='drawflights' style="color: #AAA; display:inline">Commercial Flights</label><br><br>
 
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
                 <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
@@ -1138,8 +1138,8 @@
                 var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
                 var halo_material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0.3} );
 
-                var sun = new THREE.Mesh( geometry, material );
-                var sun_halo = new THREE.Mesh( halo_geometry, halo_material );
+                sun = new THREE.Mesh( geometry, material );
+                sun_halo = new THREE.Mesh( halo_geometry, halo_material );
 
                 sun.position.set(sun_x, sun_y, sun_z);
                 sun_halo.position.set(sun_x, sun_y, sun_z);
@@ -1156,6 +1156,12 @@
                 window["Sun"] = sun
                 namedObjectList.push("Sun")
 
+            }
+
+            function redrawSun(){
+                scene.remove(sun)
+                scene.remove(sun_halo)
+                drawSun();
             }
 
             var moon;
@@ -1183,7 +1189,7 @@
                 var halo_material = new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 0.3} );
 
                 moon = new THREE.Mesh( geometry, material );
-                var moon_halo = new THREE.Mesh( halo_geometry, halo_material );   
+                moon_halo = new THREE.Mesh( halo_geometry, halo_material );   
 
                 moon_x = r * Math.cos(moon_ra) * Math.cos(moon_dec);
                 moon_y = r * Math.sin(moon_dec);
@@ -1205,6 +1211,12 @@
 
                 window["Moon"] = moon
                 namedObjectList.push("Moon")
+            }
+
+            function redrawMoon(){
+                scene.remove(moon);
+                scene.remove(moon_halo);
+                drawMoon()
             }
 
             var ra = 0;
@@ -1457,21 +1469,95 @@
                 flight_data_req.onreadystatechange = function(){
                     var flight_data = this.responseText;
                     var spl = flight_data.split("$")
-                    let flight_lats = spl[0].split(",")
-                    let flight_long = spl[1].split(",")
-                    let flight_alts = spl[2].split(",")
-                    let flight_call = spl[3].split(",")
+                    flight_lats = spl[0].split(",")
+                    flight_long = spl[1].split(",")
+                    flight_alts = spl[2].split(",")
+                    flight_call = spl[3].split(",")
 
-                    var final_lats = [];
-                    var final_long = [];
-                    var final_call = [];
+                    final_lats = [];
+                    final_long = [];
+                    final_call = [];
 
                     //calculate the offset for RA vs longitude
 
                     console.log("here")
 
                     for (var i = 0; i < flight_lats.length; i++){
-                        d_long = Math.abs(longitude - (flight_long[i]*Math.PI/180) )
+                        var d_lat = (flight_lats[i] * 1) - (dec * 180 / Math.PI)
+                        var d_long = (flight_long[i] * 1) - (longitude)
+                        var orig_d_long = d_long
+
+                        var n_d_long = d_long
+                        if (d_long > 180){
+                            var n_d_long = 360 - d_long
+                        }
+                        if (d_long < -180){
+                            var n_d_long = (-360) - d_long
+                        }
+
+                        d_long = n_d_long
+
+
+                        var ground_d_long = (d_long / 360) * Math.cos(d_lat * Math.PI / 180) * e_c_eq
+                        var ground_d_lat = (d_lat / 360) * e_c_pol
+                        var ground_dist = Math.sqrt(ground_d_lat*ground_d_lat + ground_d_long*ground_d_long)
+
+                        if (ground_dist > 100){
+                            //check for >100km distance
+                            continue
+                        }
+
+                        console.log(d_lat*1, d_long, orig_d_long)
+
+                        var quadrant = 0 //we need to specify what quadrant the azimuth is in 
+                        //since regular trig functions are only two-quadrant
+
+                        if (d_lat > 0){ //this narrows it to quadrant 1 or 2
+                            if (d_long > 0){
+                                quadrant = 1
+                            }
+                            else{
+                                quadrant = 2
+                            }
+                        }
+                        if (d_lat < 0){ //this narrows it to quadrant 3 or 4
+                            if (d_long > 0){
+                                quadrant = 4
+                            }
+                            else{
+                                quadrant = 3
+                            }
+                        }
+
+                        var flight_az = Math.abs((Math.atan(d_lat / d_long) * (180 / Math.PI))) % 90
+                        //now, modify for the quadrant
+                        flight_az = flight_az + (90 * (quadrant - 1))
+
+                        var flight_altitude = Math.abs(Math.atan((flight_alts[i] * 1/1000) / ground_dist) * (180 / Math.PI))
+
+                        //convert back to radians
+                        flight_az = flight_az * Math.PI / 180
+                        flight_altitude = flight_altitude * Math.PI / 180
+
+
+                        var flight_final_dec = Math.asin( Math.sin(flight_altitude) * Math.sin(dec) + Math.cos(flight_altitude) * Math.cos(dec) * Math.cos(flight_az))
+
+                        var final_H = Math.asin( -Math.sin(flight_az) * Math.cos(flight_altitude) / Math.cos(flight_final_dec) )
+
+                        if ((flight_az*180/Math.PI > 270 || flight_az*180/Math.PI < 90)){
+                            final_H = final_H + (Math.PI/2 - final_H)*2
+                        }
+
+                        var flight_final_ra = (calculateSiderealTime(true) % (2 * Math.PI)) - final_H
+
+
+                        console.log(flight_final_ra, flight_final_dec, flight_call[i])
+                        final_long.push(flight_final_ra)
+                        final_lats.push(flight_final_dec)
+                        final_call.push(flight_call[i])
+                        //now convert from alt-az into ra-dec
+
+                        /*d_long = Math.abs(longitude - (flight_long[i]*Math.PI/180) )
 
                         if (d_long > 180){
                             d_long = 360 - d_long
@@ -1512,9 +1598,9 @@
 
                             final_long.push(corrected_flight_ra*1)
                             final_lats.push(flight_lats[i]*1)
-                            /*final_long.push(flight_final_ra)
-                            final_lats.push(flight_final_dec)*/
-                        }
+                            final_long.push(flight_final_ra)
+                            final_lats.push(flight_final_dec)
+                        }*/
                     }
 
                     for (let i = scene.children.length - 1; i >= 0; i--){
@@ -1523,7 +1609,7 @@
                         }
                     }
 
-                    drawObjects(final_long, final_lats, 0xaaaaaa, flight_call, "Flights", true, false, 7, true, false, false, true, flight_alts);
+                    drawObjects(final_long, final_lats, 0xaaaaaa, final_call, "Flights", true, false, 7, true, false, false, true, flight_alts);
                 }
             }
 
@@ -1719,7 +1805,7 @@
             ra += raoffset;
 
 
-            function animate() {
+            function animate(){
               
                 for (var i = 0; i < camera.children.length; i++){
                 if (camera.children[i].group == "altaz"){
@@ -1869,9 +1955,6 @@
 
             var satelliterefreshID;
             drawSatellites();
-            //redraw sun every half day... hopefully you'll refresh by then...
-            setInterval(drawSun(), 43200000);
-            drawMoon();
 
             document.getElementById("equatorialcheckbox").click()
             document.getElementById("equatorialcheckbox").click()
@@ -2322,6 +2405,14 @@
             centerobj_mat = new THREE.PointsMaterial({ size: 2, sizeAttenuation: false, color: 0x000000 })
             centerobj = new THREE.Points(centerobj_geo, centerobj_mat)
             scene.add(centerobj)
+
+            drawSun()
+            //redraw sun every hour...
+            setInterval(redrawSun, 3600000);
+
+            drawMoon()
+            //redraw moon ever half hour...
+            setInterval(redrawMoon, 1800000);
 
 
         </script>
