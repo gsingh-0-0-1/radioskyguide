@@ -1102,8 +1102,10 @@
                 }
             }
 
+            var sun;
+            var sun_halo;
             function drawSun(){
-                seconds_since_j2000 = Math.floor(Date.now()/1000) - 946684800;
+                /*seconds_since_j2000 = Math.floor(Date.now()/1000) - 946684800;
 
                 seconds = seconds_since_j2000 % 86400;
 
@@ -1123,50 +1125,58 @@
                 obl_earth = 23.43661;
 
                 ra_sun = Math.atan2(Math.cos(obl_earth*Math.PI/180) * Math.sin(lambda*Math.PI/180), Math.cos(lambda*Math.PI/180));
-                dec_sun = Math.asin(Math.sin(obl_earth*Math.PI/180) * Math.sin(lambda*Math.PI/180));
+                dec_sun = Math.asin(Math.sin(obl_earth*Math.PI/180) * Math.sin(lambda*Math.PI/180));*/
 
-                sun_x = r * Math.cos(ra_sun) * Math.cos(dec_sun);
-                sun_y = r * Math.sin(dec_sun);
-                sun_z = r * Math.sin(ra_sun) * Math.cos(dec_sun);
+                var sun_pos = new XMLHttpRequest;
+                sun_pos.open("GET", "/getsunpos?offset=" + (raoffset * 24 / (2*Math.PI)))
+                sun_pos.send()
 
-                sun_rad = 2 * Math.PI * r * 0.5/360;
-                sun_halo_rad = sun_rad * 20;
+                sun_pos.onreadystatechange = function(){
+                    if (this.readyState == 4 && this.status == 200){
+                        ra_sun = this.responseText.split(",")[0] * 1
+                        dec_sun = this.responseText.split(",")[1] * 1
+                        sun_x = r * Math.cos(ra_sun) * Math.cos(dec_sun);
+                        sun_y = r * Math.sin(dec_sun);
+                        sun_z = r * Math.sin(ra_sun) * Math.cos(dec_sun);
 
-                var geometry = new THREE.SphereGeometry(sun_rad, 32, 32);
-                var halo_geometry = new THREE.CircleGeometry(sun_halo_rad, 32) //SphereGeometry(sun_halo_rad, 32, 32)
+                        sun_rad = 2 * Math.PI * r * 0.5/360;
+                        sun_halo_rad = sun_rad * 20;
 
-                var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
-                var halo_material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0.3} );
+                        var geometry = new THREE.SphereGeometry(sun_rad, 32, 32);
+                        var halo_geometry = new THREE.CircleGeometry(sun_halo_rad, 32)
 
-                sun = new THREE.Mesh( geometry, material );
-                sun_halo = new THREE.Mesh( halo_geometry, halo_material );
+                        var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+                        var halo_material = new THREE.MeshBasicMaterial( {color: 0xffff00, transparent: true, opacity: 0.3} );
 
-                sun.position.set(sun_x, sun_y, sun_z);
-                sun_halo.position.set(sun_x, sun_y, sun_z);
-                sun_halo.lookAt(camera.position)
+                        scene.remove(sun)
+                        scene.remove(sun_halo)
 
-                scene.add(sun);
-                scene.add(sun_halo);
-                sun.name = "Sun"
-                sun_halo.name = "Sun"
+                        sun = new THREE.Mesh( geometry, material );
+                        sun_halo = new THREE.Mesh( halo_geometry, halo_material );
 
-                sun.theta = ra_sun
-                sun.phi = dec_sun
+                        sun.position.set(sun_x, sun_y, sun_z);
+                        sun_halo.position.set(sun_x, sun_y, sun_z);
+                        sun_halo.lookAt(camera.position)
 
-                window["Sun"] = sun
-                namedObjectList.push("Sun")
+                        scene.add(sun);
+                        scene.add(sun_halo);
+                        sun.name = "Sun"
+                        sun_halo.name = "Sun"
 
-            }
+                        sun.theta = ra_sun
+                        sun.phi = dec_sun
 
-            function redrawSun(){
-                scene.remove(sun)
-                scene.remove(sun_halo)
-                drawSun();
+                        window["Sun"] = sun
+                        namedObjectList.push("Sun")
+                    }
+                }
+
             }
 
             var moon;
+            var moon_halo;
             function drawMoon(){
-                var lunation = {{ lunation_here }}
+                /*var lunation = {{ lunation_here }}
                 lunation = lunation * Math.PI * 2
 
                 currentJD = new Date().getTime()/86400000 + 2440587.5;
@@ -1177,46 +1187,53 @@
                 //moon_dec = (23.4 * Math.PI/180) - moon_dec;
 
                 moon_ra = {{ moon_ra_here }};
-                moon_dec = {{ moon_dec_here }};
+                moon_dec = {{ moon_dec_here }};*/
 
-                moon_rad = 2 * Math.PI * r * 0.5/360;
-                moon_halo_rad = sun_rad * 10;
+                var moon_pos = new XMLHttpRequest;
+                moon_pos.open("GET", "/getmoonpos?offset=" + (raoffset * 24 / (2*Math.PI)))
+                moon_pos.send()
+                moon_pos.onreadystatechange = function(){
+                    if (this.readyState == 4 && this.status == 200){
+                        moon_ra = this.responseText.split(",")[0] * 1
+                        moon_dec = this.responseText.split(",")[1] * 1
 
-                var geometry = new THREE.SphereGeometry(moon_rad, 32, 32);
-                var halo_geometry = new THREE.CircleGeometry(moon_halo_rad, 32)//SphereGeometry(moon_halo_rad, 32, 32);
+                        moon_rad = 2 * Math.PI * r * 0.5/360;
+                        moon_halo_rad = moon_rad * 10;
 
-                var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
-                var halo_material = new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 0.3} );
+                        var geometry = new THREE.SphereGeometry(moon_rad, 32, 32);
+                        var halo_geometry = new THREE.CircleGeometry(moon_halo_rad, 32)
 
-                moon = new THREE.Mesh( geometry, material );
-                moon_halo = new THREE.Mesh( halo_geometry, halo_material );   
+                        var material = new THREE.MeshBasicMaterial( {color: 0xffffff} );
+                        var halo_material = new THREE.MeshBasicMaterial( {color: 0xffffff, transparent: true, opacity: 0.3} );
 
-                moon_x = r * Math.cos(moon_ra) * Math.cos(moon_dec);
-                moon_y = r * Math.sin(moon_dec);
-                moon_z = r * Math.sin(moon_ra) * Math.cos(moon_dec);
+                        scene.remove(moon);
+                        scene.remove(moon_halo);
 
-                var mult = 1;
+                        moon = new THREE.Mesh( geometry, material );
+                        moon_halo = new THREE.Mesh( halo_geometry, halo_material );   
 
-                moon.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
-                moon_halo.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
-                moon_halo.lookAt(camera.position)
+                        moon_x = r * Math.cos(moon_ra) * Math.cos(moon_dec);
+                        moon_y = r * Math.sin(moon_dec);
+                        moon_z = r * Math.sin(moon_ra) * Math.cos(moon_dec);
 
-                scene.add(moon);
-                scene.add(moon_halo);
-                moon.name = "Moon"
-                moon_halo.name = "Moon"
+                        var mult = 1;
 
-                moon.theta = moon_ra
-                moon.phi = moon_dec
+                        moon.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
+                        moon_halo.position.set(moon_x*mult, moon_y*mult, moon_z*mult);
+                        moon_halo.lookAt(camera.position)
 
-                window["Moon"] = moon
-                namedObjectList.push("Moon")
-            }
+                        scene.add(moon);
+                        scene.add(moon_halo);
+                        moon.name = "Moon"
+                        moon_halo.name = "Moon"
 
-            function redrawMoon(){
-                scene.remove(moon);
-                scene.remove(moon_halo);
-                drawMoon()
+                        moon.theta = moon_ra
+                        moon.phi = moon_dec
+
+                        window["Moon"] = moon
+                        namedObjectList.push("Moon")
+                    }
+                }
             }
 
             var ra = 0;
@@ -1247,6 +1264,9 @@
 
                 d = document.getElementById("totaloffset");
                 d.innerHTML = "<input type='button' class='button' style='--bcolor: #444444; --fsize: 15px;' value='Total Time Offset (min): " + raoffset_raw.toFixed(2) + "'>";
+
+                drawSun();
+                drawMoon();
             }
 
             var ra;
@@ -2407,11 +2427,11 @@
 
             drawSun()
             //redraw sun every hour...
-            setInterval(redrawSun, 3600000);
+            setInterval(drawSun, 3600000);
 
             drawMoon()
             //redraw moon ever half hour...
-            setInterval(redrawMoon, 1800000);
+            setInterval(drawMoon, 1800000);
 
 
         </script>
