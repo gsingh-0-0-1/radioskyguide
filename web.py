@@ -464,6 +464,14 @@ def getfiledata():
         decs = process_dec(data[:, 2])
         return ','.join(list(names)) + "$" + ','.join(list(ras)) + "$" + ','.join(list(decs))
 
+@app.route('/getmoonpos')
+def getmoonpos():
+    offset = 0
+    moon = ephem.Moon(datetime.datetime.utcnow())
+    moon_ra = str(moon.ra)
+    moon_dec = str(moon.dec)
+    moon_ra = process_ra([moon_ra])
+    moon_dec = process_dec([moon_dec])
 
 @app.route('/favicon.ico')
 def favicon():
