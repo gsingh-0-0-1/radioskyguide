@@ -334,9 +334,6 @@ def gui():
                                         nvss_dec_dat_here = nvss_decs,
                                         nvss_lum_dat_here = nvss_lum,
                                         nvss_name_dat_here = nvss_names,
-                                        moon_dec_here = moon_dec,
-                                        moon_ra_here = moon_ra,
-                                        lunation_here = get_phase_on_day(utcdate.year, utcdate.month, utcdate.day ),
                                         jup_ra = jup_ra,
                                         jup_dec = jup_dec,
                                         sat_ra = sat_ra,
@@ -466,12 +463,25 @@ def getfiledata():
 
 @app.route('/getmoonpos')
 def getmoonpos():
-    offset = 0
-    moon = ephem.Moon(datetime.datetime.utcnow())
+    offset = request.args.get("offset")
+    if offset == None: offset = 0
+    moon = ephem.Moon(datetime.datetime.utcnow() + datetime.timedelta(hours=float(offset)))
     moon_ra = str(moon.ra)
     moon_dec = str(moon.dec)
     moon_ra = process_ra([moon_ra])
     moon_dec = process_dec([moon_dec])
+    return str(moon_ra[0]) + "," + str(moon_dec[0])
+
+@app.route('/getsunpos')
+def getsunpos():
+    offset = request.args.get("offset")
+    if offset == None: offset = 0
+    sun = ephem.Sun(datetime.datetime.utcnow() + datetime.timedelta(hours=float(offset)))
+    sun_ra = str(sun.ra)
+    sun_dec = str(sun.dec)
+    sun_ra = process_ra([sun_ra])
+    sun_dec = process_dec([sun_dec])
+    return str(sun_ra[0]) + "," + str(sun_dec[0])
 
 @app.route('/favicon.ico')
 def favicon():
