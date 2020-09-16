@@ -733,26 +733,42 @@
 
                 //get the time in UTC
                 seconds_since_j2000 = Math.floor(Date.now()/1000) - 946684800;
+                if (longitude < 0){
+                    longitude_east = 360 + longitude;
+                }
+                else {
+                    longitude_east = longitude;
+                }
 
-                seconds = seconds_since_j2000 % 86400;
+                longitude_h = longitude_east / 15.;
+                
+                unixSec = Date.now() / 1000.;
+                // This is from
+                // https://stackoverflow.com/a/466348/3325750
+                jd = (unixSec / 86400.0 ) + 2440587.5;
 
-                hours = Math.floor(seconds/3600);
-                minutes = Math.floor(seconds/60) - hours*60;
-                seconds = seconds - minutes*60 - hours*3600;
+                // jd of Jan1 2000
+                jan1_2000_jd = 2451545.0;
 
-                days_since_j2000 = seconds_since_j2000 / 86400;
+                ndays_per_jcentury = 36525.;
 
-                hours_passed = seconds_since_j2000 % 86400
-                hours_passed = hours_passed / 3600
+                // This if from
+                // https://astronomy.stackexchange.com/a/21004/35162
+                midnight = Math.floor(jd) + 0.5;
+                days_since_midnight = jd - midnight;
+                hours_since_midnight = days_since_midnight * 24;
+                days_since_epoch = jd - jan1_2000_jd;
+                centuries_since_epoch = days_since_epoch / ndays_per_jcentury;
+                whole_days_since_epoch = midnight - jan1_2000_jd;
+                
+                GMST = 6.697374558
+                     + 0.06570982441908 * whole_days_since_epoch
+                     + 1.00273790935 * hours_since_midnight
+                     + 0.000026 * centuries_since_epoch*centuries_since_epoch;
 
-                siderealtime = 100.46;
-                siderealtime += (0.985647 * days_since_j2000);
-                siderealtime += longitude;
+                siderealtime = GMST + longitude_h;
+                siderealtime = siderealtime % 24;
 
-                siderealtime += 15*hours_passed;
-
-                siderealtime = siderealtime % 360;
-                siderealtime = siderealtime / 15;
 
                 if (raw){
                     return (siderealtime * 15) * Math.PI / 180
