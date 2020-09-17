@@ -1506,6 +1506,13 @@
             var e_c_pol = 39940.653
             var e_c_av = (e_c_pol + e_c_eq) / 2
 
+            if ("{{ loc_here }}" == "Allen Telescope Array"){
+                var obs_site_elev = 1000
+            }
+            else{
+                var obs_site_elev = 0
+            }
+
             function updateFlights(){
                 var flight_data_req = new XMLHttpRequest;
                 flight_data_req.open("GET", "/static/flightdata.txt?time=" + new Date().getTime())
@@ -1577,7 +1584,7 @@
                         //now, modify for the quadrant
                         flight_az = flight_az + (90 * (quadrant - 1))
 
-                        var flight_altitude = Math.abs(Math.atan((flight_alts[i] * 1/1000) / ground_dist) * (180 / Math.PI))
+                        var flight_altitude = Math.abs(Math.atan(((flight_alts[i] - obs_site_elev) * 1/1000) / ground_dist) * (180 / Math.PI))
 
                         //convert back to radians
                         flight_az = flight_az * Math.PI / 180
