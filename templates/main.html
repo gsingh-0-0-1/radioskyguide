@@ -286,7 +286,16 @@
                 <label for='drawsatellites' style="color: #FFFFFF; display:inline">Starlink Satellites</label><br><br>
 
                 <input type="checkbox" name="drawflights" value="true" id="drawflights" onclick="dealWithFlightCheckbox();">
-                <label for='drawflights' style="color: #AAA; display:inline">Commercial Flights</label><br><br>
+                <label for='drawflights' style="color: #AAA; display:inline">Commercial Flights
+
+                    <br>
+                    <div style="color: #AAA; font-size: 12px">
+                        <br>
+                        Credits to
+                        <a href="http://www.opensky-network.org" style="color: #AAD" target="_blank">OpenSky API</a>
+                    </div>
+
+                </label><br><br>
 
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
                 <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
@@ -1533,7 +1542,7 @@
                         d_long = n_d_long
 
 
-                        var ground_d_long = (d_long / 360) * Math.cos(d_lat * Math.PI / 180) * e_c_eq
+                        var ground_d_long = (d_long / 360) * Math.cos(flight_lats[i] * Math.PI / 180) * e_c_eq
                         var ground_d_lat = (d_lat / 360) * e_c_pol
                         var ground_dist = Math.sqrt(ground_d_lat*ground_d_lat + ground_d_long*ground_d_long)
 
@@ -1591,51 +1600,6 @@
                         final_lats.push(flight_final_dec)
                         final_call.push(flight_call[i])
                         //now convert from alt-az into ra-dec
-
-                        /*d_long = Math.abs(longitude - (flight_long[i]*Math.PI/180) )
-
-                        if (d_long > 180){
-                            d_long = 360 - d_long
-                        }
-
-                        d_long = d_long * Math.PI / 180
-                        d_lat = Math.abs((dec * 180 / Math.PI) - flight_lats[i]) * Math.PI / 180
-
-                        d_fin = Math.acos( Math.cos(d_long/(2*Math.PI)) * Math.cos(d_lat/(2*Math.PI)) )
-                        d_fin = e_c_av * d_fin / Math.PI
-
-                        d_air = Math.sqrt(d_fin*d_fin + 1*flight_alts[i]*flight_alts[i])
-
-                        console.log(d_fin, d_air)
-
-                        if (d_air < 15000){
-                            var mod = (calculateSiderealTime(true) % (2 * Math.PI)) - (longitude * Math.PI / 180)
-                            var corrected_flight_ra = (flight_long[i] * 1) + mod
-                            //now we convert from ra/dec to alt/az
-
-                            var H = (calculateSiderealTime(true) % (2 * Math.PI)) - corrected_flight_ra
-
-                            var flight_altitude = Math.sin(flight_lats[i]*1) * Math.sin(dec)
-                            flight_altitude = flight_altitude + (Math.cos(flight_lats[i]*1) * Math.cos(dec) * Math.cos(H))
-
-                            var flight_az = - Math.sin(H) * Math.cos(flight_lats[i]*1) / Math.cos(flight_altitude)
-
-                            //convert from alt/az back to ra/dec
-                            var flight_final_dec = Math.asin( Math.sin(flight_altitude) * Math.sin(dec) + Math.cos(flight_altitude) * Math.cos(dec) * Math.cos(flight_az))
-
-                            var final_H = Math.asin( -Math.sin(flight_az) * Math.cos(flight_altitude) / Math.cos(flight_final_dec) )
-
-                            if ((flight_az*180/Math.PI > 270 || flight_az*180/Math.PI < 90)){
-                                final_H = final_H + (Math.PI/2 - final_H)*2
-                            }
-
-                            var flight_final_ra = (calculateSiderealTime(true) % (2 * Math.PI)) - final_H
-
-                            final_long.push(corrected_flight_ra*1)
-                            final_lats.push(flight_lats[i]*1)
-                            final_long.push(flight_final_ra)
-                            final_lats.push(flight_final_dec)
-                        }*/
                     }
 
                     for (let i = scene.children.length - 1; i >= 0; i--){
