@@ -295,7 +295,7 @@
                         <a href="http://www.opensky-network.org" style="color: #AAD" target="_blank">OpenSky API</a>
                     </div>
 
-                </label><br><br>
+                </label><br>
 
                 <input type="checkbox" name="drawimportant" value="true" id="drawimportant" onclick="dealWithCheckboxes();" checked>
                 <label for='drawimportant' style="color: #00FFF8; display:inline">Important Objects</label><br><br>
@@ -360,7 +360,7 @@
 
         <!-- Login panel html - the display property will be toggled on to trigger the panel  -->
 
-        <div id="bgblur" style="position:absolute; left:0 top: 0; width: 100%; height: 100%; background-color: rgba(10, 10, 10, 0.6); z-index: 4; display: none">
+        <div id="bgblur" style="position:absolute; left:0 top: 0; width: 100%; height: 100%; background-color: rgba(10, 10, 10, 0.6); z-index: 4; display: none; backdrop-filter: blur(10px)">
         </div>
 
         <div id="loginpanel" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); background-image: url('static/sagstarcloud.JPG'); background-size: 200%; width: 30%; height: 62%; border: 0px solid #ddd; display: none; z-index: 5; border-radius: 100%">
@@ -1164,7 +1164,7 @@
                         sun_y = r * Math.sin(dec_sun);
                         sun_z = r * Math.sin(ra_sun) * Math.cos(dec_sun);
 
-                        sun_rad = 2 * Math.PI * r * 0.5/360;
+                        sun_rad = 2 * Math.PI * r * 0.25/360;
                         sun_halo_rad = sun_rad * 20;
 
                         var geometry = new THREE.SphereGeometry(sun_rad, 32, 32);
@@ -1201,18 +1201,6 @@
             var moon;
             var moon_halo;
             function drawMoon(){
-                /*var lunation = {{ lunation_here }}
-                lunation = lunation * Math.PI * 2
-
-                currentJD = new Date().getTime()/86400000 + 2440587.5;
-
-                //moon_pos = astrojs.ephem.moonPos(currentJD);
-                //moon_ra = moon_pos["lon"] * Math.PI/180;
-                //moon_dec = moon_pos["lat"] * Math.PI/180;
-                //moon_dec = (23.4 * Math.PI/180) - moon_dec;
-
-                moon_ra = {{ moon_ra_here }};
-                moon_dec = {{ moon_dec_here }};*/
 
                 var moon_pos = new XMLHttpRequest;
                 moon_pos.open("GET", "/getmoonpos?offset=" + (raoffset * 24 / (2*Math.PI)))
@@ -1222,7 +1210,7 @@
                         moon_ra = this.responseText.split(",")[0] * 1
                         moon_dec = this.responseText.split(",")[1] * 1
 
-                        moon_rad = 2 * Math.PI * r * 0.5/360;
+                        moon_rad = 2 * Math.PI * r * 0.25/360;
                         moon_halo_rad = moon_rad * 10;
 
                         var geometry = new THREE.SphereGeometry(moon_rad, 32, 32);
@@ -1336,7 +1324,7 @@
             var current_antenna_interval = setInterval(function () {
                 updateAltAz(antenna);
                 //dealWithAltAzInput(e);
-            }, 100);
+            }, 500);
 
             function changeAntenna(new_antenna=''){
                 new_antenna = document.getElementById("antenna_select").value;
@@ -1358,7 +1346,7 @@
                     current_antenna_interval = setInterval(function () {
                         updateAltAz(new_antenna);
                         dealWithAltAzInput(e);
-                    }, 1000);
+                    }, 500);
                 }
             }
 
@@ -1724,6 +1712,7 @@
             antenna_req.send();
             var alt;
             var az;
+            var adata;
             antenna_req.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     adata = this.responseText;
@@ -1736,22 +1725,127 @@
                 }
             };
 
+            var antenna_azel_data;
             //this is to actually get the antenna data for each option
-            function getAntennaData(this_antenna){
-              var antenna_req = new XMLHttpRequest();        
-              antenna_req.open("GET", "/antennadata/azel");
-              antenna_req.send();
-              var alt;
-              var az;
-              antenna_req.onreadystatechange = function() {
+            function getAntennaData(this_antenna, single=true){
+                var antenna_req = new XMLHttpRequest();        
+                antenna_req.open("GET", "/antennadata/azel");
+                antenna_req.send();
+                var alt;
+                var az;
+                antenna_req.onreadystatechange = function() {
                   if (this.readyState == 4 && this.status == 200) {
                       adata = this.responseText;
                       adata = JSON.parse(adata)
-                      antenna_azel_data = adata;
+                      antenna_azel_data = adata; //keep this global so we can access it from other functions
                   }
-              };
-              return [antenna_azel_data[this_antenna]["el"], antenna_azel_data[this_antenna]["az"]]
+                };
+                if (single){
+                    return [antenna_azel_data[this_antenna]["el"], antenna_azel_data[this_antenna]["az"]]
+                }
+                else{
+                    return antenna_azel_data
+                }
             }
+
+
+            obs_antenna_list = ['1a (simulated)', '1a', '1f', '1c', '2a', '2b', '2h', '3c', '4g', '1k', '5c']
+            var drawnAntennasList = [];
+            //draw antenna crosshairs on the sky
+            function updateAntennaCrosshairs(){
+                //var full_antenna_data = getAntennaData('', false);
+                
+                var full_antenna_data = antenna_azel_data
+
+                console.log(full_antenna_data)
+
+                var antenna_list = Object.keys(full_antenna_data);
+                for (var i = 0; i < antenna_list.length; i++){
+                    var curr_ant = antenna_list[i]
+                    console.log(curr_ant)
+                    if (obs_antenna_list.includes(curr_ant)){
+                        var ant_az = full_antenna_data[curr_ant]['az'] * 1 
+                        var ant_alt = full_antenna_data[curr_ant]['el'] * 1
+
+                        console.log(ant_az, ant_alt)
+
+                        var ant_dec = Math.asin( Math.sin(ant_alt * Math.PI / 180) * Math.sin(dec) + Math.cos(ant_alt * Math.PI / 180) * Math.cos(dec) * Math.cos(ant_az * Math.PI / 180))
+
+                        var ant_h = Math.asin( -Math.sin(ant_az * Math.PI / 180) * Math.cos(ant_alt * Math.PI / 180) / Math.cos(ant_dec) )
+
+                        if ((ant_az > 270 || ant_az < 90)){
+                            ant_h = ant_h + (Math.PI/2 - ant_h)*2
+                        }
+
+                        var ant_ra = (calculateSiderealTime(true) + raoffset - ant_h) % (2 * Math.PI)
+
+                        console.log(ant_ra, ant_dec)
+
+                        var ant_x = r * Math.cos(ant_ra) * Math.cos(ant_dec);
+                        var ant_y = r * Math.sin(ant_dec);
+                        var ant_z = r * Math.sin(ant_ra) * Math.cos(ant_dec);
+                        
+                        var ant_rad = 2 * Math.PI * r * (1.2 / 360);
+
+                        var ant_mat = new THREE.LineBasicMaterial( {color: 0xff0000} )
+                        var ant_geo = new THREE.Geometry();
+
+                        var ant_marker_size = 0.25
+
+                        ant_geo.vertices.push(new THREE.Vector3(ant_marker_size, 0, 0));
+                        ant_geo.vertices.push(new THREE.Vector3(ant_marker_size, 0, 0));
+                        ant_geo.vertices.push(new THREE.Vector3(-ant_marker_size, 0, 0));
+                        ant_geo.vertices.push(new THREE.Vector3(0, 0, 0));
+                        ant_geo.vertices.push(new THREE.Vector3(0, -ant_marker_size, 0));
+                        ant_geo.vertices.push(new THREE.Vector3(0, ant_marker_size, 0));
+                        //var ant_geometry = new THREE.CircleGeometry(ant_rad, 32)
+
+                        //var ant_material = new THREE.MeshBasicMaterial( {color: 0xff0000, transparent: true, opacity: 0.3} );
+
+                        scene.remove(window[curr_ant+"_ant_marker"])
+
+                        window[curr_ant+"_ant_marker"] = new THREE.Line(ant_geo, ant_mat);
+
+                        window[curr_ant+"_ant_marker"].position.set(ant_x, ant_y, ant_z)
+                        window[curr_ant+"_ant_marker"].quaternion.copy(camera.quaternion)
+                        window[curr_ant+"_ant_marker"].group = "antenna_wideview_disp"
+                        window[curr_ant+"_ant_marker"].name = "Antenna " + curr_ant
+                        if (antenna != "none"){
+                            window[curr_ant+"_ant_marker"].visible = false
+                        }
+                        scene.add(window[curr_ant+"_ant_marker"])
+
+                        if (!drawnAntennasList.includes(curr_ant+"_ant_marker")){
+                            drawnAntennasList.push(curr_ant+"_ant_marker")
+                        }
+
+                    }
+                }
+            }
+
+
+            //this function makes sure to hide antenna crosshairs on the sky
+            //and show if not in antenna view
+            function antennaCrosshairsVisiblity(){
+                console.log(antenna)
+                if (antenna != "none"){
+                    for (var i = 0; i < drawnAntennasList.length; i++){
+                        //if (window[drawnAntennasList[i]+"_ant_marker"].visible == true){
+                        window[drawnAntennasList[i]].visible = false
+                        //}
+                    }
+                }
+                if (antenna == "none"){
+                    for (var i = 0; i < drawnAntennasList.length; i++){
+                        //if (window[drawnAntennasList[i]+"_ant_marker"].visible == false){
+                        //window[drawnAntennasList[i]].visible = true
+                        //}
+                    }
+                }
+            }
+
+
+            
 
             //this function helps with updating the alt-az in the currently selected menu
 			function updatetopright(obj){
@@ -1885,7 +1979,7 @@
                 camz = r * Math.sin(ra) * Math.cos(dec);
 
                for (var i = 1; i < scene.children.length; i++){
-                  if (scene.children[i].group == "equatorial" || scene.children[i].spec == "crosshair"){
+                  if (scene.children[i].group == "equatorial" || scene.children[i].spec == "crosshair" || scene.children[i].group == "antenna_wideview_disp"){
                       continue
                   }
                   x = scene.children[i].position.x
@@ -1972,7 +2066,7 @@
             var raycaster = new THREE.Raycaster();
             var crosshair = new Object();
             var crosshairinterval;
-            raycaster.params.Line.threshold = 0;
+            raycaster.params.Line.threshold = 0.1;
             raycaster.params.Sprite.threshold = 0;
             var toprightnameUpdateInterval = ''
 
@@ -2420,6 +2514,9 @@
             drawMoon()
             //redraw moon ever half hour...
             setInterval(drawMoon, 1800000);
+
+
+            setInterval(updateAntennaCrosshairs, 500);
 
 
         </script>
