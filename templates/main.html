@@ -1757,7 +1757,6 @@
                 var antenna_list = Object.keys(full_antenna_data);
                 for (var i = 0; i < antenna_list.length; i++){
                     var curr_ant = antenna_list[i]
-                    console.log(curr_ant)
                     if (obs_antenna_list.includes(curr_ant)){
                         var ant_az = full_antenna_data[curr_ant]['az'] * 1 
                         var ant_alt = full_antenna_data[curr_ant]['el'] * 1
