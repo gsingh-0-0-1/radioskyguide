@@ -1519,8 +1519,6 @@
 
                     //calculate the offset for RA vs longitude
 
-                    console.log("here")
-
                     for (var i = 0; i < flight_lats.length; i++){
                         var d_lat = (flight_lats[i] * 1) - (dec * 180 / Math.PI)
                         var d_long = (flight_long[i] * 1) - (longitude)
@@ -1756,8 +1754,6 @@
                 
                 var full_antenna_data = antenna_azel_data
 
-                console.log(full_antenna_data)
-
                 var antenna_list = Object.keys(full_antenna_data);
                 for (var i = 0; i < antenna_list.length; i++){
                     var curr_ant = antenna_list[i]
@@ -1765,8 +1761,6 @@
                     if (obs_antenna_list.includes(curr_ant)){
                         var ant_az = full_antenna_data[curr_ant]['az'] * 1 
                         var ant_alt = full_antenna_data[curr_ant]['el'] * 1
-
-                        console.log(ant_az, ant_alt)
 
                         var ant_dec = Math.asin( Math.sin(ant_alt * Math.PI / 180) * Math.sin(dec) + Math.cos(ant_alt * Math.PI / 180) * Math.cos(dec) * Math.cos(ant_az * Math.PI / 180))
 
@@ -1777,8 +1771,6 @@
                         }
 
                         var ant_ra = (calculateSiderealTime(true) + raoffset - ant_h) % (2 * Math.PI)
-
-                        console.log(ant_ra, ant_dec)
 
                         var ant_x = r * Math.cos(ant_ra) * Math.cos(ant_dec);
                         var ant_y = r * Math.sin(ant_dec);
@@ -1826,7 +1818,6 @@
             //this function makes sure to hide antenna crosshairs on the sky
             //and show if not in antenna view
             function antennaCrosshairsVisiblity(){
-                console.log(antenna)
                 if (antenna != "none"){
                     for (var i = 0; i < drawnAntennasList.length; i++){
                         //if (window[drawnAntennasList[i]+"_ant_marker"].visible == true){
