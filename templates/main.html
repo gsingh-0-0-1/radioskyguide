@@ -169,7 +169,7 @@
 
             <span id="antennae">
 
-            <input type="button" class="button" style="--bcolor: #3f1166; --fsize: 15px;" value="Available Antennae">
+            <input type="button" class="button" style="--bcolor: #3f1166; --fsize: 15px;" value="Selected Antenna">
 
             <br>
 
@@ -1457,6 +1457,7 @@
                         velocityEci = positionAndVelocity.velocity;
 
                     if (positionEci == undefined){
+                      console.log(name, satrec, positionEci)
                       continue;
                     }
 
@@ -2189,7 +2190,7 @@
               if (event.keyCode == 13 || event.which == 13){
                 searchbar = document.getElementById("objectsearchbar")
                 object_list_div = document.getElementById("objectsearch");
-                object_matches = namedObjectList.filter(element => element.includes(searchbar.value));
+                object_matches = namedObjectList.filter(element => element.includes(searchbar.value.toUpperCase()));
                 if (searchbar.value == ''){
                   object_list_div.innerHTML = ''
                   object_list_div.style.background = 'none'
