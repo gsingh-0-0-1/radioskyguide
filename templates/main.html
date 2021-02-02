@@ -2056,13 +2056,14 @@
             var raycaster = new THREE.Raycaster();
             var crosshair = new Object();
             var crosshairinterval;
-            raycaster.params.Line.threshold = 0.1;
-            raycaster.params.Sprite.threshold = 0;
-            var toprightnameUpdateInterval = ''
+            //raycaster.params.Line.threshold = 0.1;
+            //raycaster.params.Sprite.threshold = 0;
+	    var toprightnameUpdateInterval = ''
 
             function onclick(event, obj='none') {
-                raycaster.params.Points.threshold = 0.25/camera.zoom
-                raycaster.params.Mesh.threshold = 0.25/camera.zoom
+                raycaster.params.Points.threshold = 0.15/camera.zoom
+                raycaster.params.Mesh.threshold = 0.15/camera.zoom
+		raycaster.linePrecision = 0.1 / camera.zoom
                 var display = false;
                 var mouse = new THREE.Vector2();
                 var rect = renderer.domElement.getBoundingClientRect();
