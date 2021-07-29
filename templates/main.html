@@ -2191,7 +2191,7 @@
               if (event.keyCode == 13 || event.which == 13){
                 searchbar = document.getElementById("objectsearchbar")
                 object_list_div = document.getElementById("objectsearch");
-                object_matches = namedObjectList.filter(element => element.includes(searchbar.value.toUpperCase()));
+                object_matches = namedObjectList.filter(element => element.toUpperCase().includes(searchbar.value.toUpperCase()));
                 if (searchbar.value == ''){
                   object_list_div.innerHTML = ''
                   object_list_div.style.background = 'none'
