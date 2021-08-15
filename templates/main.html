@@ -1492,8 +1492,11 @@
                         drawObjects([satlongitude], [satlatitude], 0xffffff, [name], "Satellite", true, true);
                     }
 
-                    window[name].theta = satlongitude + Math.PI
-                    window[name].phi = satlatitude + Math.PI / 2
+                    if (satlongitude < 0){
+                        satlongitude = (2 * Math.PI) + satlongitude
+                    }
+                    window[name].theta = satlongitude
+                    window[name].phi = satlatitude
                     //}
                     
                 }
