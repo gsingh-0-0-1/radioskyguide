@@ -1866,9 +1866,12 @@
 				}
 				
 				toprightname = document.getElementById("currentobject").innerHTML
-				toprightname = toprightname.split("<br>Alt")[0]
+				toprightname = toprightname.split("<br><br>---Coordinates---")[0]
 
-				toprightname += "<br>Alt: " + object_el.toFixed(4) + ", Az: " + object_az.toFixed(4)
+                toprightname += "<br><br>---Coordinates---"
+
+				toprightname += "<br>Alt: " + object_el.toFixed(4)
+                toprightname += "<br>Az: " + object_az.toFixed(4)
 
                 let theta = window[obj.name].theta
                 let phi = window[obj.name].phi
