@@ -1179,6 +1179,9 @@
                         sun = new THREE.Mesh( geometry, material );
                         sun_halo = new THREE.Mesh( halo_geometry, halo_material );
 
+                        sun_halo.theta = ra_sun
+                        sun_halo.phi = dec_sun
+
                         sun.position.set(sun_x, sun_y, sun_z);
                         sun_halo.position.set(sun_x, sun_y, sun_z);
                         sun_halo.lookAt(camera.position)
@@ -1239,6 +1242,9 @@
                         scene.add(moon_halo);
                         moon.name = "Moon"
                         moon_halo.name = "Moon"
+
+                        moon_halo.theta = moon_ra
+                        moon_halo.phi = moon_dec
 
                         moon.theta = moon_ra
                         moon.phi = moon_dec
@@ -1457,7 +1463,6 @@
                         velocityEci = positionAndVelocity.velocity;
 
                     if (positionEci == undefined){
-                      console.log(name, satrec, positionEci)
                       continue;
                     }
 
@@ -1486,6 +1491,9 @@
                     else{
                         drawObjects([satlongitude], [satlatitude], 0xffffff, [name], "Satellite", true, true);
                     }
+
+                    window[name].theta = satlongitude + Math.PI
+                    window[name].phi = satlatitude + Math.PI / 2
                     //}
                     
                 }
@@ -1545,8 +1553,6 @@
                             continue
                         }
 
-                        console.log(d_lat*1, d_long, orig_d_long)
-
                         var quadrant = 0 //we need to specify what quadrant the azimuth is in 
                         //since regular trig functions are only two-quadrant
 
@@ -1589,7 +1595,6 @@
                         var flight_final_ra = (calculateSiderealTime(true) % (2 * Math.PI)) - final_H
 
 
-                        console.log(flight_final_ra, flight_final_dec, flight_call[i])
                         final_long.push(flight_final_ra)
                         final_lats.push(flight_final_dec)
                         final_call.push(flight_call[i])
@@ -1863,11 +1868,72 @@
 				toprightname = document.getElementById("currentobject").innerHTML
 				toprightname = toprightname.split("<br>Alt")[0]
 
-				toprightname += "<br>Alt " + object_el.toFixed(4) + ", Az: " + object_az.toFixed(4)
+				toprightname += "<br>Alt: " + object_el.toFixed(4) + ", Az: " + object_az.toFixed(4)
+
+                let theta = window[obj.name].theta
+                let phi = window[obj.name].phi
+
+                theta = theta * 24 / (2 * Math.PI) //get the hours
+                let theta_hour = Math.trunc(theta)
+                if (String(theta_hour).length == 1){
+                    theta_hour = "0"+theta_hour
+                }
+
+                theta = theta - theta_hour //get the minutes
+                theta = 60 * theta
+                let theta_minute = Math.trunc(theta)
+                if (String(theta_minute).length == 1){
+                    theta_minute = "0"+theta_minute
+                }
+
+                theta = theta - theta_minute //get the seconds
+                theta = 60 * theta
+                theta = Math.trunc(theta)
+                if (String(theta).length == 1){
+                    theta = "0"+theta
+                }
+
+                phi = phi * 180 / (Math.PI) //get the declination degrees
+                phi = phi + 90 //make all phis positive, makes it easier to deal with minutes and seconds
+                let phi_degree = Math.trunc(phi)
+                if (String(phi_degree).length == 1){
+                    phi_degree = "0"+phi_degree
+                }
+
+                phi = phi - phi_degree
+
+                phi_degree = phi_degree - 90
+                if (String(phi_degree).length == 1){
+                    phi_degree = "0"+phi_degree
+                }
+                if (String(Math.abs(phi_degree)).length == 1 && phi_degree < 0){ //deal with negative dec
+                    phi_degree = "-0"+Math.abs(phi_degree)
+                }
+                if (phi_degree > 0){
+                    phi_degree = "+" + phi_degree
+                }
+
+                phi = 60 * phi // get the declination minutes
+                let phi_minute = Math.trunc(phi)
+                phi = phi - phi_minute
+                if (String(phi_minute).length == 1){
+                    phi_minute = "0" + phi_minute
+                }
+
+                phi = phi * 60
+                phi = Math.trunc(phi) //get the declination seconds
+                if (String(phi).length == 1){
+                    phi = "0" + phi
+                }
 				/*centerobj.matrixWorldInverse.getInverse( centerobj.matrixWorld );
 				vec = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z)
 				vec.applyMatrix4( centerobj.matrixWorldInverse );
 				toprightname += "<br>X " + vec.x + " Y: " + vec.y*/
+
+                //if (obj.group != "Satellite"){
+                    toprightname += "<br>RA: " + theta_hour + ":" + theta_minute + ":" + theta
+                    toprightname += "<br>Dec: " + phi_degree + ":" + phi_minute + ":" + phi
+                //}
 
 			    document.getElementById("currentobject").innerHTML = toprightname
 
@@ -2331,8 +2397,6 @@
                         var file_ras = file_data.split("$")[1].split(",")
                         var file_decs = file_data.split("$")[2].split(",")
                         var file_names = file_data.split("$")[0].split(",")
-                        console.log(file)
-                        console.log(file_ras)
                         window["udef_"+file+"_list"] = []
                         drawObjects(file_ras, file_decs, 0xeeeeee, file_names, "udef_"+file, true);
                     }
