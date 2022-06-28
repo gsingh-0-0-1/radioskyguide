@@ -283,7 +283,7 @@
                 <label for='drawmessier' style="color: #00AAFF; display:inline">Messier Catalog</label><br><br>
 
                 <input type="checkbox" name="drawsatellites" value="true" id="drawsatellites" onclick="dealWithCheckboxes();">
-                <label for='drawsatellites' style="color: #FFFFFF; display:inline">Starlink Satellites</label><br><br>
+                <label for='drawsatellites' style="color: #FFFFFF; display:inline">Satellites</label><br><br>
 
                 <input type="checkbox" name="drawflights" value="true" id="drawflights" onclick="dealWithFlightCheckbox();">
                 <label for='drawflights' style="color: #AAA; display:inline">Commercial Flights
@@ -1434,7 +1434,7 @@
                     if (this.readyState == 4 && this.status == 200) {
                         data = this.responseText;
                         data = data.split("\n0");
-                        //data = data.filter(element => element.includes("STARLINK"));
+                        data = data.filter(element => element.includes("STARLINK"));
                     }
                 };
             }
@@ -1443,7 +1443,7 @@
  
                 for (var i = 0; i < data.length; i+=1){
                     var sat = data[i].split("\n")
-                    name = sat[0];
+                    name = sat[0].replace("\r", "");
 
                     line1 = sat[1];
                     line2 = sat[2];
@@ -1759,9 +1759,9 @@
             var drawnAntennasList = [];
             //draw antenna crosshairs on the sky
             function updateAntennaCrosshairs(){
-                //var full_antenna_data = getAntennaData('', false);
+                var full_antenna_data = getAntennaData('', false);
                 
-                var full_antenna_data = antenna_azel_data
+                //var full_antenna_data = antenna_azel_data
 
                 var antenna_list = Object.keys(full_antenna_data);
                 for (var i = 0; i < antenna_list.length; i++){
@@ -1775,14 +1775,16 @@
                         var ant_h = Math.asin( -Math.sin(ant_az * Math.PI / 180) * Math.cos(ant_alt * Math.PI / 180) / Math.cos(ant_dec) )
 
                         if ((ant_az > 270 || ant_az < 90)){
+			//if (ant_az > 270){
                             ant_h = ant_h + (Math.PI/2 - ant_h)*2
+			    //ant_h = ant_h - Math.PI / 2
                         }
 
-                        var ant_ra = (calculateSiderealTime(true) + raoffset - ant_h) % (2 * Math.PI)
+                        var ant_ra = (calculateSiderealTime(true) + raoffset - ant_h) % (2 * Math.PI) 
 
-                        var ant_x = r * Math.cos(ant_ra) * Math.cos(ant_dec);
-                        var ant_y = r * Math.sin(ant_dec);
-                        var ant_z = r * Math.sin(ant_ra) * Math.cos(ant_dec);
+                        var ant_y = r * Math.cos(ant_az * Math.PI / 180) * Math.cos(ant_alt * Math.PI / 180) //r * Math.cos(ant_ra) * Math.cos(ant_dec);
+                        var ant_z = -r * Math.sin(ant_alt * Math.PI / 180) //r * Math.sin(ant_dec);
+                        var ant_x = r * Math.sin(ant_az * Math.PI / 180) * Math.cos(ant_alt * Math.PI / 180) //r * Math.sin(ant_ra) * Math.cos(ant_dec);
                         
                         var ant_rad = 2 * Math.PI * r * (1.2 / 360);
 
@@ -1801,18 +1803,19 @@
 
                         //var ant_material = new THREE.MeshBasicMaterial( {color: 0xff0000, transparent: true, opacity: 0.3} );
 
-                        scene.remove(window[curr_ant+"_ant_marker"])
+                        camera.remove(window[curr_ant+"_ant_marker"])
 
                         window[curr_ant+"_ant_marker"] = new THREE.Line(ant_geo, ant_mat);
 
                         window[curr_ant+"_ant_marker"].position.set(ant_x, ant_y, ant_z)
-                        window[curr_ant+"_ant_marker"].quaternion.copy(camera.quaternion)
-                        window[curr_ant+"_ant_marker"].group = "antenna_wideview_disp"
+                        //window[curr_ant+"_ant_marker"].quaternion.copy(camera.quaternion)
+                        window[curr_ant+"_ant_marker"].rotation.set(0, 0, 0)
+			window[curr_ant+"_ant_marker"].group = "antenna_wideview_disp"
                         window[curr_ant+"_ant_marker"].name = "Antenna " + curr_ant
                         if (antenna != "none"){
                             window[curr_ant+"_ant_marker"].visible = false
                         }
-                        scene.add(window[curr_ant+"_ant_marker"])
+                        camera.add(window[curr_ant+"_ant_marker"])
 
                         if (!drawnAntennasList.includes(curr_ant+"_ant_marker")){
                             drawnAntennasList.push(curr_ant+"_ant_marker")
@@ -1871,10 +1874,22 @@
 				toprightname = document.getElementById("currentobject").innerHTML
 				toprightname = toprightname.split("<br><br>---Coordinates---")[0]
 
+				if (toprightname.includes("Antenna")){
+					//alert(toprightname)
+					var thisant = toprightname.replace("Antenna ", "")
+					object_el = antenna_azel_data[thisant]['el']
+					object_az = antenna_azel_data[thisant]['az']
+				}
+
                 toprightname += "<br><br>---Coordinates---"
 
-				toprightname += "<br>Alt: " + object_el.toFixed(4)
+		toprightname += "<br>Alt: " + object_el.toFixed(4)
                 toprightname += "<br>Az: " + object_az.toFixed(4)
+
+		if (toprightname.includes("Antenna")){
+			document.getElementById("currentobject").innerHTML = toprightname
+			return
+		}
 
                 let theta = window[obj.name].theta
                 let phi = window[obj.name].phi
@@ -2014,7 +2029,7 @@
                 antenna_dec = Math.asin( Math.sin(act_alt * Math.PI / 180) * Math.sin(dec) + Math.cos(act_alt * Math.PI / 180) * Math.cos(dec) * Math.cos(disp_az * Math.PI / 180))
 
                 var H = Math.asin( -Math.sin(disp_az * Math.PI / 180) * Math.cos(act_alt * Math.PI / 180) / Math.cos(antenna_dec) )
-
+		var origH = H
                 if ((disp_az > 270 || disp_az < 90) && antenna != "none"){
                     H = H + (Math.PI/2 - H)*2
                 }
@@ -2034,7 +2049,7 @@
                 ra = calculateSiderealTime(true);
                 ra += raoffset;
 
-                antenna_ra = ra - H
+                antenna_ra = ra - origH
 
                 camx = r * Math.cos(ra) * Math.cos(dec);
                 camy = r * Math.sin(dec);
